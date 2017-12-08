@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane fx:id="rootPanel" minHeight="560.0" minWidth="740.0" prefHeight="720.0" prefWidth="740.0" style="-fx-background-color: #eeeeee; -fx-border-color: #000000; -fx-border-width: 2; -fx-background-radius: 2;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fko.tetris.ui.TetrisGUI_Controller">
+   <top>
+      <VBox minHeight="65.0" BorderPane.alignment="CENTER">
+         <children>
+            <MenuBar maxHeight="-Infinity" minHeight="30.0" minWidth="-Infinity" prefHeight="30.0">
+              <menus>
+                <Menu fx:id="menu_game" mnemonicParsing="false" text="Game">
+                  <items>
+                        <MenuItem fx:id="newGame_menu" mnemonicParsing="false" onAction="#newGameDialog_Action" text="New Game">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem fx:id="stopGame_menu" disable="true" mnemonicParsing="false" onAction="#stopGame_action" text="Stop Game">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem fx:id="pauseGame_menu" disable="true" mnemonicParsing="false" onAction="#pauseGame_action" text="Pause Game">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="P" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem fx:id="resumeGame_menu" disable="true" mnemonicParsing="false" onAction="#resumeGame_action" text="Resume Game">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                    <MenuItem fx:id="close_menu" mnemonicParsing="false" onAction="#close_action" text="Close">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                  </items>
+                     <accelerator>
+                        <KeyCodeCombination alt="DOWN" code="G" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator>
+                </Menu>
+                  <Menu fx:id="menu_level" mnemonicParsing="false" text="Level">
+                     <accelerator>
+                        <KeyCodeCombination alt="DOWN" code="L" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator>
+                  </Menu>
+                <Menu fx:id="menu_help" mnemonicParsing="false" text="?">
+                  <items>
+                    <MenuItem fx:id="about_menu" mnemonicParsing="false" onAction="#aboutDialogOpen_action" text="About" />
+                  </items>
+                     <accelerator>
+                        <KeyCodeCombination alt="DOWN" code="H" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <ToolBar maxHeight="-Infinity" minHeight="35.0" prefHeight="35.0">
+              <items>
+                <Button fx:id="newGame_button" mnemonicParsing="false" onAction="#newGameDialog_Action" text="New" />
+                  <Separator orientation="VERTICAL" prefHeight="200.0" />
+                  <Button fx:id="stopGame_button" disable="true" mnemonicParsing="false" onAction="#stopGame_action" text="Stop" />
+                  <Button fx:id="pauseGame_button" disable="true" mnemonicParsing="false" onAction="#pauseGame_action" text="Pause" />
+                  <Button fx:id="resumeGame_button" disable="true" mnemonicParsing="false" onAction="#resumeGame_action" text="Resume" />
+              </items>
+            </ToolBar>
+         </children>
+      </VBox>
+   </top>
+   <bottom>
+      <AnchorPane maxHeight="25.0" minHeight="25.0" prefHeight="25.0" style="-fx-background-color: #cccccc; -fx-border-color: #000000; -fx-border-width: 1 0 0 0;" BorderPane.alignment="CENTER">
+         <children>
+            <GridPane gridLinesVisible="true" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="100.0" percentWidth="25.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="100.0" percentWidth="60.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label fx:id="statusbar_copyright_test" text="(c) Frank Kopp 2017">
+                     <GridPane.margin>
+                        <Insets left="5.0" />
+                     </GridPane.margin>
+                     <font>
+                        <Font name="Arial" size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="statusbar_status_text" text="Game Status: Game running, White is thinking" GridPane.columnIndex="1">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <GridPane.margin>
+                        <Insets left="5.0" right="5.0" />
+                     </GridPane.margin>
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="statusbar_mem_text" text="? MB / ? MB" GridPane.columnIndex="2" GridPane.halignment="RIGHT">
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                     <font>
+                        <Font name="Arial" size="11.0" />
+                     </font>
+                  </Label>
+               </children>
+            </GridPane>
+         </children>
+      </AnchorPane>
+   </bottom>
+   <center>
+      <GridPane BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+      </GridPane>
+   </center>
+</BorderPane>
