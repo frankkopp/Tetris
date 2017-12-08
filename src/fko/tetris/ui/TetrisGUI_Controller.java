@@ -28,10 +28,13 @@ SOFTWARE.
 package fko.tetris.ui;
 
 import java.net.URL;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 import fko.tetris.Tetris;
+import fko.tetris.TetrisGame;
 import fko.tetris.util.HelperTools;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -47,13 +50,12 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-public class TetrisGUI_Controller {
+public class TetrisGUI_Controller implements Observer {
 	
-	// -- to save and restore the last position of our window
-	private static final WindowStateFX windowState = new WindowStateFX();
-	
-    // important nodes
-    private Stage _primaryStage;
+	private static final WindowStateFX windowState = new WindowStateFX(); // to save and restore the last position of our window
+    private Stage _primaryStage; // handle to primary stage
+    
+	private TetrisGame _tetrisGame; // holds a running tetrisGame
         
     /**
      * This method is called by the FXMLLoader when initialization is complete
@@ -94,6 +96,88 @@ public class TetrisGUI_Controller {
     }
     
     /**
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		
+		System.out.println("update from "+o+" with args: "+arg);
+		
+		if (_tetrisGame != null && _tetrisGame.isRunning()) { // game is running
+			 PlatformUtil.platformRunAndWait(() -> setUItoGameRunning());
+		} else { // no game 
+			 PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning());
+		}
+		
+	}
+
+	/**
+	 * 
+	 */
+	private void setUItoGameRunning() {
+		// -- set possible actions (menu) --
+		newGame_menu.setDisable(true);
+		newGame_button.setDisable(true);
+		stopGame_menu.setDisable(false);
+		stopGame_button.setDisable(false);
+		if (_tetrisGame.isPaused()) {
+			pauseGame_menu.setDisable(true);
+			pauseGame_button.setDisable(true);
+			resumeGame_menu.setDisable(false);
+			resumeGame_button.setDisable(false);
+		} else {
+			pauseGame_menu.setDisable(false);
+			pauseGame_button.setDisable(false);
+			resumeGame_menu.setDisable(true);
+			resumeGame_button.setDisable(true);
+		}
+		close_menu.setDisable(false);
+		about_menu.setDisable(false);
+		statusbar_status_text.setText("Game running");
+	}
+
+    /**
+	 * 
+	 */
+	private void setUItoGameNotRunning() {
+		// -- set possible actions (menu) --
+		newGame_menu.setDisable(false);
+		newGame_button.setDisable(false);
+		stopGame_menu.setDisable(true);
+		stopGame_button.setDisable(true);
+		pauseGame_menu.setDisable(true);
+		pauseGame_button.setDisable(true);
+		resumeGame_menu.setDisable(true);
+		resumeGame_button.setDisable(true);
+		close_menu.setDisable(false);
+		about_menu.setDisable(false);
+		statusbar_status_text.setText("No Game");
+	}
+
+	/**
+     * Save the current sizes and coordinates of all windows to restore them
+     * when starting up the next time.
+     */
+    private void saveWindowStates() {
+        windowState.setProperty("windowLocationX", String.valueOf(this._primaryStage.getX()));
+        windowState.setProperty("windowLocationY", String.valueOf(this._primaryStage.getY()));
+        windowState.setProperty("windowSizeX", String.valueOf(this._primaryStage.getWidth()));
+        windowState.setProperty("windowSizeY", String.valueOf(this._primaryStage.getHeight()));
+        windowState.save();
+    }
+    
+    /**
+     * @return the windowstate
+     */
+    public static WindowStateFX getWindowState() {
+        return windowState;
+    }
+    
+    // #######################################################################
+    // Actions
+    // #######################################################################
+    
+	/**
      * Called when window is closed
      * @param event
      */
@@ -112,24 +196,33 @@ public class TetrisGUI_Controller {
             // ... user chose CANCEL or closed the dialog
         }
     }
-
-    /**
-     * Save the current sizes and coordinates of all windows to restore them
-     * when starting up the next time.
-     */
-    private void saveWindowStates() {
-        windowState.setProperty("windowLocationX", String.valueOf(this._primaryStage.getX()));
-        windowState.setProperty("windowLocationY", String.valueOf(this._primaryStage.getY()));
-        windowState.setProperty("windowSizeX", String.valueOf(this._primaryStage.getWidth()));
-        windowState.setProperty("windowSizeY", String.valueOf(this._primaryStage.getHeight()));
-        windowState.save();
-    }
     
-    /**
-     * @return the windowstate
-     */
-    public static WindowStateFX getWindowState() {
-        return windowState;
+    @FXML
+    void newGame_Action(ActionEvent event) {
+    	_tetrisGame = new TetrisGame();
+    	_tetrisGame.addObserver(this);
+    	_tetrisGame.startTetrisGame();
+    }
+
+    @FXML
+    void stopGame_action(ActionEvent event) {
+    	_tetrisGame.stopTetrisGame();
+    }
+
+    @FXML
+    void pauseGame_action(ActionEvent event) {
+    	_tetrisGame.setPaused(true);
+    }
+
+    @FXML
+    void resumeGame_action(ActionEvent event) {
+    	_tetrisGame.setPaused(false);
+    }
+
+    @FXML
+    void aboutDialogOpen_action(ActionEvent event) {
+        AboutDialog aboutDialogStage = new AboutDialog();
+        aboutDialogStage.showAndWait();
     }
 
     
@@ -193,31 +286,6 @@ public class TetrisGUI_Controller {
 
     @FXML // fx:id="resumeGame_button"
     private Button resumeGame_button; // Value injected by FXMLLoader
-
-    @FXML
-    void newGameDialog_Action(ActionEvent event) {
-
-    }
-
-    @FXML
-    void stopGame_action(ActionEvent event) {
-
-    }
-
-    @FXML
-    void pauseGame_action(ActionEvent event) {
-
-    }
-
-    @FXML
-    void resumeGame_action(ActionEvent event) {
-
-    }
-
-    @FXML
-    void aboutDialogOpen_action(ActionEvent event) {
-
-    }
 
 
 	/**

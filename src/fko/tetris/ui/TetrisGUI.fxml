@@ -20,7 +20,7 @@
               <menus>
                 <Menu fx:id="menu_game" mnemonicParsing="false" text="Game">
                   <items>
-                        <MenuItem fx:id="newGame_menu" mnemonicParsing="false" onAction="#newGameDialog_Action" text="New Game">
+                        <MenuItem fx:id="newGame_menu" mnemonicParsing="false" onAction="#newGame_Action" text="New Game">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
@@ -63,7 +63,7 @@
             </MenuBar>
             <ToolBar maxHeight="-Infinity" minHeight="35.0" prefHeight="35.0">
               <items>
-                <Button fx:id="newGame_button" mnemonicParsing="false" onAction="#newGameDialog_Action" text="New" />
+                <Button fx:id="newGame_button" mnemonicParsing="false" onAction="#newGame_Action" text="New" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                   <Button fx:id="stopGame_button" disable="true" mnemonicParsing="false" onAction="#stopGame_action" text="Stop" />
                   <Button fx:id="pauseGame_button" disable="true" mnemonicParsing="false" onAction="#pauseGame_action" text="Pause" />
@@ -94,7 +94,7 @@
                         <Font name="Arial" size="11.0" />
                      </font>
                   </Label>
-                  <Label fx:id="statusbar_status_text" text="Game Status: Game running, White is thinking" GridPane.columnIndex="1">
+                  <Label fx:id="statusbar_status_text" text="Status: " GridPane.columnIndex="1">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -119,17 +119,12 @@
       </AnchorPane>
    </bottom>
    <center>
-      <GridPane BorderPane.alignment="CENTER">
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-      </GridPane>
+      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </center>
+   <left>
+      <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
+   </left>
+   <right>
+      <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
+   </right>
 </BorderPane>

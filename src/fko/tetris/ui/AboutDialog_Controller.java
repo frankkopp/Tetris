@@ -24,49 +24,39 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package fko.tetris;
 
-import fko.tetris.ui.TetrisGUI;
+package fko.tetris.ui;
+
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.stage.Stage;
 
 /**
- * Main class for Tetris app.
+ * @author fkopp
  */
-public class Tetris {
+public class AboutDialog_Controller {
 
-	/**
-	 * The handle to the user interface class
-	 */
-	public static TetrisGUI _ui;
-	
-	/**
-	 * The handle to the model
-	 */
-	public static TetrisGame _tetrisModel;
-	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		
-		_ui = new TetrisGUI();
-		_ui.waitForUI();
-		
-	}
-	
-    /**
-     * Clean up and exit the application
-     */
-    public static void exitTetris() {
-    	exitTetris(0);
+    @FXML // ResourceBundle that was given to the FXMLLoader
+    private ResourceBundle resources;
+
+    @FXML // URL location of the FXML file that was given to the FXMLLoader
+    private URL location;
+
+    @FXML // fx:id="aboutDialog_OK_button"
+    private Button aboutDialog_OK_button; // Value injected by FXMLLoader
+
+    @FXML
+    void aboutDialog_closeAction(ActionEvent event) {
+        Stage stage = (Stage) aboutDialog_OK_button.getScene().getWindow();
+        stage.close();
     }
 
-    /**
-     * Clean up and exit the application
-     */
-    private static void exitTetris(int returnCode) {
-        // nothing to clean up yet
-        System.exit(returnCode);
+    @FXML // This method is called by the FXMLLoader when initialization is complete
+    void initialize() {
+        assert aboutDialog_OK_button != null : "fx:id=\"aboutDialog_OK_button\" was not injected: check your FXML file 'AboutDialog.fxml'.";
     }
-	
-
 }

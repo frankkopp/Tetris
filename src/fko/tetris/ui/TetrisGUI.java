@@ -41,22 +41,13 @@ import javafx.stage.Stage;
 public class TetrisGUI extends Application implements Observer {
 
 	/**
-	 * The singleton instance of this class
-	 */
-	private static TetrisGUI _instance = null;
-
-	/**
-	 * The primary stage
-	 */
-	private Stage _primaryStage;
-
-	/**
 	 * The main controller for this JavaFX application
 	 */
 	public static TetrisGUI_Controller _controller;
 
-	// the root pane for the gui 
-	private BorderPane _root;
+	private static TetrisGUI _instance = null; 	// The singleton instance of this class
+	private static Stage _primaryStage; 		// The primary stage
+	private BorderPane _root;					// the root pane for the gui 
 
 	/**
 	 * Creates the JavaFX UI
@@ -81,7 +72,7 @@ public class TetrisGUI extends Application implements Observer {
 	@Override
 	public void start(Stage primaryStage) {
 
-		_primaryStage = primaryStage;
+		TetrisGUI._primaryStage = primaryStage;
 
 		try {
 
@@ -144,7 +135,7 @@ public class TetrisGUI extends Application implements Observer {
 	/**
 	 * @return the primary stage which has been stored as a static field
 	 */
-	public Stage getPrimaryStage() {
+	public static Stage getPrimaryStage() {
 		return _primaryStage;
 	}
 
