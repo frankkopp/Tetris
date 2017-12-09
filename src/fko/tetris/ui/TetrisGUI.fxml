@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="rootPanel" minHeight="560.0" minWidth="740.0" prefHeight="720.0" prefWidth="740.0" style="-fx-background-color: #eeeeee; -fx-border-color: #000000; -fx-border-width: 2; -fx-background-radius: 2;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fko.tetris.ui.TetrisGUI_Controller">
+<BorderPane fx:id="rootPanel" minHeight="755.0" minWidth="760.0" prefHeight="755.0" prefWidth="760.0" style="-fx-background-color: #000000; -fx-border-color: #000000; -fx-border-width: 2; -fx-background-radius: 2;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fko.tetris.ui.TetrisGUI_Controller">
    <top>
       <VBox minHeight="65.0" BorderPane.alignment="CENTER">
          <children>
@@ -78,9 +78,9 @@
          <children>
             <GridPane gridLinesVisible="true" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="100.0" percentWidth="25.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="100.0" percentWidth="60.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
+                <ColumnConstraints fillWidth="false" hgrow="NEVER" minWidth="50.0" percentWidth="25.0" />
+                <ColumnConstraints hgrow="ALWAYS" minWidth="80.0" percentWidth="60.0" />
+                  <ColumnConstraints fillWidth="false" halignment="RIGHT" hgrow="NEVER" minWidth="25.0" percentWidth="15.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -118,13 +118,13 @@
          </children>
       </AnchorPane>
    </bottom>
-   <center>
-      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-   </center>
    <left>
-      <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
+      <Pane minWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
    </left>
    <right>
-      <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
+      <Pane minWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
    </right>
+   <center>
+      <Pane fx:id="playfieldPane" maxHeight="600.0" maxWidth="300.0" minHeight="600.0" minWidth="300.0" prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER" />
+   </center>
 </BorderPane>

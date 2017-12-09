@@ -48,14 +48,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class TetrisGUI_Controller implements Observer {
 	
 	private static final WindowStateFX windowState = new WindowStateFX(); // to save and restore the last position of our window
     private Stage _primaryStage; // handle to primary stage
-    
-	private TetrisGame _tetrisGame; // holds a running tetrisGame
+    private TetrisGame _tetrisGame; // holds a running tetrisGame
+    private PlayfieldPane _playfieldPane; // handle to playfieldPane
         
     /**
      * This method is called by the FXMLLoader when initialization is complete
@@ -63,39 +64,48 @@ public class TetrisGUI_Controller implements Observer {
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
 
-    	// set convenience reference to primary stage
-        _primaryStage = TetrisGUI.getInstance().getPrimaryStage();
+		
+        _primaryStage = TetrisGUI.getPrimaryStage(); // set convenience reference to primary stage
     	
-    	// FXML auto checks
-    	assertFXML();
+    	assertFXML(); // FXML auto checks
         
-        // add constantly updated memory info into status panel
-        addMemLabelUpdater();
+        addMemLabelUpdater(); // add constantly updated memory info into status panel
+        
+        addPlayfieldPane(); // add the playfield pane 
     }
 	
     /**
-     * Adds an updater to the mem label in the status bar
-     */
-    private void addMemLabelUpdater() {
-        Task<Void> dynamicTimeTask = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                while (true) {
-                    updateMessage(HelperTools.getMBytes(Runtime.getRuntime().freeMemory()) + " MB / "
-                            + HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB");
-                    try {Thread.sleep(500);} catch (InterruptedException ex) {break;}
-                }
-                return null;
-            }
-        };
-        statusbar_mem_text.textProperty().bind(dynamicTimeTask.messageProperty());
-        Thread t2 = new Thread(dynamicTimeTask);
-        t2.setName("Statusbar Mem Labal Updater");
-        t2.setDaemon(true);
-        t2.start();
-    }
-    
-    /**
+	 * 
+	 */
+	private void addPlayfieldPane() {
+		_playfieldPane = new PlayfieldPane();
+		rootPanel.setCenter(_playfieldPane);
+	}
+
+	/**
+	 * Adds an updater to the mem label in the status bar
+	 */
+	private void addMemLabelUpdater() {
+	    Task<Void> dynamicTimeTask = new Task<Void>() {
+	        @Override
+	        protected Void call() throws Exception {
+	            while (true) {
+	                updateMessage(HelperTools.getMBytes(Runtime.getRuntime().freeMemory()) + " MB / "
+	                        + HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB");
+	                try {Thread.sleep(500);} catch (InterruptedException ex) {break;}
+	            }
+	            return null;
+	        }
+	    };
+	    statusbar_mem_text.textProperty().bind(dynamicTimeTask.messageProperty());
+	    Thread t2 = new Thread(dynamicTimeTask);
+	    t2.setName("Statusbar Mem Labal Updater");
+	    t2.setDaemon(true);
+	    t2.start();
+	}
+
+	/**
+     * This is called by model explicitly whenever the model changes
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	@Override
@@ -115,6 +125,7 @@ public class TetrisGUI_Controller implements Observer {
 	 * 
 	 */
 	private void setUItoGameRunning() {
+		
 		// -- set possible actions (menu) --
 		newGame_menu.setDisable(true);
 		newGame_button.setDisable(true);
@@ -173,7 +184,9 @@ public class TetrisGUI_Controller implements Observer {
         return windowState;
     }
     
-    // #######################################################################
+    
+
+	// #######################################################################
     // Actions
     // #######################################################################
     
@@ -235,6 +248,9 @@ public class TetrisGUI_Controller implements Observer {
 
     @FXML // URL location of the FXML file that was given to the FXMLLoader
     private URL location;
+    
+    @FXML // fx:id="playfieldPane"
+    private Pane playfieldPane; // Value injected by FXMLLoader
 
     @FXML // fx:id="newGame_button"
     private Button newGame_button; // Value injected by FXMLLoader

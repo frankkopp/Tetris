@@ -172,7 +172,7 @@ public class TetrisGame extends Observable implements Runnable {
 	/**
 	 * @return the _playfield
 	 */
-	public Playfield get_playfield() {
+	public Playfield getPlayfield() {
 		return _playfield;
 	}
 	

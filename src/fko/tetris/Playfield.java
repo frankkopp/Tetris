@@ -53,7 +53,7 @@ public class Playfield {
 	// the internal data structure for the matrix
 	// a zero representing an empty field, a non-zero an occupied field
 	// non-zeros also determine the color (defined in Tetrimino class)
-	private Color[][] _mainMatrix;
+	private TetrisColor[][] _mainMatrix;
 	
 	// convenience field for SKYLINE+BUFFERZONE
 	private int _playfieldHeight;
@@ -64,17 +64,63 @@ public class Playfield {
 	 */
 	public Playfield() {
 		this._playfieldHeight = SKYLINE+BUFFERZONE;
-		this._mainMatrix = new Color[PLAYFIELD_WIDTH][_playfieldHeight];
+		this._mainMatrix = new TetrisColor[PLAYFIELD_WIDTH][_playfieldHeight];
 		
-		// iterate through all cells a initialize with zero
+		// iterate through all cells and initialize with zero
 		for (int yi = 0; yi < _playfieldHeight; yi++) {
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
-				_mainMatrix[xi][yi] = Color.EMPTY;
+				_mainMatrix[xi][yi] = TetrisColor.EMPTY;
 			}
 		}
 		
+		// DEBUG
+		_mainMatrix[0][0] = TetrisColor.BLUE;
+		_mainMatrix[1][0] = TetrisColor.BLUE;
+		_mainMatrix[2][0] = TetrisColor.BLUE;
+		_mainMatrix[3][0] = TetrisColor.BLUE;
+		_mainMatrix[4][0] = TetrisColor.PURPLE;
+		_mainMatrix[5][0] = TetrisColor.PURPLE;
+		_mainMatrix[5][1] = TetrisColor.PURPLE;
+		_mainMatrix[6][0] = TetrisColor.PURPLE;
+		_mainMatrix[7][0] = TetrisColor.YELLOW;
+		_mainMatrix[7][1] = TetrisColor.YELLOW;
+		_mainMatrix[8][0] = TetrisColor.YELLOW;
+		_mainMatrix[8][1] = TetrisColor.YELLOW;
+
+		_mainMatrix[0][20] = TetrisColor.YELLOW;
+		_mainMatrix[0][21] = TetrisColor.YELLOW;
+		_mainMatrix[1][20] = TetrisColor.YELLOW;
+		_mainMatrix[1][21] = TetrisColor.YELLOW;
+		
+		_mainMatrix[2][18] = TetrisColor.YELLOW;
+		_mainMatrix[2][19] = TetrisColor.YELLOW;
+		_mainMatrix[3][18] = TetrisColor.YELLOW;
+		_mainMatrix[3][19] = TetrisColor.YELLOW;
+
+		_mainMatrix[4][19] = TetrisColor.YELLOW;
+		_mainMatrix[4][20] = TetrisColor.YELLOW;
+		_mainMatrix[5][19] = TetrisColor.YELLOW;
+		_mainMatrix[5][20] = TetrisColor.YELLOW;
+		
 	}
 	
+	public int getColumns() {
+		return PLAYFIELD_WIDTH;
+	}
+
+	public int getVisibleRows() {
+		return SKYLINE;
+	}
+
+	/**
+	 * @param xi
+	 * @param yi
+	 * @return
+	 */
+	public TetrisColor getColor(int xi, int yi) {
+		return _mainMatrix[xi][yi];
+	}
+
 	
 	
 	

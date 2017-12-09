@@ -84,8 +84,8 @@ public class TetrisGUI extends Application implements Observer {
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
 			_primaryStage.setScene(scene);
-			_primaryStage.setMinWidth(740);
-			_primaryStage.setMinHeight(700);
+			_primaryStage.setMinWidth(785);
+			_primaryStage.setMinHeight(795);
 
             // get last window position and size
             double windowLocX = Double.parseDouble(
