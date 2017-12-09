@@ -92,7 +92,7 @@ public class PlayfieldPane extends Pane {
 	/**
 	 * Draws all elements in the panel. Lines and Tetriminos
 	 */
-	private void draw() {
+	public void draw() {
 		if (_playField == null) _playField=new Playfield(); // draw default field if no other playField is defined
 		draw(_playField);
 	}

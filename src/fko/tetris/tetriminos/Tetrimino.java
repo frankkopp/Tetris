@@ -30,17 +30,27 @@ import fko.tetris.TetrisColor;
  */
 abstract public class Tetrimino {
 	
-	public final static int NORTH = 0;
-	public final static int EAST  = 1;
-	public final static int SOUTH = 2;
-	public final static int WEST  = 3;
-	
 	protected String 		_myName;
 	protected TetrisColor 	_myColor;
 	
 	/**
 	 * This matrix holds 4 [][] matrices - NORTH, EAST, SOUTH, WEST
-	 * with y and x coordinates
+	 * with y and x coordinates</br>
+	 * E.g. <code>
+	 * 		{ //NORTH </br>
+				{0, 0, 0, 0},</br>
+				{0, 1, 1, 0},</br>
+				{0, 1, 1, 0},</br>
+				{0, 0, 0, 0}</br>
+			},</br>
+			{ // EAST</br>
+				{0, 0, 0, 0},</br>
+				{0, 1, 1, 0},</br>
+				{0, 1, 1, 0},</br>
+				{0, 0, 0, 0}</br>
+			},...</br>
+			</code>
+	 * 
 	 */
 	protected int[][][] _tMatrix;
 	
@@ -55,10 +65,36 @@ abstract public class Tetrimino {
 	 */
 	protected int[][]   _tRotationPoint1;
 	
+	/**
+	 * Retrieve the Matrix for a given facing
+	 * @see java.lang.Object#toString()
+	 */
+	public int[][] getMatrix(Facing facing) {
+		return _tMatrix[facing.ordinal()];
+	}
+	
+	/**
+	 * Retrieves the color of the Tetrimino
+	 * @return the _myColor
+	 */
+	public TetrisColor getColor() {
+		return _myColor;
+	}
+
 	@Override
 	public String toString() {
 		return _myName;
 		
+	}
+	
+	/**
+	 * All for facings
+	 */
+	public enum Facing {
+		NORTH,
+		EAST,
+		SOUTH,
+		WEST;
 	}
 
 }

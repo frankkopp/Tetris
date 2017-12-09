@@ -56,30 +56,36 @@ public class TetrisGUI_Controller implements Observer {
 	private static final WindowStateFX windowState = new WindowStateFX(); // to save and restore the last position of our window
     private Stage _primaryStage; // handle to primary stage
     private TetrisGame _tetrisGame; // holds a running tetrisGame
-    private PlayfieldPane _playfieldPane; // handle to playfieldPane
+    private PlayfieldPane _playfieldPane; // handle to PlayfieldPane
+	private NextQueuePane _nextQueuePane; // handle to NextQueuePane
         
     /**
      * This method is called by the FXMLLoader when initialization is complete
      */
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
-
-		
         _primaryStage = TetrisGUI.getPrimaryStage(); // set convenience reference to primary stage
-    	
     	assertFXML(); // FXML auto checks
         
         addMemLabelUpdater(); // add constantly updated memory info into status panel
-        
         addPlayfieldPane(); // add the playfield pane 
+        addNextQueuePane(); // add the next queue pane
     }
 	
-    /**
-	 * 
+    /*
+	 * Creates a PlayfieldPane and adds it to the root panel  
 	 */
 	private void addPlayfieldPane() {
 		_playfieldPane = new PlayfieldPane();
 		rootPanel.setCenter(_playfieldPane);
+	}
+	
+    /*
+	 * Creates a NextQueuePane and adds it to the root panel  
+	 */
+	private void addNextQueuePane() {
+		_nextQueuePane = new NextQueuePane();
+		rootPanel.setRight(_nextQueuePane);
 	}
 
 	/**
@@ -114,18 +120,30 @@ public class TetrisGUI_Controller implements Observer {
 		System.out.println("update from "+o+" with args: "+arg);
 		
 		if (_tetrisGame != null && _tetrisGame.isRunning()) { // game is running
-			 PlatformUtil.platformRunAndWait(() -> setUItoGameRunning());
+			 PlatformUtil.platformRunAndWait(() -> setUItoGameRunning()); // setup ui
+			 _playfieldPane.setPlayField(_tetrisGame.getPlayfield());
+			 _nextQueuePane.setNextQueue(_tetrisGame.getNextQueue());
+			 PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		} else { // no game 
-			 PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning());
+			 PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning()); // setup ui 
+			 _playfieldPane.setPlayField(null);
+			 _nextQueuePane.setNextQueue(null);
+			 PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		}
-		
+	}
+
+	/**
+	 * @return
+	 */
+	private void draw() {
+		_playfieldPane.draw();
+		_nextQueuePane.draw();
 	}
 
 	/**
 	 * 
 	 */
 	private void setUItoGameRunning() {
-		
 		// -- set possible actions (menu) --
 		newGame_menu.setDisable(true);
 		newGame_button.setDisable(true);

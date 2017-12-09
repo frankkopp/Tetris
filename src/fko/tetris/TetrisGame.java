@@ -25,8 +25,6 @@ package fko.tetris;
 
 import java.time.LocalDateTime;
 import java.util.Observable;
-import java.util.Queue;
-import java.util.Set;
 
 import fko.tetris.tetriminos.Tetrimino;
 
@@ -112,6 +110,12 @@ public class TetrisGame extends Observable implements Runnable {
 			// vvv DEBUG / TEMPORARY
 			try {
 				System.out.println(LocalDateTime.now());
+
+				_nextQueue.getNext();
+				// -- tell the view that model has changed
+		        setChanged();
+		        notifyObservers("NextQueue getNext");
+
 				Thread.sleep(1000);
 			} catch (InterruptedException e) { /* nothing */ }
 			// ^^^ DEBUG
@@ -120,7 +124,7 @@ public class TetrisGame extends Observable implements Runnable {
 				while (_isPaused && _gameStopped == false) {
 					System.out.println("PAUSED "+LocalDateTime.now());
 					try {
-						Thread.sleep(1000);
+				        Thread.sleep(1000);
 					} catch (InterruptedException e) { /* nothing */ }
 				}
 			}
@@ -155,27 +159,19 @@ public class TetrisGame extends Observable implements Runnable {
 	}
 
 	/**
-	 * Fills the next queue from the bag until queue has max elements. Creates new bag if bag is empty.
-	 * @return the filled queue
-	 */
-	private Queue fillFromBag() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @return new Set of 7 Tetriminos
-	 */
-	private Set createNewBag() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
 	 * @return the _playfield
 	 */
 	public Playfield getPlayfield() {
 		return _playfield;
 	}
+
+	/**
+	 * @return the _nextQueue
+	 */
+	public NextQueue getNextQueue() {
+		return _nextQueue;
+	}
+	
+	
 	
 }

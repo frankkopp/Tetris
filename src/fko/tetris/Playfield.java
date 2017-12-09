@@ -74,6 +74,7 @@ public class Playfield {
 		}
 		
 		// DEBUG
+		/*
 		_mainMatrix[0][0] = TetrisColor.BLUE;
 		_mainMatrix[1][0] = TetrisColor.BLUE;
 		_mainMatrix[2][0] = TetrisColor.BLUE;
@@ -101,6 +102,7 @@ public class Playfield {
 		_mainMatrix[4][20] = TetrisColor.YELLOW;
 		_mainMatrix[5][19] = TetrisColor.YELLOW;
 		_mainMatrix[5][20] = TetrisColor.YELLOW;
+		*/
 		
 	}
 	
