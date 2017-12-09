@@ -28,6 +28,8 @@ import java.util.Observable;
 import java.util.Queue;
 import java.util.Set;
 
+import fko.tetris.tetriminos.Tetrimino;
+
 /**
  * This represents the state of a Tetris game. It holds all information necessary to represent a Tetris game at any 
  * point in time.
@@ -37,8 +39,8 @@ public class TetrisGame extends Observable implements Runnable {
 	
 	// Tetris state
 	private Playfield 	_playfield;	// matrix with all cells
-	private Set			_bag;		// bag with all 7 Tetriminos - randomly shuffled to the next queue
-	private Queue		_nextQueue;	// holds a list the next Tetriminos
+	private Bag			_bag;		// bag with all 7 Tetriminos - randomly shuffled to the next queue
+	private NextQueue	_nextQueue;	// holds a list the next Tetriminos
 	private Tetrimino	_holdQueue; // holds one Tetrimino to be used later
 	private int			_startLevel; 	// start level can be set differntly by the UI
 	private int			_currentLevel; 	// current level while playing
@@ -55,15 +57,15 @@ public class TetrisGame extends Observable implements Runnable {
 	 * Creates a Tetris game with default values
 	 */
 	public TetrisGame() {
-		_playfield = new Playfield();
-		_bag = createNewBag();
-		_nextQueue = fillFromBag();
-		_holdQueue = null;
-		_startLevel = 1;
-		_currentLevel = 1;
-		_score = 0;
-		_lineCount = 0;
-		_tetrisesCount = 0;
+		_playfield 		= new Playfield();
+		_bag 			= new Bag();
+		_nextQueue		= new NextQueue(_bag, 3);
+		_holdQueue 		= null;
+		_startLevel 	= 1;
+		_currentLevel 	= 1;
+		_score 			= 0;
+		_lineCount 		= 0;
+		_tetrisesCount 	= 0;
 	}
 	
 	 /**

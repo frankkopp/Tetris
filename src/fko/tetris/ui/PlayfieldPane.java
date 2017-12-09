@@ -36,12 +36,12 @@ import javafx.scene.shape.Rectangle;
  */
 public class PlayfieldPane extends Pane {
 	
-	private static double HEIGHT = 600;
-	private static double WIDTH = 300;
+	private static final double HEIGHT = 600;
+	private static final double WIDTH = 300;
 
-	private static Color BACKGROUND_COLOR = Color.BLACK;
-	private static Color GRID_COLOR = Color.LIGHTGRAY;
-	private static Color FRAME_COLOR = Color.LIGHTGRAY;
+	private static final Color BACKGROUND_COLOR = Color.BLACK;
+	private static final Color GRID_COLOR = Color.LIGHTGRAY;
+	private static final Color FRAME_COLOR = Color.LIGHTGRAY;
 
 	private Playfield _playField; // the playField to draw
 	

@@ -37,18 +37,18 @@ public class Playfield {
 	/**
 	 * The line which separates he visible area from the hidden buffer zone
 	 */
-	public static int SKYLINE = 20;
+	public static final int SKYLINE = 20;
 	
 	/**
 	 * The height of the buffer zone.
 	 * Together with the SKYLINE it determines the height of the overall playfield matrix
 	 */
-	public static int BUFFERZONE = 20;
+	public static final int BUFFERZONE = 20;
 	
 	/**
 	 * Playfield matrix width
 	 */
-	public static int PLAYFIELD_WIDTH = 10;
+	public static final int PLAYFIELD_WIDTH = 10;
 			
 	// the internal data structure for the matrix
 	// a zero representing an empty field, a non-zero an occupied field

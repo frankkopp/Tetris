@@ -26,39 +26,49 @@ package fko.tetris.tetriminos;
 import fko.tetris.TetrisColor;
 
 /**
- * Interface for Tetriminos 
+ * 
  */
-abstract public class Tetrimino {
+public class O_Tetrimino extends Tetrimino {
 	
-	public final static int NORTH = 0;
-	public final static int EAST  = 1;
-	public final static int SOUTH = 2;
-	public final static int WEST  = 3;
-	
-	protected String 		_myName;
-	protected TetrisColor 	_myColor;
-	
-	/**
-	 * This matrix holds 4 [][] matrices - NORTH, EAST, SOUTH, WEST
-	 * with y and x coordinates
-	 */
-	protected int[][][] _tMatrix;
-	
-	/**
-	 * the start point is placed in cell 5:21 for each Tetrimino
-	 */
-	protected int[] 	_startPoint;
-	
-	/**
-	 * The rotation point is place in cell 5:21 for each Tetrimino
-	 * It also helps with rotation
-	 */
-	protected int[][]   _tRotationPoint1;
-	
-	@Override
-	public String toString() {
-		return _myName;
+	public O_Tetrimino() {
+		_myName = "O";
+		_myColor = TetrisColor.YELLOW;
 		
+		_tMatrix = new int[][][] {
+			{ //NORTH
+				{0, 0, 0, 0},
+				{0, 1, 1, 0},
+				{0, 1, 1, 0},
+				{0, 0, 0, 0}
+			},
+			{ // EAST
+				{0, 0, 0, 0},
+				{0, 1, 1, 0},
+				{0, 1, 1, 0},
+				{0, 0, 0, 0}
+			},
+			{ // SOUTH
+				{0, 0, 0, 0},
+				{0, 1, 1, 0},
+				{0, 1, 1, 0},
+				{0, 0, 0, 0}
+			},
+			{ // WEST
+				{0, 0, 0, 0},
+				{0, 1, 1, 0},
+				{0, 1, 1, 0},
+				{0, 0, 0, 0}
+			}
+		};
+		
+		_startPoint = new int[] {2,1};
+		
+		_tRotationPoint1 = new int[][] {
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 1, 0, 0},
+				{0, 0, 0, 0}
+		};
 	}
 
 }

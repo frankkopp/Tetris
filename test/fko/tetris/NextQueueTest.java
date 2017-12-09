@@ -21,44 +21,50 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package fko.tetris.tetriminos;
+package fko.tetris;
 
-import fko.tetris.TetrisColor;
+import java.util.ListIterator;
+
+import org.junit.Test;
+
+import fko.tetris.tetriminos.Tetrimino;
 
 /**
- * Interface for Tetriminos 
+ * 
  */
-abstract public class Tetrimino {
-	
-	public final static int NORTH = 0;
-	public final static int EAST  = 1;
-	public final static int SOUTH = 2;
-	public final static int WEST  = 3;
-	
-	protected String 		_myName;
-	protected TetrisColor 	_myColor;
-	
+public class NextQueueTest {
+
 	/**
-	 * This matrix holds 4 [][] matrices - NORTH, EAST, SOUTH, WEST
-	 * with y and x coordinates
+	 * Test method for {@link fko.tetris.NextQueue#getNext()}.
 	 */
-	protected int[][][] _tMatrix;
-	
-	/**
-	 * the start point is placed in cell 5:21 for each Tetrimino
-	 */
-	protected int[] 	_startPoint;
-	
-	/**
-	 * The rotation point is place in cell 5:21 for each Tetrimino
-	 * It also helps with rotation
-	 */
-	protected int[][]   _tRotationPoint1;
-	
-	@Override
-	public String toString() {
-		return _myName;
+	@Test
+	public final void testGetNext() {
+		Bag bag = new Bag();
+		NextQueue nq = new NextQueue(bag, 3);
 		
+		for (int i=0; i<100; i++) {
+			
+		}
+		
+		
+	}
+
+	/**
+	 * Test method for {@link fko.tetris.NextQueue#getListIterator()}.
+	 */
+	@Test
+	public final void testGetListIterator() {
+		Bag bag = new Bag();
+		NextQueue nq = new NextQueue(bag, 3);
+		
+		for (int i=0; i<100; i++) {
+			ListIterator<Tetrimino> li = nq.getListIterator();
+			while(li.hasNext()) {
+				System.out.print(li.next().toString()+" ");
+			}
+			System.out.println();
+			System.out.println(nq.getNext() + " <-- " + nq + " <-- " + bag);
+		}
 	}
 
 }
