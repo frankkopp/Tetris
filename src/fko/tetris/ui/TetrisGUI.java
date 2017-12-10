@@ -23,6 +23,8 @@ SOFTWARE.
  */
 package fko.tetris.ui;
 
+import java.util.Locale;
+
 import com.sun.javafx.application.PlatformImpl;
 
 import javafx.application.Application;
@@ -56,6 +58,8 @@ public class TetrisGUI extends Application {
 
 		// Startup the JavaFX platform
 		Platform.setImplicitExit(false);
+		
+		Locale.setDefault(Locale.GERMANY);
 		
 		PlatformImpl.startup(() -> {
 			final Stage primaryStage = new Stage();
@@ -107,6 +111,9 @@ public class TetrisGUI extends Application {
 			_primaryStage.setWidth(windowSizeX);
 			_primaryStage.setHeight(windowSizeY);
 
+			// add key handler
+			_controller.addKeyEventHandler(); 
+			
 			// now show the window
 			_primaryStage.show();
 

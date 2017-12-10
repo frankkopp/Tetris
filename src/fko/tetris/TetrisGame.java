@@ -24,6 +24,8 @@ SOFTWARE.
 package fko.tetris;
 
 import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import fko.tetris.tetriminos.Tetrimino;
 
@@ -32,7 +34,7 @@ import fko.tetris.tetriminos.Tetrimino;
  * point in time.
  * 
  */
-public class TetrisGame extends Observable implements Runnable {
+public class TetrisGame extends Observable implements Runnable, Observer {
 	
 	// Tetris state
 	private Playfield 	_playfield;	// matrix with all cells
@@ -55,6 +57,8 @@ public class TetrisGame extends Observable implements Runnable {
 									// which states can follow
 	
 	private TetrisTimer _fallingTimer; // timer to control falling time
+	
+	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<TetrisControlEvents>();
 	
 	/**
 	 * Creates a Tetris game with default values
@@ -114,6 +118,9 @@ public class TetrisGame extends Observable implements Runnable {
         
         _phaseState = TetrisPhase.GENERATION; // we always start with GENERATION
 		
+        // clear control queue
+        _controlQueue.clear();
+        
 		do { // loop as long as game is running
 			
 			// STATE MACHINE
@@ -137,23 +144,52 @@ public class TetrisGame extends Observable implements Runnable {
 				// Start falling timer
 				// TODO: make time depended of level
 				_fallingTimer = new TetrisTimer(1000);
+				_fallingTimer.addObserver(this);
 				_fallingTimer.start();
 
 				// While timer is >0 allow movements
 				// movement = inputs from keyboard (events)
 				// we query an event blocking if necessary
 				// timer will wake us if no event
+				boolean breakFlag = false;
 				do {
-					System.out.println("Remaining Time: "+_fallingTimer.getRemainingTime());
-					
 					// handle movement events
-					
-					// vvv DEBUG / TEMPORARY
-					try { Thread.sleep(100);} 
-					catch (InterruptedException e) { /* nothing */ }
-					// ^^^ DEBUG
-					
-				} while (_fallingTimer.getRemainingTime() > 0);
+					 // Take next control event or wait until available
+					TetrisControlEvents event = TetrisControlEvents.NONE;
+			        try { 
+			        		event = _controlQueue.take();
+			        } catch (InterruptedException e) { /* empty*/ }
+			        
+			        // event handling
+			        if (event != TetrisControlEvents.NONE) { // NONE is used to wake the take()
+			        		switch(event) {
+			        		case LEFT:	
+			        			_playfield.moveLeft(); // ignored if no move possible
+			        			break;
+			        		case RIGHT:
+			        			_playfield.moveRight(); // ignored if no move possible
+			        			break;
+			        		case RTURN:
+			        			_playfield.turnRight(); // ignored if no move possible
+			        			break;
+			        		case LTURN:
+			        			_playfield.turnLeft();  // ignored if no move possible
+			        			break;
+			        		case SOFTDOWN:				
+			        			_playfield.moveDown();	// ignored if no move possible
+			        			break;
+			        		case HARDDOWN:				
+			        			_playfield.hardDown();
+			        			break;
+			        		case HOLD:
+			        			// ignore for now
+			        			break;
+			        		}
+			    			// -- tell the view that model has changed
+			    			setChanged();
+			    	        notifyObservers("after event");
+			        }
+				} while (breakFlag || _fallingTimer.getRemainingTime() > 0);
 
 				// stop the timer just t make sure
 				_fallingTimer.stop();
@@ -206,8 +242,19 @@ public class TetrisGame extends Observable implements Runnable {
         notifyObservers("Game Thread stopped");
 	}
 
+	public void controlQueueAdd(TetrisControlEvents e) {
+		_controlQueue.add(e);
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		if (o == _fallingTimer) {
+			_controlQueue.add(TetrisControlEvents.NONE);
+		}
+	}
+
 	/*
-	 * checkss if game is paused and waits until game is resumed 
+	 * checks if game is paused and waits until game is resumed 
 	 */
 	private void waitIfPaused() {
 		if (_isPaused) {
@@ -255,7 +302,5 @@ public class TetrisGame extends Observable implements Runnable {
 	public NextQueue getNextQueue() {
 		return _nextQueue;
 	}
-	
-	
 	
 }

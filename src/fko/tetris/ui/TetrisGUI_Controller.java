@@ -28,17 +28,20 @@ SOFTWARE.
 package fko.tetris.ui;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import fko.tetris.TetrisControlEvents;
 import fko.tetris.Tetris;
 import fko.tetris.TetrisGame;
 import fko.tetris.util.HelperTools;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -47,6 +50,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -78,6 +82,34 @@ public class TetrisGUI_Controller implements Observer {
 		addMemLabelUpdater(); // add constantly updated memory info into status panel
 		addPlayfieldPane(); // add the playfield pane 
 		addNextQueuePane(); // add the next queue pane
+	}
+
+	protected void addKeyEventHandler() {
+
+		_primaryStage.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+			@Override
+			public void handle(KeyEvent event) {
+				//System.out.println("Key Pressed: "+event.getCode().toString());
+				switch (event.getCode()) {
+				case LEFT:	_tetrisGame.controlQueueAdd(TetrisControlEvents.LEFT); break;
+				case RIGHT:	_tetrisGame.controlQueueAdd(TetrisControlEvents.RIGHT); break;
+				case S:		_tetrisGame.controlQueueAdd(TetrisControlEvents.RTURN); break;
+				case A:		_tetrisGame.controlQueueAdd(TetrisControlEvents.LTURN); break;
+				case DOWN:	_tetrisGame.controlQueueAdd(TetrisControlEvents.SOFTDOWN); break;
+				case UP:		_tetrisGame.controlQueueAdd(TetrisControlEvents.HARDDOWN); break;
+				case D:		_tetrisGame.controlQueueAdd(TetrisControlEvents.HOLD); break;
+				}
+			}
+		}); 
+
+		_primaryStage.getScene().setOnKeyReleased(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				switch (event.getCode()) {
+				}
+			}
+		});
 	}
 
 	/*
