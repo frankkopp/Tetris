@@ -44,12 +44,13 @@ public class Tetris {
 	public static TetrisGame _tetrisModel;
 	
 	/**
-	 * @param args
+	 * Main creates the UI object (JavaFX Application) and waits for the UI to show. After that the thread exits as 
+	 * JavaFX runs in a separate thread. 
+	 * @param args - not yet used
 	 */
 	public static void main(String[] args) {
-		
+
 		_ui = new TetrisGUI();
-		_ui.waitForUI();
 		
 	}
 	

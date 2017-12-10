@@ -43,8 +43,7 @@ public class PlatformUtil {
     /**
      * Calls Platform.runLater to run the runnable but waits until it has
      * finished execution.
-     * Waiting is implemented be means of a CountDownLatch.
-     *
+     * Waiting is implemented by means of a CountDownLatch.
      * @param runnable
      */
     public static void platformRunAndWait(final Runnable runnable) {
