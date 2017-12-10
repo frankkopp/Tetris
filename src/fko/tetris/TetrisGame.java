@@ -196,6 +196,7 @@ public class TetrisGame extends Observable implements Runnable {
 			setChanged();
 	        notifyObservers("After phase loop");
 			
+	        // TODO: improve to also pause during the phases
 			waitIfPaused();
 			
 		} while (_gameStopped == false);
