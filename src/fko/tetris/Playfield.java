@@ -126,6 +126,8 @@ public class Playfield {
 	 */
 	public boolean spawn(Tetrimino next) {
 
+		clearMatrix(_foregroundMatrix);
+		
 		int[][] tMatrix = next.getMatrix(Facing.NORTH);
 
 		// define spawn point - Tetrimino have a defined starting point which should be placed on 5:21
@@ -318,10 +320,6 @@ public class Playfield {
 	}
 
 	public void turnLeft() {
-
-	}
-
-	public void hardDown() {
 
 	}
 

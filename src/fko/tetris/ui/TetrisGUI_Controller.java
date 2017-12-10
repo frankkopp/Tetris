@@ -175,7 +175,7 @@ public class TetrisGUI_Controller implements Observer {
 		 * model and calls update() we have a deadlock. 
 		 */
 
-		System.out.println("update from "+o+" with args: "+arg);
+		//System.out.println("update from "+o+" with args: "+arg);
 
 		if (_tetrisGame != null && _tetrisGame.isRunning()) { // game is running
 			_playfieldPane.setPlayField(_tetrisGame.getPlayfield());
