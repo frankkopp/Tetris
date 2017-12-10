@@ -29,6 +29,8 @@ import fko.tetris.tetriminos.Tetrimino.Facing;
 /**
  * This represent the internal playfield which basically consists of two matrices of 10 columns and 40 rows.
  * The matrix coordinates start at 0,0 at the lower left cell and 9,39 with the upper right cell.
+ * The background matrix contains all settled Tetriminos.
+ * The foreground matrix contains the current Tetrimino in play. 
  * 
  * From Tetris Guideline
  * Playfield is 10:40, where rows above 20 are hidden or obstructed by the field frame to trick the player into thinking
@@ -81,37 +83,6 @@ public class Playfield {
 
 		clearMatrix(_backgroundMatrix);
 		clearMatrix(_foregroundMatrix);
-
-		// DEBUG
-		//		_backgroundMatrix[3][18] = TetrisColor.BLUE;
-		//		_backgroundMatrix[4][18] = TetrisColor.BLUE;
-		//		_backgroundMatrix[5][18] = TetrisColor.BLUE;
-		//		_backgroundMatrix[6][18] = TetrisColor.BLUE;
-
-		//		_backgroundMatrix[0][1] = TetrisColor.BLUE;
-		//		_backgroundMatrix[1][1] = TetrisColor.BLUE;
-		//		_backgroundMatrix[2][1] = TetrisColor.BLUE;
-		//		_backgroundMatrix[3][1] = TetrisColor.BLUE;
-
-		/*
-		_backgroundMatrix[0][0] = TetrisColor.BLUE;
-		_backgroundMatrix[1][0] = TetrisColor.BLUE;
-		_backgroundMatrix[2][0] = TetrisColor.BLUE;
-		_backgroundMatrix[3][0] = TetrisColor.BLUE;
-		_backgroundMatrix[4][0] = TetrisColor.PURPLE;
-		_backgroundMatrix[5][0] = TetrisColor.PURPLE;
-		_backgroundMatrix[5][1] = TetrisColor.PURPLE;
-		_backgroundMatrix[6][0] = TetrisColor.PURPLE;
-		_backgroundMatrix[7][0] = TetrisColor.YELLOW;
-		_backgroundMatrix[7][1] = TetrisColor.YELLOW;
-		_backgroundMatrix[8][0] = TetrisColor.YELLOW;
-		_backgroundMatrix[8][1] = TetrisColor.YELLOW;
-		_foregroundMatrix[4][19] = TetrisColor.YELLOW;
-		_foregroundMatrix[4][20] = TetrisColor.YELLOW;
-		_foregroundMatrix[5][19] = TetrisColor.YELLOW;
-		_foregroundMatrix[5][20] = TetrisColor.YELLOW;
-		 */
-
 	}
 
 	/**
@@ -142,18 +113,14 @@ public class Playfield {
 		// loop through the Tetrimino matrix and write to foreground 
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
-
 				int yi_reversed = tMatrix.length-1 - yi; // the Tetrimino matrix is reverse to the foreground matrix
-
 				// check for collision
 				if (_backgroundMatrix[startPointX+xi][startPointy+yi_reversed] != TetrisColor.EMPTY) {
 					return true; // collision
 				}
-
 				// place color of Tetrimino on foreground matrix or set empty. 
 				_foregroundMatrix[startPointX+xi][startPointy+yi_reversed] 
 						= tMatrix[yi][xi] == 1 ? next.getColor() : TetrisColor.EMPTY;
-
 			}
 		}
 		return false; // no collision
@@ -196,7 +163,7 @@ public class Playfield {
 		return true; // no collisions so we can move down
 	}
 
-	/**
+	/*
 	 * Checks if cell below is free to move into.
 	 * @param xi
 	 * @param yi
@@ -210,7 +177,7 @@ public class Playfield {
 		return true;
 	}
 
-	/**
+	/*
 	 * @param markedForMove
 	 */
 	private void doMoveDown() {
@@ -226,11 +193,15 @@ public class Playfield {
 		}
 	}
 
+	/**
+	 * Move the Tetrimino left one cell, If blocked does not move and returns true<br/>
+	 * @return true if surface on the left
+	 */
 	public boolean moveLeft() {
 
-		// remember the cells we want to move after we have checked all cells if they can move
+		// Remember the cells we want to move after we have checked all cells if they can move
 		// Max 4 cells should occupied as all Tetriminos have for cells
-		// 2 values [0] for x, [1] for y
+		// 2 values - [0] for x, [1] for y
 		// IMPORTANT: the order in this array determines the order of the actual move. Make
 		// sure that moving the cells does not overwrite other Tetrimino cells
 		// control the order via the loop adding cells.
@@ -275,6 +246,11 @@ public class Playfield {
 		return true;
 	}
 
+
+	/**
+	 * Move the Tetrimino right one cell, If blocked does not move and returns true<br/>
+	 * @return true if surface on the right
+	 */
 	public boolean moveRight() {
 
 		// remember the cells we want to move after we have checked all cells if they can move
@@ -324,18 +300,19 @@ public class Playfield {
 	}
 
 	public boolean turnRight() {
+		System.out.println("TURN RIGHT");
 		return false;
 	}
 
 	public boolean turnLeft() {
+		System.out.println("TURN LEFT");
 		return false;
 	}
 
 	/**
-	 * 
+	 * Merges the Tetrimino in play into the background
 	 */
 	public void merge() {
-		System.out.println("<<MERGE");
 		// we do not know where the Tetrimino is so we scan the matrix and copy occupied cell to background
 		for (int yi = 0; yi < _playfieldHeight; yi++) {
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {

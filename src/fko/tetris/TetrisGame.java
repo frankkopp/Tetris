@@ -129,15 +129,12 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				generationPhase();
 				break;
 			case FALLING:
-				System.out.println("ENTER FALLING PHASE");
 				fallingPhase(); 
 				break;
 			case LOCK:
-				System.out.println("ENTER LOCK PHASE");
 				lockPhase();
 				break;
 			case PATTERN:
-				System.out.println("PATTERN PHASE");
 				_phaseState = TetrisPhase.ITERATE;
 				break;
 			case ITERATE:
@@ -200,7 +197,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// timer will wake us if no event
 		boolean breakFlag = false;
 		do {
-			System.out.println("FALLING PHASE");
 			// handle movement events
 			// Take next control event or wait until available
 			TetrisControlEvents event = TetrisControlEvents.NONE;
@@ -275,7 +271,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// timer will wake us if no event
 		boolean breakFlag = false;
 		do {
-			System.out.println("LOCK PHASE");
 			// handle movement events
 			// Take next control event or wait until available
 			TetrisControlEvents event = TetrisControlEvents.NONE;
