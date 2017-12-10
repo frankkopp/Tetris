@@ -80,6 +80,13 @@ abstract public class Tetrimino {
 	public TetrisColor getColor() {
 		return _myColor;
 	}
+	
+	/**
+	 * @return the _startPoint
+	 */
+	public int[] get_startPoint() {
+		return _startPoint;
+	}
 
 	@Override
 	public String toString() {

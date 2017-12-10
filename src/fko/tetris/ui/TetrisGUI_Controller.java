@@ -51,6 +51,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+/**
+ * The Controller sets up additional ui elements after the FXML loader has done its initialization. The FXML loader
+ * calls the Controller's initialize() method.<br/> 
+ * The Controller also receives all input and events from the user interface and the model and executes the appropriate 
+ * ui updates and model actions. The UI calls the actions methods directly. The model signals via the Observer Interface 
+ * @see java.util.Observer#update(java.util.Observable, java.lang.Object) that the model has changed and the UI 
+ * should update its views.
+ */
 public class TetrisGUI_Controller implements Observer {
 	
 	private static final WindowStateFX windowState = new WindowStateFX(); // to save and restore the last position of our window
@@ -88,7 +96,7 @@ public class TetrisGUI_Controller implements Observer {
 		rootPanel.setRight(_nextQueuePane);
 	}
 
-	/**
+	/*
 	 * Adds an updater to the mem label in the status bar
 	 */
 	private void addMemLabelUpdater() {
@@ -117,31 +125,49 @@ public class TetrisGUI_Controller implements Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		
+		/* IMPORTANT:
+		 * This is usually called by another thread and not the FAT thread (FX Application Thread).
+		 * Other threads cannot change to UI - this would cause an exception. Therefore Platform.runLater(r) 
+		 * is used to hand over a Runnable to the FAT. Here this is encapsulated by a util-Class PlatformUtil which
+		 * adds a method platformRunAndWait(r) to wait for the UI to finish the task before is returns to the non-FAT 
+		 * thread.
+		 * If you don't need to wait for the UI use runFutureTask(r). 
+		 * 
+		 * Waiting for the UI helps when the model changes very quickly otherwise and the UI would have trouble showing 
+		 * meaningful output. It also prevents exceptions for when the UI tries to access something in the model which
+		 * has already changed again, e.g. does not exist any more.
+		 * Do not use this if you do not want calculations in the model to be slowed down.
+		 * 
+		 * The update() call from another thread quite often is the cause for deadlocks as the update of the UI in 
+		 * the FAT often uses model objects to update the UI. E.g. if a call to a model object's method in turn updates the 
+		 * model and calls update() we have a deadlock. 
+		 */
+		
 		System.out.println("update from "+o+" with args: "+arg);
 		
 		if (_tetrisGame != null && _tetrisGame.isRunning()) { // game is running
-			 PlatformUtil.platformRunAndWait(() -> setUItoGameRunning()); // setup ui
 			 _playfieldPane.setPlayField(_tetrisGame.getPlayfield());
 			 _nextQueuePane.setNextQueue(_tetrisGame.getNextQueue());
+			 PlatformUtil.platformRunAndWait(() -> setUItoGameRunning()); // setup ui
 			 PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		} else { // no game 
-			 PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning()); // setup ui 
 			 _playfieldPane.setPlayField(null);
 			 _nextQueuePane.setNextQueue(null);
+			 PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning()); // setup ui 
 			 PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		}
 	}
 
-	/**
-	 * @return
+	/*
+	 * calls draw for all panes  
 	 */
 	private void draw() {
 		_playfieldPane.draw();
 		_nextQueuePane.draw();
 	}
 
-	/**
-	 * 
+	/*
+	 * Setup controls (menu, buttons, etc.) for running game 
 	 */
 	private void setUItoGameRunning() {
 		// -- set possible actions (menu) --
@@ -165,8 +191,8 @@ public class TetrisGUI_Controller implements Observer {
 		statusbar_status_text.setText("Game running");
 	}
 
-    /**
-	 * 
+    /*
+	 * Setup controls (menu, buttons, etc.) for game not running
 	 */
 	private void setUItoGameNotRunning() {
 		// -- set possible actions (menu) --
@@ -183,7 +209,7 @@ public class TetrisGUI_Controller implements Observer {
 		statusbar_status_text.setText("No Game");
 	}
 
-	/**
+	/*
      * Save the current sizes and coordinates of all windows to restore them
      * when starting up the next time.
      */
@@ -196,7 +222,8 @@ public class TetrisGUI_Controller implements Observer {
     }
     
     /**
-     * @return the windowstate
+     * Return the window state object.
+     * @return the window state
      */
     public static WindowStateFX getWindowState() {
         return windowState;
@@ -206,6 +233,8 @@ public class TetrisGUI_Controller implements Observer {
 
 	// #######################################################################
     // Actions
+    // IMPORTANT: Watch out for deadlocks - JavaFX app thread calling model
+    // 			  is always dangerous.	
     // #######################################################################
     
 	/**
@@ -256,9 +285,8 @@ public class TetrisGUI_Controller implements Observer {
         aboutDialogStage.showAndWait();
     }
 
-    
     // #######################################################
-    // FXML
+    // FXML Setup
     // #######################################################
 
     @FXML // ResourceBundle that was given to the FXMLLoader
@@ -322,7 +350,7 @@ public class TetrisGUI_Controller implements Observer {
     private Button resumeGame_button; // Value injected by FXMLLoader
 
 
-	/**
+	/*
 	 * FXML checks
 	 */
 	private void assertFXML() {

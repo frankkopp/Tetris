@@ -23,6 +23,9 @@ SOFTWARE.
  */
 package fko.tetris;
 
+import fko.tetris.tetriminos.Tetrimino;
+import fko.tetris.tetriminos.Tetrimino.Facing;
+
 /**
  * This represent the internal playfield which basically consists of a matrix of 10 columns and 40 rows.
  * The matrix coordinates start at 0,0 at the lower left cell and 9,39 with the upper right cell.
@@ -50,60 +53,168 @@ public class Playfield {
 	 */
 	public static final int PLAYFIELD_WIDTH = 10;
 			
-	// the internal data structure for the matrix
-	// a zero representing an empty field, a non-zero an occupied field
-	// non-zeros also determine the color (defined in Tetrimino class)
-	private TetrisColor[][] _mainMatrix;
+	// the internal data structure for the background matrix.
+	// All Tetriminos which are locked in place are merged into the background.
+	// A zero representing an empty field, a non-zero an occupied field.
+	// Non-zeros also determine the color (defined in Tetrimino class)
+	private TetrisColor[][] _backgroundMatrix;
+	
+	// the internal data structure for the foreground matrix.
+	// Tetriminos which are still in play stored here. 
+	// The foreground checks also for collisions against the background. 
+	// A zero representing an empty field, a non-zero an occupied field.
+	// Non-zeros also determine the color (defined in Tetrimino class)
+	private TetrisColor[][] _foregroundMatrix;
+
 	
 	// convenience field for SKYLINE+BUFFERZONE
-	private int _playfieldHeight;
+	private int _playfieldHeight = SKYLINE + BUFFERZONE;
 
 	/**
 	 * Generates a new Playfield with default width and height
-	 * @param _mainMatrix
+	 * @param _backgroundMatrix
 	 */
 	public Playfield() {
-		this._playfieldHeight = SKYLINE+BUFFERZONE;
-		this._mainMatrix = new TetrisColor[PLAYFIELD_WIDTH][_playfieldHeight];
+		this._backgroundMatrix = new TetrisColor[PLAYFIELD_WIDTH][_playfieldHeight];
+		this._foregroundMatrix = new TetrisColor[PLAYFIELD_WIDTH][_playfieldHeight];
 		
+		clearMatrix(_backgroundMatrix);
+		clearMatrix(_foregroundMatrix);
+		
+		// DEBUG
+//		_backgroundMatrix[3][18] = TetrisColor.BLUE;
+//		_backgroundMatrix[4][18] = TetrisColor.BLUE;
+//		_backgroundMatrix[5][18] = TetrisColor.BLUE;
+//		_backgroundMatrix[6][18] = TetrisColor.BLUE;
+		
+		/*
+		_backgroundMatrix[0][0] = TetrisColor.BLUE;
+		_backgroundMatrix[1][0] = TetrisColor.BLUE;
+		_backgroundMatrix[2][0] = TetrisColor.BLUE;
+		_backgroundMatrix[3][0] = TetrisColor.BLUE;
+		_backgroundMatrix[4][0] = TetrisColor.PURPLE;
+		_backgroundMatrix[5][0] = TetrisColor.PURPLE;
+		_backgroundMatrix[5][1] = TetrisColor.PURPLE;
+		_backgroundMatrix[6][0] = TetrisColor.PURPLE;
+		_backgroundMatrix[7][0] = TetrisColor.YELLOW;
+		_backgroundMatrix[7][1] = TetrisColor.YELLOW;
+		_backgroundMatrix[8][0] = TetrisColor.YELLOW;
+		_backgroundMatrix[8][1] = TetrisColor.YELLOW;
+		_foregroundMatrix[4][19] = TetrisColor.YELLOW;
+		_foregroundMatrix[4][20] = TetrisColor.YELLOW;
+		_foregroundMatrix[5][19] = TetrisColor.YELLOW;
+		_foregroundMatrix[5][20] = TetrisColor.YELLOW;
+		*/
+		
+	}
+
+	/**
+	 * Spawns a new Tetrimino.<br/>
+	 * Tetriminos are all generated North Facing (just as they appear in the Next Queue) on the 
+	 * 21st and 22nd rows, just above the Skyline. Every Tetrimino that is three Minos wide is generated on the 4th 
+	 * cell across (4, 21) and stretches to the 6th (6, 21). This includes the T-Tetrimino, L-Tetrimino, J-Tetrimino, 
+	 * S-Tetrimino and Z-Tetrimino. The I-Tetrimino and O-Tetrimino are exactly centered horizontally at generation. 
+	 * The I-Tetrimino is generated on the 21st row (not 22nd), stretching from the 4th to 7th cells (4, 21) - (7, 21),
+	 * and the O-Tetrimino is generated on the 5th and 6th cell (5, 21) - (6, 21).
+	 * @param next
+	 * @return true if collision detected - false otherwise
+	 */
+	public boolean spawn(Tetrimino next) {
+		
+		int[][] tMatrix = next.getMatrix(Facing.NORTH);
+		
+		// define spawn point - Tetrimino have a defined starting point which should be placed on 5:21
+		int spawnrow    = 17;// SKYLINE; // SKYLINE = 20
+		int spawncolumn = 4; // 5 when 1..10 
+		
+		// shift for starting point defined in Tetrimino
+		int startPointX = spawncolumn - next.get_startPoint()[1]; 
+		int startPointy = spawnrow - (tMatrix.length-1-next.get_startPoint()[0]);
+		
+		// loop through the Tetrimino matrix and write to foreground 
+		for (int yi = 0; yi < tMatrix.length; yi++) {
+			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
+				
+				int yi_reversed = tMatrix.length-1 - yi; // the Tetrimino matrix is reverse to the foreground matrix
+				
+				// check for collision
+				if (_backgroundMatrix[startPointX+xi][startPointy+yi_reversed] != TetrisColor.EMPTY) {
+					return true; // collision
+				}
+				
+				// place color of Tetrimino on foreground matrix or set empty. 
+				_foregroundMatrix[startPointX+xi][startPointy+yi_reversed] 
+						= tMatrix[yi][xi] == 1 ? next.getColor() : TetrisColor.EMPTY;
+				
+			}
+		}
+		return false; // no collision
+	}
+
+	/**
+	 * Move the Tetrimino down one cell and checks if it has landed on a surface.<br/>
+	 * Throws exception if collision.
+	 * @return if landed on surface
+	 * @throws RuntimeException if collision occurs
+	 */
+	public boolean moveDown() {
+		System.out.println("MOVE DOWN");
+
+		// remember the cells we want to move after we have checked all cells if they can move
+		// Max 4 cells should occupied as all Tetriminos have for cells
+		// 2 values [0] for x, [1] for y
+		int[][] markedForMove = new int[4][2];
+		int cellNumber = 0;
+
+		// we do not know where the Tetrimino is so we scan the matrix and mark occupied cell for move down
+		// loop through the Tetrimino matrix 
+		for (int yi = 0; yi < _playfieldHeight; yi++) {
+			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
+				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
+					if (canMoveDown(xi,yi)) { // check for collision 
+						markedForMove[cellNumber][0] = xi;
+						markedForMove[cellNumber][1] = yi;
+						cellNumber++;
+					} else { // on surface - move would be collision
+						return true;
+					}
+				}
+			}
+		}
+		// actual move
+		for(int i=0;i<4;i++) {
+			int x = markedForMove[i][0];
+			int y = markedForMove[i][1];
+			if (y!=0) { // only when a useful value is in y
+				TetrisColor temp = _foregroundMatrix[x][y];
+				_foregroundMatrix[x][y] = TetrisColor.EMPTY;
+				_foregroundMatrix[x][y-1] = temp;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if cell below is free to move into.
+	 * @param xi
+	 * @param yi
+	 * @return true if free, false if blocked or edge
+	 */
+	private boolean canMoveDown(int xi, int yi) {
+
+		return true;
+	}
+
+	/**
+	 * 
+	 */
+	private void clearMatrix(TetrisColor[][] m) {
 		// iterate through all cells and initialize with zero
 		for (int yi = 0; yi < _playfieldHeight; yi++) {
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
-				_mainMatrix[xi][yi] = TetrisColor.EMPTY;
+				m[xi][yi] = TetrisColor.EMPTY;
 			}
 		}
-		
-		// DEBUG
-		/*
-		_mainMatrix[0][0] = TetrisColor.BLUE;
-		_mainMatrix[1][0] = TetrisColor.BLUE;
-		_mainMatrix[2][0] = TetrisColor.BLUE;
-		_mainMatrix[3][0] = TetrisColor.BLUE;
-		_mainMatrix[4][0] = TetrisColor.PURPLE;
-		_mainMatrix[5][0] = TetrisColor.PURPLE;
-		_mainMatrix[5][1] = TetrisColor.PURPLE;
-		_mainMatrix[6][0] = TetrisColor.PURPLE;
-		_mainMatrix[7][0] = TetrisColor.YELLOW;
-		_mainMatrix[7][1] = TetrisColor.YELLOW;
-		_mainMatrix[8][0] = TetrisColor.YELLOW;
-		_mainMatrix[8][1] = TetrisColor.YELLOW;
-
-		_mainMatrix[0][20] = TetrisColor.YELLOW;
-		_mainMatrix[0][21] = TetrisColor.YELLOW;
-		_mainMatrix[1][20] = TetrisColor.YELLOW;
-		_mainMatrix[1][21] = TetrisColor.YELLOW;
-		
-		_mainMatrix[2][18] = TetrisColor.YELLOW;
-		_mainMatrix[2][19] = TetrisColor.YELLOW;
-		_mainMatrix[3][18] = TetrisColor.YELLOW;
-		_mainMatrix[3][19] = TetrisColor.YELLOW;
-
-		_mainMatrix[4][19] = TetrisColor.YELLOW;
-		_mainMatrix[4][20] = TetrisColor.YELLOW;
-		_mainMatrix[5][19] = TetrisColor.YELLOW;
-		_mainMatrix[5][20] = TetrisColor.YELLOW;
-		*/
-		
 	}
 	
 	public int getColumns() {
@@ -119,11 +230,27 @@ public class Playfield {
 	 * @param yi
 	 * @return
 	 */
-	public TetrisColor getColor(int xi, int yi) {
-		return _mainMatrix[xi][yi];
+	public TetrisColor getBackgroundColor(int xi, int yi) {
+		return _backgroundMatrix[xi][yi];
 	}
 
+	/**
+	 * @param xi
+	 * @param yi
+	 * @return
+	 */
+	public TetrisColor getForegroundColor(int xi, int yi) {
+		return _foregroundMatrix[xi][yi];
+	}
 	
+	private void debugPrintMatrix(TetrisColor[][] m) {
+		for (int yi = _playfieldHeight-1; yi >= 0; yi--) {
+			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
+				System.out.print(m[xi][yi].ordinal()+" ");
+			}
+			System.out.println();
+		}
+	}
 	
 	
 

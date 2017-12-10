@@ -24,6 +24,7 @@ SOFTWARE.
 package fko.tetris.ui;
 
 import fko.tetris.Playfield;
+import fko.tetris.TetrisColor;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
@@ -145,12 +146,24 @@ public class PlayfieldPane extends Pane {
 		int cr = 0; // counter for the prepared rectangle objects
 		for (int yi = 0; yi < Playfield.SKYLINE; yi++) { // we only draw the visible part therefore only to SKYLINE
 			for (int xi = 0; xi < Playfield.PLAYFIELD_WIDTH; xi++) {
+				final TetrisColor bc = _playField.getBackgroundColor(xi,yi);
+				final TetrisColor fc = _playField.getForegroundColor(xi,yi);
+				
+				Color color = fc.toColor(); // use fc as default
+				if (fc != TetrisColor.EMPTY && bc != TetrisColor.EMPTY) { // COLLISSION 
+					System.err.println("Collission: foreground and background contain color "+xi+":"+yi);
+					// keep fc as default even for this case
+				} else if (fc == TetrisColor.EMPTY && bc != TetrisColor.EMPTY) {
+					color = bc.toColor(); // fc is empty but bc not -> use bc
+				} // other cases work with fc
+				
 				double h = (HEIGHT/Playfield.SKYLINE);
 				double w = (WIDTH/Playfield.PLAYFIELD_WIDTH);
 				double offset_h = HEIGHT -(h*(yi+1)); // height is measured top down were as our playField is buttom up 
 				double offset_w = w * xi;
 				Rectangle block = _block[cr++];
-				block.setFill(_playField.getColor(xi,yi).toColor());
+				
+				block.setFill(color);
 				block.setX(offset_w+1); // +1 to not overdraw the lines
 				block.setY(offset_h+1);
 				block.setWidth(w-1); // -1 to not overdraw the lines

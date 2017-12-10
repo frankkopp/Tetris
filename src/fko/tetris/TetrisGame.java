@@ -23,7 +23,6 @@ SOFTWARE.
  */
 package fko.tetris;
 
-import java.time.LocalDateTime;
 import java.util.Observable;
 
 import fko.tetris.tetriminos.Tetrimino;
@@ -51,6 +50,12 @@ public class TetrisGame extends Observable implements Runnable {
 	private boolean 	_gameStopped = true; 	// flag to stop a running game
 	private boolean 	_isPaused;
 	
+	private TetrisPhase _phaseState;	// the state/phase the engine is currently in
+									// this determines what inputs and actions are allowed and 
+									// which states can follow
+	
+	private TetrisTimer _fallingTimer; // timer to control falling time
+	
 	/**
 	 * Creates a Tetris game with default values
 	 */
@@ -64,6 +69,8 @@ public class TetrisGame extends Observable implements Runnable {
 		_score 			= 0;
 		_lineCount 		= 0;
 		_tetrisesCount 	= 0;
+		
+		_phaseState = TetrisPhase.GENERATION;
 	}
 	
 	 /**
@@ -104,36 +111,112 @@ public class TetrisGame extends Observable implements Runnable {
 		// -- tell the view that model has changed
         setChanged();
         notifyObservers("Game Thread started");
+        
+        _phaseState = TetrisPhase.GENERATION; // we always start with GENERATION
 		
 		do { // loop as long as game is running
 			
-			// vvv DEBUG / TEMPORARY
-			try {
-				System.out.println(LocalDateTime.now());
-
-				_nextQueue.getNext();
-				// -- tell the view that model has changed
-		        setChanged();
-		        notifyObservers("NextQueue getNext");
-
-				Thread.sleep(1000);
-			} catch (InterruptedException e) { /* nothing */ }
-			// ^^^ DEBUG
+			// STATE MACHINE
+			switch (_phaseState) {
 			
-			if (_isPaused) {
-				while (_isPaused && _gameStopped == false) {
-					System.out.println("PAUSED "+LocalDateTime.now());
-					try {
-				        Thread.sleep(1000);
-					} catch (InterruptedException e) { /* nothing */ }
+			case GENERATION:
+				
+				// Generation Phase
+				Tetrimino next = _nextQueue.getNext();
+				if (_playfield.spawn(next)) {
+					// collision detected - BLOCK OUT GAME OVER CONDITION
+					_phaseState = TetrisPhase.GAMEOVER;
+					break;
+				} else {
+					_phaseState = TetrisPhase.FALLING;
 				}
+				break;
+				
+			case FALLING:
+				
+				// Start falling timer
+				// TODO: make time depended of level
+				_fallingTimer = new TetrisTimer(1000);
+				_fallingTimer.start();
+
+				// While timer is >0 allow movements
+				// movement = inputs from keyboard (events)
+				// we query an event blocking if necessary
+				// timer will wake us if no event
+				do {
+					System.out.println("Remaining Time: "+_fallingTimer.getRemainingTime());
+					
+					// handle movement events
+					
+					// vvv DEBUG / TEMPORARY
+					try { Thread.sleep(100);} 
+					catch (InterruptedException e) { /* nothing */ }
+					// ^^^ DEBUG
+					
+				} while (_fallingTimer.getRemainingTime() > 0);
+
+				// stop the timer just t make sure
+				_fallingTimer.stop();
+				
+				// time is <=0 shift Tetrimino DOWN
+				// if landed on surface then phase = LOCK
+				// else start over with FALLING
+				if (_playfield.moveDown()) { 
+					System.out.println("Touchdown!");
+					// landed on surface
+					_phaseState = TetrisPhase.LOCK;
+				} 
+				
+				break;
+				
+			case LOCK:
+				break;
+			case PATTERN:
+				break;
+			case ITERATE:
+				break;
+			case ANIMATE:
+				break;
+			case ELIMINATE:
+				break;
+			case COMPLETION:
+				break;
+			case GAMEOVER:
+				System.out.println("GAME OVER");
+				_gameStopped=true;
+				break;
+				
+			default:
+				System.err.println("Did we miss a state?");
+				break;
 			}
+			
+			
+			// -- tell the view that model has changed
+			setChanged();
+	        notifyObservers("After phase loop");
+			
+			waitIfPaused();
 			
 		} while (_gameStopped == false);
 		
 		// -- tell the view that model has changed
         setChanged();
         notifyObservers("Game Thread stopped");
+	}
+
+	/*
+	 * checkss if game is paused and waits until game is resumed 
+	 */
+	private void waitIfPaused() {
+		if (_isPaused) {
+			while (_isPaused && _gameStopped == false) {
+				//System.out.println("PAUSED "+LocalDateTime.now());
+				try {
+			        Thread.sleep(1000);
+				} catch (InterruptedException e) { /* nothing */ }
+			}
+		}
 	}
 	
 	public boolean isRunning() {
