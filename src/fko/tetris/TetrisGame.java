@@ -57,9 +57,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	// which states can follow
 
 	private TetrisTimer _fallingTimer; // timer to control falling time
-
-	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<TetrisControlEvents>();
-
+	private TetrisTimer _lockTimer;		// timer to control lock time
+	
+	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<>();
 	/**
 	 * Creates a Tetris game with default values
 	 */
@@ -129,12 +129,15 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				generationPhase();
 				break;
 			case FALLING:
+				System.out.println("ENTER FALLING PHASE");
 				fallingPhase(); 
 				break;
 			case LOCK:
-				_phaseState = TetrisPhase.PATTERN;
+				System.out.println("ENTER LOCK PHASE");
+				lockPhase();
 				break;
 			case PATTERN:
+				System.out.println("PATTERN PHASE");
 				_phaseState = TetrisPhase.ITERATE;
 				break;
 			case ITERATE:
@@ -170,6 +173,17 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		notifyObservers("Game Thread stopped");
 	}
 
+	private void generationPhase() {
+		// Generation Phase
+		Tetrimino next = _nextQueue.getNext();
+		if (_playfield.spawn(next)) {
+			// collision detected - BLOCK OUT GAME OVER CONDITION
+			_phaseState = TetrisPhase.GAMEOVER;
+		} else {
+			_phaseState = TetrisPhase.FALLING;
+		}
+	}
+
 	/**
 	 * 
 	 */
@@ -179,13 +193,14 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_fallingTimer = new TetrisTimer(1000);
 		_fallingTimer.addObserver(this);
 		_fallingTimer.start();
-
+		
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
 		// we query an event blocking if necessary
 		// timer will wake us if no event
 		boolean breakFlag = false;
 		do {
+			System.out.println("FALLING PHASE");
 			// handle movement events
 			// Take next control event or wait until available
 			TetrisControlEvents event = TetrisControlEvents.NONE;
@@ -216,6 +231,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 					setChanged();
 					notifyObservers("after event");
 				}
+				breakFlag = true;
 				break;
 			case HOLD:
 				// ignore for now
@@ -228,7 +244,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			setChanged();
 			notifyObservers("after event");
 
-		} while (breakFlag || _fallingTimer.getRemainingTime() > 0);
+		} while (!breakFlag && _fallingTimer.getRemainingTime() > 0);
 
 		// stop the timer just t make sure
 		_fallingTimer.stop();
@@ -237,7 +253,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// if landed on surface then phase = LOCK
 		// else start over with FALLING
 		if (_playfield.moveDown()) { 
-			System.out.println("Touchdown!");
 			// landed on surface
 			_phaseState = TetrisPhase.LOCK;
 		}
@@ -246,15 +261,95 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	/**
 	 * 
 	 */
-	private void generationPhase() {
-		// Generation Phase
-		Tetrimino next = _nextQueue.getNext();
-		if (_playfield.spawn(next)) {
-			// collision detected - BLOCK OUT GAME OVER CONDITION
-			_phaseState = TetrisPhase.GAMEOVER;
-		} else {
-			_phaseState = TetrisPhase.FALLING;
+	private void lockPhase() {
+
+		// Start lock timer
+		// resets to 500ms every time the Tetrimino moves
+		_lockTimer = new TetrisTimer(500);
+		_lockTimer.addObserver(this);
+		_lockTimer.start();
+		
+		// While timer is >0 allow movements
+		// movement = inputs from keyboard (events)
+		// we query an event blocking if necessary
+		// timer will wake us if no event
+		boolean breakFlag = false;
+		do {
+			System.out.println("LOCK PHASE");
+			// handle movement events
+			// Take next control event or wait until available
+			TetrisControlEvents event = TetrisControlEvents.NONE;
+			try { 
+				event = _controlQueue.take();
+			} catch (InterruptedException e) { /* empty*/ }
+
+			// event handling
+			switch(event) {
+			case LEFT:	
+				if (!_playfield.moveLeft()) { // if moved reset timer
+					_lockTimer.stop();
+					_lockTimer.reset();
+				}
+				break;
+			case RIGHT:
+				if (!_playfield.moveRight()) { // if moved reset timer
+					_lockTimer.stop();
+					_lockTimer.reset();
+				}
+				break;
+			case RTURN:
+				if (!_playfield.turnRight()) { // if moved reset timer
+					_lockTimer.stop();
+					_lockTimer.reset();
+				}
+				break;
+			case LTURN:
+				if (!_playfield.turnLeft()) { // if moved reset timer
+					_lockTimer.stop();
+					_lockTimer.reset();
+				}
+				break;
+			case SOFTDOWN:		
+				// ignore in LOCK
+				break;
+			case HARDDOWN:				
+				while (!_playfield.moveDown()) {
+					// -- tell the view that model has changed
+					setChanged();
+					notifyObservers("after event");
+				}
+				breakFlag = true;
+				break;
+			case HOLD:
+				// ignore for now
+				break;
+			case NONE:
+				break;
+			}
+			
+			// check if Tetrimino can move down
+			// if yes then go back to phase FALLING
+			if (_playfield.canMoveDown()) {
+				System.out.println("LOCK CAN MOVE -> FALLING");
+				breakFlag = true;
+				_phaseState = TetrisPhase.FALLING;
+			}
+
+			// -- tell the view that model has changed
+			setChanged();
+			notifyObservers("after event");
+
+		} while (!breakFlag && _lockTimer.getRemainingTime() > 0);
+
+		// stop the timer just to make sure
+		_lockTimer.stop();
+		
+		// merge Tetrimino into background
+		if (_phaseState == TetrisPhase.LOCK) {// only merge if we are still in phase LOCK
+			_playfield.merge();
+			_phaseState = TetrisPhase.PATTERN; // go to next phase
 		}
+
 	}
 
 	public void controlQueueAdd(TetrisControlEvents e) {
@@ -263,9 +358,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o == _fallingTimer) {
-			_controlQueue.add(TetrisControlEvents.NONE);
-		}
+		_controlQueue.add(TetrisControlEvents.NONE);
 	}
 
 	/*
