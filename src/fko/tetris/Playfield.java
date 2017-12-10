@@ -27,9 +27,8 @@ import fko.tetris.tetriminos.Tetrimino;
 import fko.tetris.tetriminos.Tetrimino.Facing;
 
 /**
- * This represent the internal playfield which basically consists of a matrix of 10 columns and 40 rows.
+ * This represent the internal playfield which basically consists of two matrices of 10 columns and 40 rows.
  * The matrix coordinates start at 0,0 at the lower left cell and 9,39 with the upper right cell.
- * 
  * 
  * From Tetris Guideline
  * Playfield is 10:40, where rows above 20 are hidden or obstructed by the field frame to trick the player into thinking
