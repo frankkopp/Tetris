@@ -58,7 +58,6 @@ public class TetrisTimerTest {
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		assertTrue(timer.getRemainingTime() < 2000);

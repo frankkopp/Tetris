@@ -115,7 +115,7 @@ public class TetrisTimer extends Observable {
 	 */
 	public synchronized long getRemainingTime() {
 		if (_isStarted)
-			return _remaingTime - _lastSystemtime - System.currentTimeMillis();
+			return _remaingTime - (System.currentTimeMillis()-_lastSystemtime);
 		else
 			return _remaingTime;
 	}
