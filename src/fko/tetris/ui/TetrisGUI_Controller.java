@@ -60,35 +60,35 @@ import javafx.stage.Stage;
  * should update its views.
  */
 public class TetrisGUI_Controller implements Observer {
-	
+
 	private static final WindowStateFX windowState = new WindowStateFX(); // to save and restore the last position of our window
-    private Stage _primaryStage; // handle to primary stage
-    private TetrisGame _tetrisGame; // holds a running tetrisGame
-    private PlayfieldPane _playfieldPane; // handle to PlayfieldPane
+	private Stage _primaryStage; // handle to primary stage
+	private TetrisGame _tetrisGame; // holds a running tetrisGame
+	private PlayfieldPane _playfieldPane; // handle to PlayfieldPane
 	private NextQueuePane _nextQueuePane; // handle to NextQueuePane
-        
-    /**
-     * This method is called by the FXMLLoader when initialization is complete
-     */
-    @FXML // This method is called by the FXMLLoader when initialization is complete
-    void initialize() {
-        _primaryStage = TetrisGUI.getPrimaryStage(); // set convenience reference to primary stage
-    	assertFXML(); // FXML auto checks
-        
-        addMemLabelUpdater(); // add constantly updated memory info into status panel
-        addPlayfieldPane(); // add the playfield pane 
-        addNextQueuePane(); // add the next queue pane
-    }
-	
-    /*
+
+	/**
+	 * This method is called by the FXMLLoader when initialization is complete
+	 */
+	@FXML // This method is called by the FXMLLoader when initialization is complete
+	void initialize() {
+		_primaryStage = TetrisGUI.getPrimaryStage(); // set convenience reference to primary stage
+		assertFXML(); // FXML auto checks
+
+		addMemLabelUpdater(); // add constantly updated memory info into status panel
+		addPlayfieldPane(); // add the playfield pane 
+		addNextQueuePane(); // add the next queue pane
+	}
+
+	/*
 	 * Creates a PlayfieldPane and adds it to the root panel  
 	 */
 	private void addPlayfieldPane() {
 		_playfieldPane = new PlayfieldPane();
 		rootPanel.setCenter(_playfieldPane);
 	}
-	
-    /*
+
+	/*
 	 * Creates a NextQueuePane and adds it to the root panel  
 	 */
 	private void addNextQueuePane() {
@@ -100,31 +100,31 @@ public class TetrisGUI_Controller implements Observer {
 	 * Adds an updater to the mem label in the status bar
 	 */
 	private void addMemLabelUpdater() {
-	    Task<Void> dynamicTimeTask = new Task<Void>() {
-	        @Override
-	        protected Void call() throws Exception {
-	            while (true) {
-	                updateMessage(HelperTools.getMBytes(Runtime.getRuntime().freeMemory()) + " MB / "
-	                        + HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB");
-	                try {Thread.sleep(500);} catch (InterruptedException ex) {break;}
-	            }
-	            return null;
-	        }
-	    };
-	    statusbar_mem_text.textProperty().bind(dynamicTimeTask.messageProperty());
-	    Thread t2 = new Thread(dynamicTimeTask);
-	    t2.setName("Statusbar Mem Labal Updater");
-	    t2.setDaemon(true);
-	    t2.start();
+		Task<Void> dynamicTimeTask = new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+				while (true) {
+					updateMessage(HelperTools.getMBytes(Runtime.getRuntime().freeMemory()) + " MB / "
+							+ HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB");
+					try {Thread.sleep(500);} catch (InterruptedException ex) {break;}
+				}
+				return null;
+			}
+		};
+		statusbar_mem_text.textProperty().bind(dynamicTimeTask.messageProperty());
+		Thread t2 = new Thread(dynamicTimeTask);
+		t2.setName("Statusbar Mem Labal Updater");
+		t2.setDaemon(true);
+		t2.start();
 	}
 
 	/**
-     * This is called by model explicitly whenever the model changes
+	 * This is called by model explicitly whenever the model changes
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	@Override
 	public void update(Observable o, Object arg) {
-		
+
 		/* IMPORTANT:
 		 * This is usually called by another thread and not the FAT thread (FX Application Thread).
 		 * Other threads cannot change to UI - this would cause an exception. Therefore Platform.runLater(r) 
@@ -142,19 +142,19 @@ public class TetrisGUI_Controller implements Observer {
 		 * the FAT often uses model objects to update the UI. E.g. if a call to a model object's method in turn updates the 
 		 * model and calls update() we have a deadlock. 
 		 */
-		
+
 		System.out.println("update from "+o+" with args: "+arg);
-		
+
 		if (_tetrisGame != null && _tetrisGame.isRunning()) { // game is running
-			 _playfieldPane.setPlayField(_tetrisGame.getPlayfield());
-			 _nextQueuePane.setNextQueue(_tetrisGame.getNextQueue());
-			 PlatformUtil.platformRunAndWait(() -> setUItoGameRunning()); // setup ui
-			 PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
+			_playfieldPane.setPlayField(_tetrisGame.getPlayfield());
+			_nextQueuePane.setNextQueue(_tetrisGame.getNextQueue());
+			PlatformUtil.platformRunAndWait(() -> setUItoGameRunning()); // setup ui
+			PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		} else { // no game 
-			 _playfieldPane.setPlayField(null);
-			 _nextQueuePane.setNextQueue(null);
-			 PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning()); // setup ui 
-			 PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
+			_playfieldPane.setPlayField(null);
+			_nextQueuePane.setNextQueue(null);
+			PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning()); // setup ui 
+			PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		}
 	}
 
@@ -191,7 +191,7 @@ public class TetrisGUI_Controller implements Observer {
 		statusbar_status_text.setText("Game running");
 	}
 
-    /*
+	/*
 	 * Setup controls (menu, buttons, etc.) for game not running
 	 */
 	private void setUItoGameNotRunning() {
@@ -210,144 +210,144 @@ public class TetrisGUI_Controller implements Observer {
 	}
 
 	/*
-     * Save the current sizes and coordinates of all windows to restore them
-     * when starting up the next time.
-     */
-    private void saveWindowStates() {
-        windowState.setProperty("windowLocationX", String.valueOf(this._primaryStage.getX()));
-        windowState.setProperty("windowLocationY", String.valueOf(this._primaryStage.getY()));
-        windowState.setProperty("windowSizeX", String.valueOf(this._primaryStage.getWidth()));
-        windowState.setProperty("windowSizeY", String.valueOf(this._primaryStage.getHeight()));
-        windowState.save();
-    }
-    
-    /**
-     * Return the window state object.
-     * @return the window state
-     */
-    public static WindowStateFX getWindowState() {
-        return windowState;
-    }
-    
-    
+	 * Save the current sizes and coordinates of all windows to restore them
+	 * when starting up the next time.
+	 */
+	private void saveWindowStates() {
+		windowState.setProperty("windowLocationX", String.valueOf(this._primaryStage.getX()));
+		windowState.setProperty("windowLocationY", String.valueOf(this._primaryStage.getY()));
+		windowState.setProperty("windowSizeX", String.valueOf(this._primaryStage.getWidth()));
+		windowState.setProperty("windowSizeY", String.valueOf(this._primaryStage.getHeight()));
+		windowState.save();
+	}
+
+	/**
+	 * Return the window state object.
+	 * @return the window state
+	 */
+	public static WindowStateFX getWindowState() {
+		return windowState;
+	}
+
+
 
 	// #######################################################################
-    // Actions
-    // IMPORTANT: Watch out for deadlocks - JavaFX app thread calling model
-    // 			  is always dangerous.	
-    // #######################################################################
-    
+	// Actions
+	// IMPORTANT: Watch out for deadlocks - JavaFX app thread calling model
+	// 			  is always dangerous.	
+	// #######################################################################
+
 	/**
-     * Called when window is closed
-     * @param event
-     */
-    @FXML
-    void close_action(Event event) {
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.initOwner(_primaryStage);
-        alert.setTitle("Close Tetris");
-        alert.setHeaderText("Close Tetris");
-        alert.setContentText("Do your really want to quit Tetris?");
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.OK){
-            saveWindowStates();
-            Tetris.exitTetris();
-        } else {
-            // ... user chose CANCEL or closed the dialog
-        }
-    }
-    
-    @FXML
-    void newGame_Action(ActionEvent event) {
-    	_tetrisGame = new TetrisGame();
-    	_tetrisGame.addObserver(this);
-    	_tetrisGame.startTetrisGame();
-    }
+	 * Called when window is closed
+	 * @param event
+	 */
+	@FXML
+	void close_action(Event event) {
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.initOwner(_primaryStage);
+		alert.setTitle("Close Tetris");
+		alert.setHeaderText("Close Tetris");
+		alert.setContentText("Do your really want to quit Tetris?");
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.OK){
+			saveWindowStates();
+			Tetris.exitTetris();
+		} else {
+			// ... user chose CANCEL or closed the dialog
+		}
+	}
 
-    @FXML
-    void stopGame_action(ActionEvent event) {
-    	_tetrisGame.stopTetrisGame();
-    }
+	@FXML
+	void newGame_Action(ActionEvent event) {
+		_tetrisGame = new TetrisGame();
+		_tetrisGame.addObserver(this);
+		_tetrisGame.startTetrisGame();
+	}
 
-    @FXML
-    void pauseGame_action(ActionEvent event) {
-    	_tetrisGame.setPaused(true);
-    }
+	@FXML
+	void stopGame_action(ActionEvent event) {
+		_tetrisGame.stopTetrisGame();
+	}
 
-    @FXML
-    void resumeGame_action(ActionEvent event) {
-    	_tetrisGame.setPaused(false);
-    }
+	@FXML
+	void pauseGame_action(ActionEvent event) {
+		_tetrisGame.setPaused(true);
+	}
 
-    @FXML
-    void aboutDialogOpen_action(ActionEvent event) {
-        AboutDialog aboutDialogStage = new AboutDialog();
-        aboutDialogStage.showAndWait();
-    }
+	@FXML
+	void resumeGame_action(ActionEvent event) {
+		_tetrisGame.setPaused(false);
+	}
 
-    // #######################################################
-    // FXML Setup
-    // #######################################################
+	@FXML
+	void aboutDialogOpen_action(ActionEvent event) {
+		AboutDialog aboutDialogStage = new AboutDialog();
+		aboutDialogStage.showAndWait();
+	}
 
-    @FXML // ResourceBundle that was given to the FXMLLoader
-    private ResourceBundle resources;
+	// #######################################################
+	// FXML Setup
+	// #######################################################
 
-    @FXML // URL location of the FXML file that was given to the FXMLLoader
-    private URL location;
-    
-    @FXML // fx:id="playfieldPane"
-    private Pane playfieldPane; // Value injected by FXMLLoader
+	@FXML // ResourceBundle that was given to the FXMLLoader
+	private ResourceBundle resources;
 
-    @FXML // fx:id="newGame_button"
-    private Button newGame_button; // Value injected by FXMLLoader
+	@FXML // URL location of the FXML file that was given to the FXMLLoader
+	private URL location;
 
-    @FXML // fx:id="statusbar_mem_text"
-    private Label statusbar_mem_text; // Value injected by FXMLLoader
+	@FXML // fx:id="playfieldPane"
+	private Pane playfieldPane; // Value injected by FXMLLoader
 
-    @FXML // fx:id="newGame_menu"
-    private MenuItem newGame_menu; // Value injected by FXMLLoader
+	@FXML // fx:id="newGame_button"
+	private Button newGame_button; // Value injected by FXMLLoader
 
-    @FXML // fx:id="statusbar_copyright_test"
-    private Label statusbar_copyright_test; // Value injected by FXMLLoader
+	@FXML // fx:id="statusbar_mem_text"
+	private Label statusbar_mem_text; // Value injected by FXMLLoader
 
-    @FXML // fx:id="resumeGame_menu"
-    private MenuItem resumeGame_menu; // Value injected by FXMLLoader
+	@FXML // fx:id="newGame_menu"
+	private MenuItem newGame_menu; // Value injected by FXMLLoader
 
-    @FXML // fx:id="menu_game"
-    private Menu menu_game; // Value injected by FXMLLoader
+	@FXML // fx:id="statusbar_copyright_test"
+	private Label statusbar_copyright_test; // Value injected by FXMLLoader
 
-    @FXML // fx:id="stopGame_menu"
-    private MenuItem stopGame_menu; // Value injected by FXMLLoader
+	@FXML // fx:id="resumeGame_menu"
+	private MenuItem resumeGame_menu; // Value injected by FXMLLoader
 
-    @FXML // fx:id="statusbar_status_text"
-    private Label statusbar_status_text; // Value injected by FXMLLoader
+	@FXML // fx:id="menu_game"
+	private Menu menu_game; // Value injected by FXMLLoader
 
-    @FXML // fx:id="about_menu"
-    private MenuItem about_menu; // Value injected by FXMLLoader
+	@FXML // fx:id="stopGame_menu"
+	private MenuItem stopGame_menu; // Value injected by FXMLLoader
 
-    @FXML // fx:id="rootPanel"
-    private BorderPane rootPanel; // Value injected by FXMLLoader
+	@FXML // fx:id="statusbar_status_text"
+	private Label statusbar_status_text; // Value injected by FXMLLoader
 
-    @FXML // fx:id="menu_help"
-    private Menu menu_help; // Value injected by FXMLLoader
+	@FXML // fx:id="about_menu"
+	private MenuItem about_menu; // Value injected by FXMLLoader
 
-    @FXML // fx:id="stopGame_button"
-    private Button stopGame_button; // Value injected by FXMLLoader
+	@FXML // fx:id="rootPanel"
+	private BorderPane rootPanel; // Value injected by FXMLLoader
 
-    @FXML // fx:id="pauseGame_button"
-    private Button pauseGame_button; // Value injected by FXMLLoader
+	@FXML // fx:id="menu_help"
+	private Menu menu_help; // Value injected by FXMLLoader
 
-    @FXML // fx:id="pauseGame_menu"
-    private MenuItem pauseGame_menu; // Value injected by FXMLLoader
+	@FXML // fx:id="stopGame_button"
+	private Button stopGame_button; // Value injected by FXMLLoader
 
-    @FXML // fx:id="menu_level"
-    private Menu menu_level; // Value injected by FXMLLoader
+	@FXML // fx:id="pauseGame_button"
+	private Button pauseGame_button; // Value injected by FXMLLoader
 
-    @FXML // fx:id="close_menu"
-    private MenuItem close_menu; // Value injected by FXMLLoader
+	@FXML // fx:id="pauseGame_menu"
+	private MenuItem pauseGame_menu; // Value injected by FXMLLoader
 
-    @FXML // fx:id="resumeGame_button"
-    private Button resumeGame_button; // Value injected by FXMLLoader
+	@FXML // fx:id="menu_level"
+	private Menu menu_level; // Value injected by FXMLLoader
+
+	@FXML // fx:id="close_menu"
+	private MenuItem close_menu; // Value injected by FXMLLoader
+
+	@FXML // fx:id="resumeGame_button"
+	private Button resumeGame_button; // Value injected by FXMLLoader
 
 
 	/*
@@ -355,22 +355,22 @@ public class TetrisGUI_Controller implements Observer {
 	 */
 	private void assertFXML() {
 		assert newGame_button != null : "fx:id=\"newGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert statusbar_mem_text != null : "fx:id=\"statusbar_mem_text\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert newGame_menu != null : "fx:id=\"newGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert statusbar_copyright_test != null : "fx:id=\"statusbar_copyright_test\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert resumeGame_menu != null : "fx:id=\"resumeGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert menu_game != null : "fx:id=\"menu_game\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert stopGame_menu != null : "fx:id=\"stopGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert statusbar_status_text != null : "fx:id=\"statusbar_status_text\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert about_menu != null : "fx:id=\"about_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert rootPanel != null : "fx:id=\"rootPanel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert menu_help != null : "fx:id=\"menu_help\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert stopGame_button != null : "fx:id=\"stopGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert pauseGame_button != null : "fx:id=\"pauseGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert pauseGame_menu != null : "fx:id=\"pauseGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert menu_level != null : "fx:id=\"menu_level\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert close_menu != null : "fx:id=\"close_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-        assert resumeGame_button != null : "fx:id=\"resumeGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert statusbar_mem_text != null : "fx:id=\"statusbar_mem_text\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert newGame_menu != null : "fx:id=\"newGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert statusbar_copyright_test != null : "fx:id=\"statusbar_copyright_test\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert resumeGame_menu != null : "fx:id=\"resumeGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert menu_game != null : "fx:id=\"menu_game\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert stopGame_menu != null : "fx:id=\"stopGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert statusbar_status_text != null : "fx:id=\"statusbar_status_text\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert about_menu != null : "fx:id=\"about_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert rootPanel != null : "fx:id=\"rootPanel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert menu_help != null : "fx:id=\"menu_help\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert stopGame_button != null : "fx:id=\"stopGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert pauseGame_button != null : "fx:id=\"pauseGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert pauseGame_menu != null : "fx:id=\"pauseGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert menu_level != null : "fx:id=\"menu_level\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert close_menu != null : "fx:id=\"close_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert resumeGame_button != null : "fx:id=\"resumeGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }
