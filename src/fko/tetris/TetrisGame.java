@@ -263,7 +263,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * 
 	 */
 	private void lockPhase() {
-		System.out.println("Enter LOCK phase");
+		//System.out.println("Enter LOCK phase");
 
 		// Start lock timer
 		// resets to 500ms every time the Tetrimino moves
@@ -327,7 +327,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// check if Tetrimino can move down
 			// if yes then go back to phase FALLING
 			if (_playfield.canMoveDown()) {
-				System.out.println("LOCK CAN MOVE -> FALLING");
+				//System.out.println("LOCK CAN MOVE -> FALLING");
 				breakFlag = true;
 				_phaseState = TetrisPhase.FALLING;
 			}
@@ -355,16 +355,16 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o ==_fallingTimer)
-			System.out.println("Update from FALLING timer time is out!");
-		else 
-			System.out.println("Update from LOCK timer time is out!");
+//		if (o ==_fallingTimer)
+//			System.out.println("Update from FALLING timer time is out!");
+//		else 
+//			System.out.println("Update from LOCK timer time is out!");
 		
 		_controlQueue.add(TetrisControlEvents.NONE);
 	}
 
 	/*
-	 * checks if game is paused and waits until game is resumed 
+	 * Checks if game is paused and waits until game is resumed 
 	 */
 	private void waitIfPaused() {
 		if (_isPaused) {
