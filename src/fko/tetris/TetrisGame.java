@@ -135,6 +135,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				lockPhase();
 				break;
 			case PATTERN:
+				System.out.println("Enter PATTERN phase");
 				_phaseState = TetrisPhase.ITERATE;
 				break;
 			case ITERATE:
@@ -158,7 +159,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 			// -- tell the view that model has changed
 			setChanged();
-			notifyObservers("After phase loop");
+			notifyObservers("After PHASE loop");
 
 			// TODO: improve to also pause during the phases
 			waitIfPaused();
@@ -192,6 +193,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_fallingTimer.addObserver(this);
 		_fallingTimer.start();
 		
+		// clear the control queue
+		_controlQueue.clear();
+
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
 		// we query an event blocking if necessary
@@ -208,16 +212,16 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// event handling
 			switch(event) {
 			case LEFT:	
-				_playfield.moveLeft(); // ignored if no move possible
+				_playfield.moveSideway(-1); // ignored if no move possible
 				break;
 			case RIGHT:
-				_playfield.moveRight(); // ignored if no move possible
+				_playfield.moveSideway(1); // ignored if no move possible
 				break;
 			case RTURN:
-				_playfield.turnRight(); // ignored if no move possible
+				_playfield.turnMove(1); // ignored if no move possible
 				break;
 			case LTURN:
-				_playfield.turnLeft();  // ignored if no move possible
+				_playfield.turnMove(-1);  // ignored if no move possible
 				break;
 			case SOFTDOWN:				
 				_playfield.moveDown();	// ignored if no move possible
@@ -226,7 +230,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				while (!_playfield.moveDown()) {
 					// -- tell the view that model has changed
 					setChanged();
-					notifyObservers("after event");
+					notifyObservers("During FALLING after HARDWON");
 				}
 				breakFlag = true;
 				break;
@@ -239,7 +243,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 			// -- tell the view that model has changed
 			setChanged();
-			notifyObservers("after event");
+			notifyObservers("During FALLING");
 
 		} while (!breakFlag && _fallingTimer.getRemainingTime() > 0);
 
@@ -267,6 +271,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_lockTimer.addObserver(this);
 		_lockTimer.start();
 		
+		// clear the control queue
+		_controlQueue.clear();
+		
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
 		// we query an event blocking if necessary
@@ -283,28 +290,21 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// event handling
 			switch(event) {
 			case LEFT:	
-				if (!_playfield.moveLeft()) { // if moved reset timer
-					_lockTimer.stop();
-					_lockTimer.reset();
+				if (!_playfield.moveSideway(-1)) { // if moved reset timer
+					_lockTimer.stopResetRestart();
 				}
 				break;
 			case RIGHT:
-				if (!_playfield.moveRight()) { // if moved reset timer
-					_lockTimer.stop();
-					_lockTimer.reset();
-				}
+				if (!_playfield.moveSideway(1)) { // if moved reset timer
+					_lockTimer.stopResetRestart();				}
 				break;
 			case RTURN:
-				if (!_playfield.turnRight()) { // if moved reset timer
-					_lockTimer.stop();
-					_lockTimer.reset();
-				}
+				if (!_playfield.turnMove(1)) { // if moved reset timer
+					_lockTimer.stopResetRestart();				}
 				break;
 			case LTURN:
-				if (!_playfield.turnLeft()) { // if moved reset timer
-					_lockTimer.stop();
-					_lockTimer.reset();
-				}
+				if (!_playfield.turnMove(-1)) { // if moved reset timer
+					_lockTimer.stopResetRestart();				}
 				break;
 			case SOFTDOWN:		
 				// ignore in LOCK
@@ -313,7 +313,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				while (!_playfield.moveDown()) {
 					// -- tell the view that model has changed
 					setChanged();
-					notifyObservers("after event");
+					notifyObservers("During LOCK after HARDDOWN");
 				}
 				breakFlag = true;
 				break;
@@ -334,7 +334,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 			// -- tell the view that model has changed
 			setChanged();
-			notifyObservers("after event");
+			notifyObservers("During LOCK");
 
 		} while (!breakFlag && _lockTimer.getRemainingTime() > 0);
 
@@ -355,6 +355,11 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
+		if (o ==_fallingTimer)
+			System.out.println("Update from FALLING timer time is out!");
+		else 
+			System.out.println("Update from LOCK timer time is out!");
+		
 		_controlQueue.add(TetrisControlEvents.NONE);
 	}
 

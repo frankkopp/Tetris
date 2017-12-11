@@ -110,6 +110,15 @@ public class TetrisTimer extends Observable {
 	}
 	
 	/**
+	 * Stops the timer, resets the time to initial time and restarts the timer
+	 */
+	public void stopResetRestart() {
+		stop();
+		reset();
+		start();
+	}
+	
+	/**
 	 * Returns the remaining time of this timer.
 	 * @return remaining time
 	 */

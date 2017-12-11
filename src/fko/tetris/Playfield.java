@@ -81,12 +81,12 @@ public class Playfield {
 		clearMatrix(_backgroundMatrix);
 		
 		// DEBUG
-		_backgroundMatrix[0][10] = TetrisColor.LBLUE;
-		_backgroundMatrix[1][10] = TetrisColor.LBLUE;
-		_backgroundMatrix[2][10] = TetrisColor.LBLUE;
-		_backgroundMatrix[3][10] = TetrisColor.LBLUE;
-		
-		_backgroundMatrix[6][19] = TetrisColor.LBLUE;
+//		_backgroundMatrix[0][10] = TetrisColor.LBLUE;
+//		_backgroundMatrix[1][10] = TetrisColor.LBLUE;
+//		_backgroundMatrix[2][10] = TetrisColor.LBLUE;
+//		_backgroundMatrix[3][10] = TetrisColor.LBLUE;
+//		
+//		_backgroundMatrix[6][19] = TetrisColor.LBLUE;
 		
 		/*
 		_backgroundMatrix[0][0] = TetrisColor.BLUE;
@@ -149,7 +149,6 @@ public class Playfield {
 
 	/**
 	 * Move the Tetrimino down one cell and checks if it has landed on a surface.<br/>
-	 * Throws exception if collision.
 	 * @return true if landed on surface
 	 */
 	public boolean moveDown() {
@@ -163,14 +162,9 @@ public class Playfield {
 	 * @return true if move is possible, false if landed on surface
 	 */
 	public boolean canMoveDown() {
-//		_markedForMove = new int[4][2]; // new array every time we check
-//		int cellNumber = 0;
-
 		int[][] tMatrix = _currentTetrimino.getMatrix(_currentTetrimino.getCurrentOrientation());
-		
 		//System.out.println(_currentTetrimino.getShape().toString());
-		
-		// loop through the Tetrimino matrix and check for collision 
+		// loop through the Tetrimino matrix and check for surface below 
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
 				// System.out.print(tMatrix[yi][xi]+" ");
@@ -188,125 +182,76 @@ public class Playfield {
 	}
 
 	/*
-	 * @param markedForMove
+	 * actually commit the move
 	 */
 	private void doMoveDown() {
 		_currentPosition.y -= 1;
 	}
 
 	/**
-	 * Move the Tetrimino left one cell, If blocked does not move and returns true<br/>
-	 * @return true if surface on the left
+	 * Move the Tetrimino left (-1) or right (1) one cell, If blocked does not move and returns true<br/>
+	 * @return true if surface on the left or right
 	 */
-	public boolean moveLeft() {
-
-		// Remember the cells we want to move after we have checked all cells if they can move
-		// Max 4 cells should occupied as all Tetriminos have for cells
-		// 2 values - [0] for x, [1] for y
-		// IMPORTANT: the order in this array determines the order of the actual move. Make
-		// sure that moving the cells does not overwrite other Tetrimino cells
-		// control the order via the loop adding cells.
-		int[][] markedForMove = new int[4][2];
-		int cellNumber = 0;
-
-//		// we do not know where the Tetrimino is so we scan the matrix and mark occupied cell for move down
-//		// loop through the Tetrimino matrix 
-//		for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) { // scan left to right
-//			for (int yi = 0; yi < _playfieldHeight; yi++) {
-//				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
-//					if (canMoveLeft(xi,yi)) { // check for collision 
-//						markedForMove[cellNumber][0] = xi;
-//						markedForMove[cellNumber][1] = yi;
-//						cellNumber++;
-//					} else { // on surface - move would be collision
-//						return true;
-//					}
-//				}
-//			}
-//		}
-//
-//		// actual move
-//		for(int i=0;i<4;i++) {
-//			int x = markedForMove[i][0];
-//			int y = markedForMove[i][1];
-//			if (x!=0) { // only when a useful value is in x
-//				TetrisColor temp = _foregroundMatrix[x][y];
-//				_foregroundMatrix[x][y] = TetrisColor.EMPTY;
-//				_foregroundMatrix[x-1][y] = temp;
-//			}
-//		}
+	public boolean moveSideway(int direction) {
+		if (!canMoveLeft(direction)) return true; // check if move is possible or return true for collision 
+		doMoveLeft(direction); // do the actual move
 		return false;
-
 	}
-
-	private boolean canMoveLeft(int xi, int yi) {
-		if (xi<=0) return false; // most left column
-		if (_backgroundMatrix[xi-1][yi] != TetrisColor.EMPTY) { // check cell below
-			return false;
-		}
-		return true;
-	}
-
-
+	
 	/**
-	 * Move the Tetrimino right one cell, If blocked does not move and returns true<br/>
-	 * @return true if surface on the right
+	 * Check of the Tetrimino can move left one cell<br/>
+	 * @param direction 
+	 * @return true if move is possible, false if landed on surface
 	 */
-	public boolean moveRight() {
-
-		// remember the cells we want to move after we have checked all cells if they can move
-		// Max 4 cells should occupied as all Tetriminos have for cells
-		// 2 values [0] for x, [1] for y
-		// IMPORTANT: the order in this array determines the order of the actual move. Make
-		// sure that moving the cells does not overwrite other Tetrimino cells
-		// control the order via the loop adding cells.
-		int[][] markedForMove = new int[4][2];
-		int cellNumber = 0;
-
-		// we do not know where the Tetrimino is so we scan the matrix and mark occupied cell for move down
-		// loop through the Tetrimino matrix 
-//		for (int xi = PLAYFIELD_WIDTH-1; xi >= 0; xi--) { // scan right to left
-//			for (int yi = 0; yi < _playfieldHeight; yi++) {
-//				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
-//					if (canMoveRight(xi,yi)) { // check for collision 
-//						markedForMove[cellNumber][0] = xi;
-//						markedForMove[cellNumber][1] = yi;
-//						cellNumber++;
-//					} else { // on surface - move would be collision
-//						return true;
-//					}
-//				}
-//			}
-//		}
-//
-//		// actual move
-//		for(int i=0;i<4;i++) {
-//			int x = markedForMove[i][0];
-//			int y = markedForMove[i][1];
-//			if (x!=PLAYFIELD_WIDTH-1) { // only when a useful value is in x
-//				TetrisColor temp = _foregroundMatrix[x][y];
-//				_foregroundMatrix[x][y] = TetrisColor.EMPTY;
-//				_foregroundMatrix[x+1][y] = temp;
-//			}
-//		}
-		return false;
-	}
-
-	private boolean canMoveRight(int xi, int yi) {
-		if (xi>=PLAYFIELD_WIDTH-1) return false; // most right column
-		if (_backgroundMatrix[xi+1][yi] != TetrisColor.EMPTY) { // check cell below
-			return false;
+	public boolean canMoveLeft(int direction) {
+		int[][] tMatrix = _currentTetrimino.getMatrix(_currentTetrimino.getCurrentOrientation());
+//		System.out.println(_currentTetrimino.getShape().toString());
+		// loop through the Tetrimino matrix and check for surface on the left
+		for (int yi = 0; yi < tMatrix.length; yi++) {
+			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
+//				System.out.print(tMatrix[yi][xi]+" ");
+				// check for collision in cell left 
+				if (tMatrix[yi][xi] == 1) { // check for all filled parts of the matrix
+					if (direction < 0) { // left wall
+						if (_currentPosition.x+xi  <= 0) {
+//							System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi+direction)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
+							return false;
+						}
+					} else if (direction > 0) { // right wall
+						if (_currentPosition.x+xi  >= PLAYFIELD_WIDTH-1) {
+//							System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi+direction)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
+							return false;
+						}
+					}
+					// other piece is blocking the way
+					if (_backgroundMatrix[_currentPosition.x+xi+direction][_currentPosition.y-yi-1] != TetrisColor.EMPTY) {
+//						System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
+						return false;
+					}
+				}
+			}
+//			System.out.println();
 		}
-		return true;
+		return true; // no collisions so we can move down
 	}
-
-	public boolean turnRight() {
-		System.out.println("TURN RIGHT");
-		return false;
+	
+	/*
+	 * actually commit the move
+	 */
+	private void doMoveLeft(int direction) {
+		_currentPosition.x += direction;
 	}
-
-	public boolean turnLeft() {
-		System.out.println("TURN LEFT");
+	
+	/**
+	 * Turns the Tetrimino after collision checks.<br/> 
+	 * Uses Classic Rotation System. 
+	 * TODO: Implement Super Rotation System
+	 * @param direction
+	 * @return true if turn would cause collision - Tetrimino is then not turned
+	 */
+	public boolean turnMove(int direction) {
+		
+		_currentTetrimino.turn(direction);
 		return false;
 	}
 
@@ -314,15 +259,23 @@ public class Playfield {
 	 * Merges the Tetrimino in play into the background
 	 */
 	public void merge() {
-//		// we do not know where the Tetrimino is so we scan the matrix and copy occupied cell to background
-//		for (int yi = 0; yi < _playfieldHeight; yi++) {
-//			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
-//				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
-//					_backgroundMatrix[xi][yi] = _foregroundMatrix[xi][yi]; // copy to background
-//					_foregroundMatrix[xi][yi] = TetrisColor.EMPTY; // remove from foreground
-//				}
-//			}
-//		}
+		int[][] tMatrix = _currentTetrimino.getMatrix(_currentTetrimino.getCurrentOrientation());
+		//System.out.println(_currentTetrimino.getShape().toString());
+		// loop through the Tetrimino matrix and check for surface on the left
+		for (int yi = 0; yi < tMatrix.length; yi++) {
+			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
+				//System.out.print(tMatrix[yi][xi]+" ");
+				// check for collision in cell left 
+				if (tMatrix[yi][xi] == 1) { // check for all filled parts of the matrix
+					assert _backgroundMatrix[_currentPosition.x+xi][_currentPosition.y-yi-1] == TetrisColor.EMPTY;
+					// write to background
+					_backgroundMatrix[_currentPosition.x+xi][_currentPosition.y-yi-1] = _currentTetrimino.getColor(); 
+					//System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
+				}
+			}
+		}
+		_currentTetrimino = null; // erase the current tetrimino
+		//			System.out.println();
 	}
 
 	/**
