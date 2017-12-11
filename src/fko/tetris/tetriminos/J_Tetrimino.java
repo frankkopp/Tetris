@@ -24,6 +24,7 @@ SOFTWARE.
 package fko.tetris.tetriminos;
 
 import fko.tetris.TetrisColor;
+import fko.tetris.util.Coordinates;
 
 /**
  * 
@@ -36,39 +37,38 @@ public class J_Tetrimino extends Tetrimino {
 		
 		_tMatrix = new int[][][] {
 			{ //NORTH
-				{0, 0, 0, 0},
-				{1, 0, 0, 0},
-				{1, 1, 1, 0},
-				{0, 0, 0, 0}
+				{1, 0, 0},
+				{1, 1, 1},
+				{0, 0, 0}
 			},
 			{ // EAST
-				{0, 0, 0, 0},
-				{0, 1, 1, 0},
-				{0, 1, 0, 0},
-				{0, 1, 0, 0}
+				{0, 1, 1},
+				{0, 1, 0},
+				{0, 1, 0}
 			},
 			{ // SOUTH
-				{0, 0, 0, 0},
-				{0, 0, 0, 0},
-				{1, 1, 1, 0},
-				{0, 0, 1, 0}
+				{0, 0, 0},
+				{1, 1, 1},
+				{0, 0, 1}
 			},
 			{ // WEST
-				{0, 0, 0, 0},
-				{0, 1, 0, 0},
-				{0, 1, 0, 0},
-				{1, 1, 0, 0}
+				{0, 1, 0},
+				{0, 1, 0},
+				{1, 1, 0}
 			}
 		};
 		
-		_startPoint = new int[] {2,1};
-		
-		_tRotationPoint1 = new int[][] {
-				{0, 0, 0, 0},
-				{0, 0, 0, 0},
-				{0, 1, 0, 0},
-				{0, 0, 0, 0}
-		};
+		_startPoint =  new Coordinates(3,22);
 	}
+
+	/**
+	 * @see fko.tetris.tetriminos.Tetrimino#getShape()
+	 */
+	@Override
+	public TetriminoShape getShape() {
+		return TetriminoShape.J;
+	}
+	
+	
 
 }

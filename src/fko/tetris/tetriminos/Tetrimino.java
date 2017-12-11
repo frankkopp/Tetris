@@ -24,6 +24,7 @@ SOFTWARE.
 package fko.tetris.tetriminos;
 
 import fko.tetris.TetrisColor;
+import fko.tetris.util.Coordinates;
 
 /**
  * Interface for Tetriminos 
@@ -55,15 +56,14 @@ abstract public class Tetrimino {
 	protected int[][][] _tMatrix;
 	
 	/**
-	 * the start point is placed in cell 5:21 for each Tetrimino
+	 * the current orientation of this Tetrimino 
 	 */
-	protected int[] 	_startPoint;
+	protected Facing _currentOrientation = Facing.NORTH;
 	
 	/**
-	 * The rotation point is place in cell 5:21 for each Tetrimino
-	 * It also helps with rotation
+	 * the start point for the left upper corner of the matrix
 	 */
-	protected int[][]   _tRotationPoint1;
+	protected Coordinates _startPoint;
 	
 	/**
 	 * Retrieve the Matrix for a given facing
@@ -73,6 +73,13 @@ abstract public class Tetrimino {
 		return _tMatrix[facing.ordinal()];
 	}
 	
+	/**
+	 * @return the _currentOrientation
+	 */
+	public Facing getCurrentOrientation() {
+		return _currentOrientation;
+	}
+
 	/**
 	 * Retrieves the color of the Tetrimino
 	 * @return the _myColor
@@ -84,14 +91,41 @@ abstract public class Tetrimino {
 	/**
 	 * @return the _startPoint
 	 */
-	public int[] get_startPoint() {
+	public Coordinates getStartPoint() {
 		return _startPoint;
 	}
 
+	public abstract TetriminoShape getShape();
+	
+	/**
+	 * Returns the size if the quadratic matrix (length of the array in each dimension)
+	 * @return
+	 */
+	public int size() {
+		return _tMatrix[0].length; 
+
+	}
+	
+	/**
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return _myName;
 		
+	}
+	
+	/**
+	 * All Tetrimino shapes
+	 */
+	public enum TetriminoShape {
+		O,
+		I,
+		T,
+		L,
+		J,
+		S,
+		Z;
 	}
 	
 	/**

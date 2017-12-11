@@ -25,12 +25,13 @@ package fko.tetris;
 
 import fko.tetris.tetriminos.Tetrimino;
 import fko.tetris.tetriminos.Tetrimino.Facing;
+import fko.tetris.util.Coordinates;
 
 /**
- * This represent the internal playfield which basically consists of two matrices of 10 columns and 40 rows.
+ * This represent the internal playfield which basically consists of a background matrices of 10 columns and 40 rows
+ * and a current Tetrimino.
  * The matrix coordinates start at 0,0 at the lower left cell and 9,39 with the upper right cell.
  * The background matrix contains all settled Tetriminos.
- * The foreground matrix contains the current Tetrimino in play. 
  * 
  * From Tetris Guideline
  * Playfield is 10:40, where rows above 20 are hidden or obstructed by the field frame to trick the player into thinking
@@ -60,13 +61,11 @@ public class Playfield {
 	// Non-zeros also determine the color (defined in Tetrimino class)
 	private TetrisColor[][] _backgroundMatrix;
 
-	// the internal data structure for the foreground matrix.
-	// Tetriminos which are still in play stored here. 
-	// The foreground checks also for collisions against the background. 
-	// A zero representing an empty field, a non-zero an occupied field.
-	// Non-zeros also determine the color (defined in Tetrimino class)
-	private TetrisColor[][] _foregroundMatrix;
-
+	// The current Tetrimino
+	private Tetrimino _currentTetrimino;
+	
+	// The position of the current Tetrimino
+	private Coordinates _currentPosition;
 
 	// convenience field for SKYLINE+BUFFERZONE
 	private int _playfieldHeight = SKYLINE + BUFFERZONE;
@@ -79,10 +78,34 @@ public class Playfield {
 	 */
 	public Playfield() {
 		this._backgroundMatrix = new TetrisColor[PLAYFIELD_WIDTH][_playfieldHeight];
-		this._foregroundMatrix = new TetrisColor[PLAYFIELD_WIDTH][_playfieldHeight];
-
 		clearMatrix(_backgroundMatrix);
-		clearMatrix(_foregroundMatrix);
+		
+		// DEBUG
+		_backgroundMatrix[0][10] = TetrisColor.LBLUE;
+		_backgroundMatrix[1][10] = TetrisColor.LBLUE;
+		_backgroundMatrix[2][10] = TetrisColor.LBLUE;
+		_backgroundMatrix[3][10] = TetrisColor.LBLUE;
+		
+		_backgroundMatrix[6][19] = TetrisColor.LBLUE;
+		
+		/*
+		_backgroundMatrix[0][0] = TetrisColor.BLUE;
+		_backgroundMatrix[1][0] = TetrisColor.BLUE;
+		_backgroundMatrix[2][0] = TetrisColor.BLUE;
+		_backgroundMatrix[3][0] = TetrisColor.BLUE;
+		_backgroundMatrix[4][0] = TetrisColor.PURPLE;
+		_backgroundMatrix[5][0] = TetrisColor.PURPLE;
+		_backgroundMatrix[5][1] = TetrisColor.PURPLE;
+		_backgroundMatrix[6][0] = TetrisColor.PURPLE;
+		_backgroundMatrix[7][0] = TetrisColor.YELLOW;
+		_backgroundMatrix[7][1] = TetrisColor.YELLOW;
+		_backgroundMatrix[8][0] = TetrisColor.YELLOW;
+		_backgroundMatrix[8][1] = TetrisColor.YELLOW;
+		_foregroundMatrix[4][19] = TetrisColor.YELLOW;
+		_foregroundMatrix[4][20] = TetrisColor.YELLOW;
+		_foregroundMatrix[5][19] = TetrisColor.YELLOW;
+		_foregroundMatrix[5][20] = TetrisColor.YELLOW;
+		*/
 	}
 
 	/**
@@ -98,31 +121,29 @@ public class Playfield {
 	 */
 	public boolean spawn(Tetrimino next) {
 
-		clearMatrix(_foregroundMatrix);
-
 		int[][] tMatrix = next.getMatrix(Facing.NORTH);
 
 		// define spawn point - Tetrimino have a defined starting point which should be placed on 5:21
-		int spawnrow    = 17;// SKYLINE; // SKYLINE = 20
-		int spawncolumn = 4; // 5 when 1..10 
+		Coordinates startPoint = next.getStartPoint();
 
-		// shift for starting point defined in Tetrimino
-		int startPointX = spawncolumn - next.get_startPoint()[1]; 
-		int startPointy = spawnrow - (tMatrix.length-1-next.get_startPoint()[0]);
-
-		// loop through the Tetrimino matrix and write to foreground 
+		//System.out.println(next.getShape().toString());
+		
+		// loop through the Tetrimino matrix and check for collosion 
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
-				int yi_reversed = tMatrix.length-1 - yi; // the Tetrimino matrix is reverse to the foreground matrix
+				//System.out.print(tMatrix[yi][xi]+" ");
 				// check for collision
-				if (_backgroundMatrix[startPointX+xi][startPointy+yi_reversed] != TetrisColor.EMPTY) {
+				if (tMatrix[yi][xi] == 1 
+						&& _backgroundMatrix[startPoint.x+xi][startPoint.y-yi-1] != TetrisColor.EMPTY) {
+					//System.out.println("COLLOSION: "+(startPoint.x+xi)+":"+(startPoint.y-yi-1)+" "+next.getShape());
 					return true; // collision
 				}
-				// place color of Tetrimino on foreground matrix or set empty. 
-				_foregroundMatrix[startPointX+xi][startPointy+yi_reversed] 
-						= tMatrix[yi][xi] == 1 ? next.getColor() : TetrisColor.EMPTY;
 			}
+			//System.out.println();
 		}
+		// no collision so set this as new current Tetrimino
+		_currentTetrimino = next;
+		_currentPosition = startPoint.clone();
 		return false; // no collision
 	}
 
@@ -133,7 +154,7 @@ public class Playfield {
 	 */
 	public boolean moveDown() {
 		if (!canMoveDown()) return true; // check if move is possible or return true for collision 
-		doMoveDown(); // do the actutal move
+		doMoveDown(); // do the actual move
 		return false;
 	}
 
@@ -142,55 +163,35 @@ public class Playfield {
 	 * @return true if move is possible, false if landed on surface
 	 */
 	public boolean canMoveDown() {
-		_markedForMove = new int[4][2]; // new array every time we check
-		int cellNumber = 0;
+//		_markedForMove = new int[4][2]; // new array every time we check
+//		int cellNumber = 0;
 
-		// we do not know where the Tetrimino is so we scan the matrix and mark occupied cell for move down
-		// loop through the Tetrimino matrix 
-		for (int yi = 0; yi < _playfieldHeight; yi++) { // scan upwards
-			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
-				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
-					if (canMoveDown(xi,yi)) { // check for collision 
-						_markedForMove[cellNumber][0] = xi;
-						_markedForMove[cellNumber][1] = yi;
-						cellNumber++;
-					} else { // on surface - move would be collision
-						return false;
-					}
+		int[][] tMatrix = _currentTetrimino.getMatrix(_currentTetrimino.getCurrentOrientation());
+		
+		//System.out.println(_currentTetrimino.getShape().toString());
+		
+		// loop through the Tetrimino matrix and check for collision 
+		for (int yi = 0; yi < tMatrix.length; yi++) {
+			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
+				// System.out.print(tMatrix[yi][xi]+" ");
+				// check for collision in cell below => -2 instead of -1
+				if (tMatrix[yi][xi] == 1 
+						&& (_currentPosition.y-yi-2 < 0 
+						|| _backgroundMatrix[_currentPosition.x+xi][_currentPosition.y-yi-2] != TetrisColor.EMPTY)) {
+					//System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
+					return false; // collision
 				}
 			}
+			//System.out.println();
 		}
 		return true; // no collisions so we can move down
-	}
-
-	/*
-	 * Checks if cell below is free to move into.
-	 * @param xi
-	 * @param yi
-	 * @return true if free, false if blocked or edge
-	 */
-	private boolean canMoveDown(int xi, int yi) {
-		if (yi<=0) return false; // last row
-		if (_backgroundMatrix[xi][yi-1] != TetrisColor.EMPTY) { // check cell below
-			return false;
-		}
-		return true;
 	}
 
 	/*
 	 * @param markedForMove
 	 */
 	private void doMoveDown() {
-		// actual move
-		for(int i=0;i<4;i++) {
-			int x = _markedForMove[i][0];
-			int y = _markedForMove[i][1];
-			if (y!=0) { // only when a useful value is in y
-				TetrisColor temp = _foregroundMatrix[x][y];
-				_foregroundMatrix[x][y] = TetrisColor.EMPTY;
-				_foregroundMatrix[x][y-1] = temp;
-			}
-		}
+		_currentPosition.y -= 1;
 	}
 
 	/**
@@ -208,32 +209,32 @@ public class Playfield {
 		int[][] markedForMove = new int[4][2];
 		int cellNumber = 0;
 
-		// we do not know where the Tetrimino is so we scan the matrix and mark occupied cell for move down
-		// loop through the Tetrimino matrix 
-		for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) { // scan left to right
-			for (int yi = 0; yi < _playfieldHeight; yi++) {
-				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
-					if (canMoveLeft(xi,yi)) { // check for collision 
-						markedForMove[cellNumber][0] = xi;
-						markedForMove[cellNumber][1] = yi;
-						cellNumber++;
-					} else { // on surface - move would be collision
-						return true;
-					}
-				}
-			}
-		}
-
-		// actual move
-		for(int i=0;i<4;i++) {
-			int x = markedForMove[i][0];
-			int y = markedForMove[i][1];
-			if (x!=0) { // only when a useful value is in x
-				TetrisColor temp = _foregroundMatrix[x][y];
-				_foregroundMatrix[x][y] = TetrisColor.EMPTY;
-				_foregroundMatrix[x-1][y] = temp;
-			}
-		}
+//		// we do not know where the Tetrimino is so we scan the matrix and mark occupied cell for move down
+//		// loop through the Tetrimino matrix 
+//		for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) { // scan left to right
+//			for (int yi = 0; yi < _playfieldHeight; yi++) {
+//				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
+//					if (canMoveLeft(xi,yi)) { // check for collision 
+//						markedForMove[cellNumber][0] = xi;
+//						markedForMove[cellNumber][1] = yi;
+//						cellNumber++;
+//					} else { // on surface - move would be collision
+//						return true;
+//					}
+//				}
+//			}
+//		}
+//
+//		// actual move
+//		for(int i=0;i<4;i++) {
+//			int x = markedForMove[i][0];
+//			int y = markedForMove[i][1];
+//			if (x!=0) { // only when a useful value is in x
+//				TetrisColor temp = _foregroundMatrix[x][y];
+//				_foregroundMatrix[x][y] = TetrisColor.EMPTY;
+//				_foregroundMatrix[x-1][y] = temp;
+//			}
+//		}
 		return false;
 
 	}
@@ -264,30 +265,30 @@ public class Playfield {
 
 		// we do not know where the Tetrimino is so we scan the matrix and mark occupied cell for move down
 		// loop through the Tetrimino matrix 
-		for (int xi = PLAYFIELD_WIDTH-1; xi >= 0; xi--) { // scan right to left
-			for (int yi = 0; yi < _playfieldHeight; yi++) {
-				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
-					if (canMoveRight(xi,yi)) { // check for collision 
-						markedForMove[cellNumber][0] = xi;
-						markedForMove[cellNumber][1] = yi;
-						cellNumber++;
-					} else { // on surface - move would be collision
-						return true;
-					}
-				}
-			}
-		}
-
-		// actual move
-		for(int i=0;i<4;i++) {
-			int x = markedForMove[i][0];
-			int y = markedForMove[i][1];
-			if (x!=PLAYFIELD_WIDTH-1) { // only when a useful value is in x
-				TetrisColor temp = _foregroundMatrix[x][y];
-				_foregroundMatrix[x][y] = TetrisColor.EMPTY;
-				_foregroundMatrix[x+1][y] = temp;
-			}
-		}
+//		for (int xi = PLAYFIELD_WIDTH-1; xi >= 0; xi--) { // scan right to left
+//			for (int yi = 0; yi < _playfieldHeight; yi++) {
+//				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
+//					if (canMoveRight(xi,yi)) { // check for collision 
+//						markedForMove[cellNumber][0] = xi;
+//						markedForMove[cellNumber][1] = yi;
+//						cellNumber++;
+//					} else { // on surface - move would be collision
+//						return true;
+//					}
+//				}
+//			}
+//		}
+//
+//		// actual move
+//		for(int i=0;i<4;i++) {
+//			int x = markedForMove[i][0];
+//			int y = markedForMove[i][1];
+//			if (x!=PLAYFIELD_WIDTH-1) { // only when a useful value is in x
+//				TetrisColor temp = _foregroundMatrix[x][y];
+//				_foregroundMatrix[x][y] = TetrisColor.EMPTY;
+//				_foregroundMatrix[x+1][y] = temp;
+//			}
+//		}
 		return false;
 	}
 
@@ -313,15 +314,15 @@ public class Playfield {
 	 * Merges the Tetrimino in play into the background
 	 */
 	public void merge() {
-		// we do not know where the Tetrimino is so we scan the matrix and copy occupied cell to background
-		for (int yi = 0; yi < _playfieldHeight; yi++) {
-			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
-				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
-					_backgroundMatrix[xi][yi] = _foregroundMatrix[xi][yi]; // copy to background
-					_foregroundMatrix[xi][yi] = TetrisColor.EMPTY; // remove from foreground
-				}
-			}
-		}
+//		// we do not know where the Tetrimino is so we scan the matrix and copy occupied cell to background
+//		for (int yi = 0; yi < _playfieldHeight; yi++) {
+//			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
+//				if (_foregroundMatrix[xi][yi] != TetrisColor.EMPTY) { // found occupied cell
+//					_backgroundMatrix[xi][yi] = _foregroundMatrix[xi][yi]; // copy to background
+//					_foregroundMatrix[xi][yi] = TetrisColor.EMPTY; // remove from foreground
+//				}
+//			}
+//		}
 	}
 
 	/**
@@ -354,12 +355,17 @@ public class Playfield {
 	}
 
 	/**
-	 * @param xi
-	 * @param yi
-	 * @return
+	 * @return the _currentTetrimino
 	 */
-	public TetrisColor getForegroundColor(int xi, int yi) {
-		return _foregroundMatrix[xi][yi];
+	public Tetrimino getCurrentTetrimino() {
+		return _currentTetrimino;
+	}
+
+	/**
+	 * @return the _currentPosition
+	 */
+	public Coordinates getCurrentPosition() {
+		return _currentPosition;
 	}
 
 	private void debugPrintMatrix(TetrisColor[][] m) {

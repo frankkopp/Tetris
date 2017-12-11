@@ -24,6 +24,7 @@ SOFTWARE.
 package fko.tetris.tetriminos;
 
 import fko.tetris.TetrisColor;
+import fko.tetris.util.Coordinates;
 
 /**
  * 
@@ -61,14 +62,15 @@ public class I_Tetrimino extends Tetrimino {
 			}
 		};
 		
-		_startPoint = new int[] {1,1};
-		
-		_tRotationPoint1 = new int[][] {
-				{0, 0, 0, 0},
-				{0, 1, 0, 0},
-				{0, 0, 0, 0},
-				{0, 0, 0, 0}
-		};
+		_startPoint = new Coordinates(3,22);
+	}
+
+	/**
+	 * @see fko.tetris.tetriminos.Tetrimino#getShape()
+	 */
+	@Override
+	public TetriminoShape getShape() {
+		return TetriminoShape.I;
 	}
 
 }

@@ -21,52 +21,54 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package fko.tetris.tetriminos;
-
-import fko.tetris.TetrisColor;
-import fko.tetris.util.Coordinates;
+package fko.tetris.util;
 
 /**
- * 
+ * A simple class representing a pair of int for usage of x,y coordinates in a matrix
  */
-public class L_Tetrimino extends Tetrimino {
-	
-	public L_Tetrimino() {
-		_myName = "L";
-		_myColor = TetrisColor.ORANGE;
-		
-		_tMatrix = new int[][][] {
-			{ //NORTH
-				{0, 0, 1},
-				{1, 1, 1},
-				{0, 0, 0}
-			},
-			{ // EAST
-				{0, 1, 0},
-				{0, 1, 0},
-				{0, 1, 1}
-			},
-			{ // SOUTH
-				{0, 0, 0,},
-				{1, 1, 1,},
-				{1, 0, 0,}
-			},
-			{ // WEST
-				{1, 1, 0},
-				{0, 1, 0},
-				{0, 1, 0}
-			}
-		};
-		
-		_startPoint =  new Coordinates(3,22);
+public class Coordinates {
+
+	public int x = 0;
+	public int y = 0;
+
+	/**
+	 * @param x
+	 * @param y
+	 */
+	public Coordinates(int x, int y) {
+		this.x = x;
+		this.y = y;
 	}
 
 	/**
-	 * @see fko.tetris.tetriminos.Tetrimino#getShape()
+	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public TetriminoShape getShape() {
-		return TetriminoShape.L;
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (this == obj) return true; 
+		if (obj instanceof Coordinates 
+				&& ((Coordinates) obj).x == this.x
+				&& ((Coordinates) obj).y == this.y)
+			return true;
+		return false;
 	}
 
+	/**
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Coordinates clone() {
+		return new Coordinates(x, y);
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "("+x+","+y+")";
+	}
+	
+	
 }

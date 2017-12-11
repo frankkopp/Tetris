@@ -41,7 +41,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private Bag			_bag;		// bag with all 7 Tetriminos - randomly shuffled to the next queue
 	private NextQueue	_nextQueue;	// holds a list the next Tetriminos
 	private Tetrimino	_holdQueue; // holds one Tetrimino to be used later
-	private int			_startLevel; 	// start level can be set differntly by the UI
+	private int			_startLevel; 	// start level can be set differently by the UI
 	private int			_currentLevel; 	// current level while playing
 	private int			_score;			// current score
 	private int			_lineCount;	// who many line have been eliminated since start
@@ -174,7 +174,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// Generation Phase
 		Tetrimino next = _nextQueue.getNext();
 		if (_playfield.spawn(next)) {
-			// collision detected - BLOCK OUT GAME OVER CONDITION
+			// collision detected - "BLOCK OUT" GAME OVER CONDITION
 			_phaseState = TetrisPhase.GAMEOVER;
 		} else {
 			_phaseState = TetrisPhase.FALLING;
@@ -185,6 +185,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * 
 	 */
 	private void fallingPhase() {
+		
 		// Start falling timer
 		// TODO: make time depended of level
 		_fallingTimer = new TetrisTimer(1000);
@@ -258,6 +259,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * 
 	 */
 	private void lockPhase() {
+		System.out.println("Enter LOCK phase");
 
 		// Start lock timer
 		// resets to 500ms every time the Tetrimino moves
