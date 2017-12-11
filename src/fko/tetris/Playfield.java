@@ -26,6 +26,7 @@ package fko.tetris;
 import fko.tetris.tetriminos.Tetrimino;
 import fko.tetris.tetriminos.Tetrimino.Facing;
 import fko.tetris.util.Coordinates;
+import fko.tetris.util.SimpleIntList;
 
 /**
  * This represent the internal playfield which basically consists of a background matrices of 10 columns and 40 rows
@@ -56,7 +57,7 @@ public class Playfield {
 	public static final int PLAYFIELD_WIDTH = 10;
 
 	// the internal data structure for the background matrix.
-	// All Tetriminos which are locked in place are merged into the background.
+	// All Tetriminos which are locked in place are merged into the background as Minos.
 	// A zero representing an empty field, a non-zero an occupied field.
 	// Non-zeros also determine the color (defined in Tetrimino class)
 	private TetrisColor[][] _backgroundMatrix;
@@ -70,7 +71,8 @@ public class Playfield {
 	// convenience field for SKYLINE+BUFFERZONE
 	private int _playfieldHeight = SKYLINE + BUFFERZONE;
 
-	private int[][] _markedForMove;
+	// lines marked for clearing - call clearMarkedLines() to delete these lines
+	private SimpleIntList _markedLineClears;
 
 	/**
 	 * Generates a new Playfield with default width and height
@@ -88,24 +90,26 @@ public class Playfield {
 //		
 //		_backgroundMatrix[6][19] = TetrisColor.LBLUE;
 		
-		/*
-		_backgroundMatrix[0][0] = TetrisColor.BLUE;
-		_backgroundMatrix[1][0] = TetrisColor.BLUE;
-		_backgroundMatrix[2][0] = TetrisColor.BLUE;
-		_backgroundMatrix[3][0] = TetrisColor.BLUE;
-		_backgroundMatrix[4][0] = TetrisColor.PURPLE;
-		_backgroundMatrix[5][0] = TetrisColor.PURPLE;
-		_backgroundMatrix[5][1] = TetrisColor.PURPLE;
-		_backgroundMatrix[6][0] = TetrisColor.PURPLE;
-		_backgroundMatrix[7][0] = TetrisColor.YELLOW;
-		_backgroundMatrix[7][1] = TetrisColor.YELLOW;
-		_backgroundMatrix[8][0] = TetrisColor.YELLOW;
-		_backgroundMatrix[8][1] = TetrisColor.YELLOW;
-		_foregroundMatrix[4][19] = TetrisColor.YELLOW;
-		_foregroundMatrix[4][20] = TetrisColor.YELLOW;
-		_foregroundMatrix[5][19] = TetrisColor.YELLOW;
-		_foregroundMatrix[5][20] = TetrisColor.YELLOW;
-		*/
+//		_backgroundMatrix[0][0] = TetrisColor.BLUE;
+//		_backgroundMatrix[1][0] = TetrisColor.BLUE;
+//		_backgroundMatrix[2][0] = TetrisColor.BLUE;
+//		_backgroundMatrix[3][0] = TetrisColor.BLUE;
+//		_backgroundMatrix[4][0] = TetrisColor.PURPLE;
+//		_backgroundMatrix[5][0] = TetrisColor.PURPLE;
+//		_backgroundMatrix[6][0] = TetrisColor.PURPLE;
+//		_backgroundMatrix[7][0] = TetrisColor.YELLOW;
+//		_backgroundMatrix[8][0] = TetrisColor.YELLOW;
+//		_backgroundMatrix[9][0] = TetrisColor.YELLOW;
+//		_backgroundMatrix[0][1] = TetrisColor.BLUE;
+//		_backgroundMatrix[1][1] = TetrisColor.BLUE;
+//		_backgroundMatrix[2][1] = TetrisColor.BLUE;
+//		_backgroundMatrix[3][1] = TetrisColor.BLUE;
+//		_backgroundMatrix[4][1] = TetrisColor.PURPLE;
+//		_backgroundMatrix[5][1] = TetrisColor.PURPLE;
+//		_backgroundMatrix[6][1] = TetrisColor.PURPLE;
+//		_backgroundMatrix[7][1] = TetrisColor.YELLOW;
+//		_backgroundMatrix[8][1] = TetrisColor.YELLOW;
+//		_backgroundMatrix[9][1] = TetrisColor.YELLOW;
 	}
 
 	/**
@@ -270,35 +274,35 @@ public class Playfield {
 		// check for collisions
 		int[][] tMatrix = tmp.getMatrix(tmp.getCurrentOrientation());
 		
-		System.out.println(_currentTetrimino.getShape().toString());
+//		System.out.println(_currentTetrimino.getShape().toString());
 		
 		// loop through the Tetrimino matrix and check for collisions
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
-				System.out.print(tMatrix[yi][xi]+" ");
+//				System.out.print(tMatrix[yi][xi]+" ");
 				// check for collision in cell left 
 				if (tMatrix[yi][xi] == 1) { // check for all filled parts of the matrix
 					
 					if (_currentPosition.x+xi  < 0) { // outside left wall
-						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
+//						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
 						return false;
 					}
 					if (_currentPosition.x+xi  > PLAYFIELD_WIDTH-1) { // outside right wall
-						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
+//						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
 						return false;
 					}
 					if (_currentPosition.y-yi-1  < 0) { // below base line
-						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
+//						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
 						return false;
 					}
 					// other piece is blocking the cell
 					if (_backgroundMatrix[_currentPosition.x+xi][_currentPosition.y-yi-1] != TetrisColor.EMPTY) {
-						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
+//						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
 						return false;
 					}
 				}
 			}
-			System.out.println();
+//			System.out.println();
 		}
 		return true; // no collisions so we can move down
 	}
@@ -327,7 +331,50 @@ public class Playfield {
 	}
 
 	/**
-	 * 
+	 * This marks all lines which are full to be cleared later
+	 * @return number of lines which have been marked
+	 */
+	public int markLinesToBeCleared() {
+		// loop through the Tetrimino matrix and check for full lines
+		_markedLineClears = new SimpleIntList(_playfieldHeight);
+		for (int yi = 0; yi < _playfieldHeight; yi++) {
+			boolean foundHole = false;
+			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
+				if (_backgroundMatrix[xi][yi] == TetrisColor.EMPTY) {
+					foundHole = true;
+					break;
+				}
+			}
+			if (!foundHole) _markedLineClears.add(yi);
+		}
+		return _markedLineClears.size();
+	}
+	
+	/**
+	 * This actually deletes all lines which are marked to be cleared.
+	 * @return number of lines which have been deleted
+	 */
+	public int clearMarkedLines() {
+		// iterate upwards through the marked lines and shift all Minos above the lines one down
+		// as we created the list upwards the list should be correctly sorted
+		int clearedCounter = 0; // as we delete rows the rows of minos shift down and the index in the 
+								// _markedLinesCleares need to be decreased by 1
+		for (int i : _markedLineClears) {
+			for (int y=i-clearedCounter;y<_playfieldHeight-1;y++) {
+				for(int x=0;x<PLAYFIELD_WIDTH;x++) {
+					// copy the cell above to the current cell
+					_backgroundMatrix[x][y] = _backgroundMatrix[x][y+1];
+				}
+			}
+			clearedCounter++;
+		}
+		int counter = _markedLineClears.size();
+		_markedLineClears.clear();
+		return counter;		
+	}
+
+	/*
+	 * initializes all fields with EMPTY 
 	 */
 	private void clearMatrix(TetrisColor[][] m) {
 		// iterate through all cells and initialize with zero

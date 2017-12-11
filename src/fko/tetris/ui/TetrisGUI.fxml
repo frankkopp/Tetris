@@ -50,6 +50,19 @@
                      <accelerator>
                         <KeyCodeCombination alt="DOWN" code="L" control="UP" meta="UP" shift="UP" shortcut="UP" />
                      </accelerator>
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="Unspecified Action" />
+                        <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
+                          <content>
+                            <CheckBox text="Click Me" />
+                          </content>
+                        </CustomMenuItem>
+                     </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="Options">
+                    <items>
+                      <MenuItem mnemonicParsing="false" text="Action 1" />
+                    </items>
                   </Menu>
                 <Menu fx:id="menu_help" mnemonicParsing="false" text="?">
                   <items>
@@ -118,13 +131,47 @@
          </children>
       </AnchorPane>
    </bottom>
-   <left>
-      <Pane minWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
-   </left>
    <right>
       <Pane minWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
    </right>
    <center>
       <Pane fx:id="playfieldPane" maxHeight="600.0" maxWidth="300.0" minHeight="600.0" minWidth="300.0" prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER" />
    </center>
+   <left>
+      <VBox minWidth="200.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: c0c0c0;" BorderPane.alignment="CENTER">
+         <children>
+            <Pane fx:id="holdBox" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: cccccc;" />
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Score" />
+                  <Label text="Level" GridPane.rowIndex="1" />
+                  <Label text="Linecount" GridPane.rowIndex="2" />
+                  <Label text="Tetris Count" GridPane.rowIndex="3" />
+                  <Label fx:id="scoreLabel" text="0" GridPane.columnIndex="1" />
+                  <Label fx:id="levelLabel" text="1" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label fx:id="linecountLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label fx:id="tetrisCountLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label text="Start Level" GridPane.rowIndex="6" />
+                  <Label text="Time in Play" GridPane.rowIndex="4" />
+                  <Label fx:id="timeInPlayLabel" text="00:00:00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label fx:id="startLevelLabel" text="1" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+               </children>
+            </GridPane>
+         </children>
+      </VBox>
+   </left>
 </BorderPane>
