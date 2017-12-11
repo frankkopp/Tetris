@@ -250,9 +250,57 @@ public class Playfield {
 	 * @return true if turn would cause collision - Tetrimino is then not turned
 	 */
 	public boolean turnMove(int direction) {
+		// first create a temp copy of the current Tetrimino we can test turns with
+		Tetrimino tmp = _currentTetrimino.clone();
 		
-		_currentTetrimino.turn(direction);
+		if (canTurn(tmp, direction))
+			_currentTetrimino.turn(direction);
 		return false;
+	}
+
+	/**
+	 * @param tmp 
+	 * @param direction
+	 * @return
+	 */
+	private boolean canTurn(Tetrimino tmp, int direction) {
+		// turn the Tetrimino
+		tmp.turn(direction);
+		
+		// check for collisions
+		int[][] tMatrix = tmp.getMatrix(tmp.getCurrentOrientation());
+		
+		System.out.println(_currentTetrimino.getShape().toString());
+		
+		// loop through the Tetrimino matrix and check for collisions
+		for (int yi = 0; yi < tMatrix.length; yi++) {
+			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
+				System.out.print(tMatrix[yi][xi]+" ");
+				// check for collision in cell left 
+				if (tMatrix[yi][xi] == 1) { // check for all filled parts of the matrix
+					
+					if (_currentPosition.x+xi  < 0) { // outside left wall
+						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
+						return false;
+					}
+					if (_currentPosition.x+xi  > PLAYFIELD_WIDTH-1) { // outside right wall
+						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
+						return false;
+					}
+					if (_currentPosition.y-yi-1  < 0) { // below base line
+						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
+						return false;
+					}
+					// other piece is blocking the cell
+					if (_backgroundMatrix[_currentPosition.x+xi][_currentPosition.y-yi-1] != TetrisColor.EMPTY) {
+						System.out.println("CANNOT TURN: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
+						return false;
+					}
+				}
+			}
+			System.out.println();
+		}
+		return true; // no collisions so we can move down
 	}
 
 	/**
