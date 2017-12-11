@@ -28,14 +28,13 @@ SOFTWARE.
 package fko.tetris.ui;
 
 import java.net.URL;
-import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import fko.tetris.TetrisControlEvents;
 import fko.tetris.Tetris;
+import fko.tetris.TetrisControlEvents;
 import fko.tetris.TetrisGame;
 import fko.tetris.util.HelperTools;
 import javafx.concurrent.Task;
@@ -91,6 +90,7 @@ public class TetrisGUI_Controller implements Observer {
 			@Override
 			public void handle(KeyEvent event) {
 				//System.out.println("Key Pressed: "+event.getCode().toString());
+				if (_tetrisGame == null) return; // only when game is available
 				switch (event.getCode()) {
 				case LEFT:	_tetrisGame.controlQueueAdd(TetrisControlEvents.LEFT); break;
 				case RIGHT:	_tetrisGame.controlQueueAdd(TetrisControlEvents.RIGHT); break;
@@ -99,6 +99,7 @@ public class TetrisGUI_Controller implements Observer {
 				case DOWN:	_tetrisGame.controlQueueAdd(TetrisControlEvents.SOFTDOWN); break;
 				case UP:		_tetrisGame.controlQueueAdd(TetrisControlEvents.HARDDOWN); break;
 				case D:		_tetrisGame.controlQueueAdd(TetrisControlEvents.HOLD); break;
+				default:
 				}
 			}
 		}); 
@@ -107,6 +108,7 @@ public class TetrisGUI_Controller implements Observer {
 			@Override
 			public void handle(KeyEvent event) {
 				switch (event.getCode()) {
+				default:
 				}
 			}
 		});
