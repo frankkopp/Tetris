@@ -31,8 +31,8 @@ import fko.tetris.util.Coordinates;
  */
 abstract public class Tetrimino {
 	
-	protected String 		_myName;
-	protected TetrisColor 	_myColor;
+	String _myName;
+	TetrisColor _myColor;
 	
 	/**
 	 * This matrix holds 4 [][] matrices - NORTH, EAST, SOUTH, WEST
@@ -52,18 +52,19 @@ abstract public class Tetrimino {
 			},...</br>
 			</code>
 	 * 
+	 *IMPORTANT: Do not change the matrix arrays
 	 */
-	protected int[][][] _tMatrix;
-	
-	/**
-	 * the current orientation of this Tetrimino 
-	 */
-	protected Facing _currentOrientation = Facing.NORTH;
+	int[][][] _tMatrix;
 	
 	/**
 	 * the start point for the left upper corner of the matrix
 	 */
-	protected Coordinates _startPoint;
+	Coordinates _startPoint;
+
+	/**
+	 * the current orientation of this Tetrimino 
+	 */
+	Facing _currentOrientation = Facing.NORTH;
 	
 	/**
 	 * Retrieve the Matrix for a given facing
@@ -74,12 +75,36 @@ abstract public class Tetrimino {
 	}
 	
 	/**
+	 * Turns the Tetrimino in the given direction.<br/>
+	 * direction >0 turn right/clockwise, <0 left/counter clockwise
+	 * @return the new facing
+	 */
+	public Facing turn(int direction) {
+		if (direction < 0) {
+			switch (_currentOrientation) {
+			case NORTH: _currentOrientation=Facing.WEST; break;
+			case EAST: _currentOrientation=Facing.NORTH; break;
+			case SOUTH: _currentOrientation=Facing.EAST; break;
+			case WEST: _currentOrientation=Facing.SOUTH; break;
+			}
+		} else if (direction > 0) {
+			switch (_currentOrientation) {
+			case NORTH: _currentOrientation=Facing.EAST; break;
+			case EAST: _currentOrientation=Facing.SOUTH; break;
+			case SOUTH: _currentOrientation=Facing.WEST; break;
+			case WEST: _currentOrientation=Facing.NORTH; break;
+			}
+		}
+		return _currentOrientation;
+	}
+	
+	/**
 	 * @return the _currentOrientation
 	 */
 	public Facing getCurrentOrientation() {
 		return _currentOrientation;
 	}
-
+	
 	/**
 	 * Retrieves the color of the Tetrimino
 	 * @return the _myColor
@@ -92,7 +117,7 @@ abstract public class Tetrimino {
 	 * @return the _startPoint
 	 */
 	public Coordinates getStartPoint() {
-		return _startPoint;
+		return this._startPoint;
 	}
 
 	public abstract TetriminoShape getShape();
@@ -114,7 +139,13 @@ abstract public class Tetrimino {
 		return _myName;
 		
 	}
-	
+
+	/**
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public abstract Tetrimino clone();
+
 	/**
 	 * All Tetrimino shapes
 	 */
