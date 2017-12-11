@@ -31,8 +31,8 @@ import fko.tetris.util.Coordinates;
  */
 abstract public class Tetrimino {
 	
-	String _myName;
-	TetrisColor _myColor;
+	final String _myName;
+	final TetrisColor _myColor;
 	
 	/**
 	 * This matrix holds 4 [][] matrices - NORTH, EAST, SOUTH, WEST
@@ -54,17 +54,27 @@ abstract public class Tetrimino {
 	 * 
 	 *IMPORTANT: Do not change the matrix arrays
 	 */
-	int[][][] _tMatrix;
+	final int[][][] _tMatrix;
 	
 	/**
 	 * the start point for the left upper corner of the matrix
 	 */
-	Coordinates _startPoint;
+	final Coordinates _startPoint;
 
 	/**
 	 * the current orientation of this Tetrimino 
 	 */
 	Facing _currentOrientation = Facing.NORTH;
+	
+	/**
+	 * Constructor for sub classes to use final fields
+	 */
+	protected Tetrimino(String myName, TetrisColor myColor, int[][][] tMatrix, Coordinates startPoint) {
+		this._myName = myName;
+		this._myColor = myColor;
+		this._tMatrix = tMatrix;
+		this._startPoint = startPoint;
+	}
 	
 	/**
 	 * Retrieve the Matrix for a given facing

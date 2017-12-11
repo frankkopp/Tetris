@@ -31,46 +31,54 @@ import fko.tetris.util.Coordinates;
  */
 public class I_Tetrimino extends Tetrimino {
 	
+	static int [][][] tMatrix = new int[][][] {
+		{ //NORTH
+			{0, 0, 0, 0},
+			{1, 1, 1, 1},
+			{0, 0, 0, 0},
+			{0, 0, 0, 0}
+		},
+		{ // EAST
+			{0, 0, 1, 0},
+			{0, 0, 1, 0},
+			{0, 0, 1, 0},
+			{0, 0, 1, 0}
+		},
+		{ // SOUTH
+			{0, 0, 0, 0},
+			{0, 0, 0, 0},
+			{1, 1, 1, 1},
+			{0, 0, 0, 0}
+		},
+		{ // WEST
+			{0, 1, 0, 0},
+			{0, 1, 0, 0},
+			{0, 1, 0, 0},
+			{0, 1, 0, 0}
+		}
+	};
+	
 	public I_Tetrimino() {
-		_myName = "I";
-		_myColor = TetrisColor.LBLUE;
-		
-		_tMatrix = new int[][][] {
-			{ //NORTH
-				{0, 0, 0, 0},
-				{1, 1, 1, 1},
-				{0, 0, 0, 0},
-				{0, 0, 0, 0}
-			},
-			{ // EAST
-				{0, 0, 1, 0},
-				{0, 0, 1, 0},
-				{0, 0, 1, 0},
-				{0, 0, 1, 0}
-			},
-			{ // SOUTH
-				{0, 0, 0, 0},
-				{0, 0, 0, 0},
-				{1, 1, 1, 1},
-				{0, 0, 0, 0}
-			},
-			{ // WEST
-				{0, 1, 0, 0},
-				{0, 1, 0, 0},
-				{0, 1, 0, 0},
-				{0, 1, 0, 0}
-			}
-		};
-		
-		_startPoint = new Coordinates(3,22);
+		super ("I", TetrisColor.LBLUE, tMatrix, new Coordinates(3,22));
 	}
-
+	
 	/**
 	 * @see fko.tetris.tetriminos.Tetrimino#getShape()
 	 */
 	@Override
 	public TetriminoShape getShape() {
 		return TetriminoShape.I;
+	}
+
+	/**
+	 * @see fko.tetris.tetriminos.Tetrimino#clone()
+	 */
+	@Override
+	public Tetrimino clone() {
+		Tetrimino tnew = new I_Tetrimino();
+		// this field can be change from public
+		tnew._currentOrientation = this._currentOrientation;
+		return tnew;
 	}
 
 }

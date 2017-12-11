@@ -31,34 +31,31 @@ import fko.tetris.util.Coordinates;
  */
 public class Z_Tetrimino extends Tetrimino {
 	
+	static int [][][] tMatrix = new int[][][] {
+		{ //NORTH
+			{1, 1, 0},
+			{0, 1, 1},
+			{0, 0, 0}
+		},
+		{ // EAST
+			{0, 0, 1},
+			{0, 1, 1},
+			{0, 1, 0}
+		},
+		{ // SOUTH
+			{0, 0, 0},
+			{1, 1, 0},
+			{0, 1, 1}
+		},
+		{ // WEST
+			{0, 1, 0},
+			{1, 1, 0},
+			{1, 0, 0}
+		}
+	};
+	
 	public Z_Tetrimino() {
-		_myName = "Z";
-		_myColor = TetrisColor.RED;
-		
-		_tMatrix = new int[][][] {
-			{ //NORTH
-				{1, 1, 0},
-				{0, 1, 1},
-				{0, 0, 0}
-			},
-			{ // EAST
-				{0, 0, 1},
-				{0, 1, 1},
-				{0, 1, 0}
-			},
-			{ // SOUTH
-				{0, 0, 0},
-				{1, 1, 0},
-				{0, 1, 1}
-			},
-			{ // WEST
-				{0, 1, 0},
-				{1, 1, 0},
-				{1, 0, 0}
-			}
-		};
-		
-		_startPoint = new Coordinates(3,22);
+		super ("Z", TetrisColor.RED, tMatrix, new Coordinates(3,22));
 	}
 
 	/**
@@ -67,6 +64,17 @@ public class Z_Tetrimino extends Tetrimino {
 	@Override
 	public TetriminoShape getShape() {
 		return TetriminoShape.Z;
+	}
+
+	/**
+	 * @see fko.tetris.tetriminos.Tetrimino#clone()
+	 */
+	@Override
+	public Tetrimino clone() {
+		Tetrimino tnew = new Z_Tetrimino();
+		// this field can be change from public
+		tnew._currentOrientation = this._currentOrientation;
+		return tnew;
 	}
 	
 	

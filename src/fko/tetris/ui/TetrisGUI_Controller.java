@@ -97,7 +97,7 @@ public class TetrisGUI_Controller implements Observer {
 				case S:		_tetrisGame.controlQueueAdd(TetrisControlEvents.RTURN); break;
 				case A:		_tetrisGame.controlQueueAdd(TetrisControlEvents.LTURN); break;
 				case DOWN:	_tetrisGame.controlQueueAdd(TetrisControlEvents.SOFTDOWN); break;
-				case UP:		_tetrisGame.controlQueueAdd(TetrisControlEvents.HARDDOWN); break;
+				case UP:	_tetrisGame.controlQueueAdd(TetrisControlEvents.HARDDOWN); break;
 				case D:		_tetrisGame.controlQueueAdd(TetrisControlEvents.HOLD); break;
 				default:
 				}

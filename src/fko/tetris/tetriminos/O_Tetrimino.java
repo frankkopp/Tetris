@@ -31,38 +31,46 @@ import fko.tetris.util.Coordinates;
  */
 public class O_Tetrimino extends Tetrimino {
 	
+	static int [][][] tMatrix = new int[][][] {
+		{ //NORTH
+			{1, 1},
+			{1, 1}
+		},
+		{ // EAST
+			{1, 1},
+			{1, 1}
+		},
+		{ // SOUTH
+			{1, 1},
+			{1, 1}
+		},
+		{ // WEST
+			{1, 1},
+			{1, 1}
+		}
+	};
+	
 	public O_Tetrimino() {
-		_myName = "O";
-		_myColor = TetrisColor.YELLOW;
-		
-		_tMatrix = new int[][][] {
-			{ //NORTH
-				{1, 1},
-				{1, 1}
-			},
-			{ // EAST
-				{1, 1},
-				{1, 1}
-			},
-			{ // SOUTH
-				{1, 1},
-				{1, 1}
-			},
-			{ // WEST
-				{1, 1},
-				{1, 1}
-			}
-		};
-		
-		_startPoint =  new Coordinates(4,22);
+		super ("O", TetrisColor.YELLOW, tMatrix, new Coordinates(4,22));
 	}
-
+	
 	/**
 	 * @see fko.tetris.tetriminos.Tetrimino#getShape()
 	 */
 	@Override
 	public TetriminoShape getShape() {
 		return TetriminoShape.O;
+	}
+
+	/**
+	 * @see fko.tetris.tetriminos.Tetrimino#clone()
+	 */
+	@Override
+	public Tetrimino clone() {
+		Tetrimino tnew = new O_Tetrimino();
+		// this field can be change from public
+		tnew._currentOrientation = this._currentOrientation;
+		return tnew;
 	}
 
 }

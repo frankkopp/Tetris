@@ -31,42 +31,50 @@ import fko.tetris.util.Coordinates;
  */
 public class L_Tetrimino extends Tetrimino {
 	
+	static int [][][] tMatrix = new int[][][] {
+		{ //NORTH
+			{0, 0, 1},
+			{1, 1, 1},
+			{0, 0, 0}
+		},
+		{ // EAST
+			{0, 1, 0},
+			{0, 1, 0},
+			{0, 1, 1}
+		},
+		{ // SOUTH
+			{0, 0, 0,},
+			{1, 1, 1,},
+			{1, 0, 0,}
+		},
+		{ // WEST
+			{1, 1, 0},
+			{0, 1, 0},
+			{0, 1, 0}
+		}
+	};
+	
 	public L_Tetrimino() {
-		_myName = "L";
-		_myColor = TetrisColor.ORANGE;
-		
-		_tMatrix = new int[][][] {
-			{ //NORTH
-				{0, 0, 1},
-				{1, 1, 1},
-				{0, 0, 0}
-			},
-			{ // EAST
-				{0, 1, 0},
-				{0, 1, 0},
-				{0, 1, 1}
-			},
-			{ // SOUTH
-				{0, 0, 0,},
-				{1, 1, 1,},
-				{1, 0, 0,}
-			},
-			{ // WEST
-				{1, 1, 0},
-				{0, 1, 0},
-				{0, 1, 0}
-			}
-		};
-		
-		_startPoint =  new Coordinates(3,22);
+		super ("L", TetrisColor.ORANGE, tMatrix, new Coordinates(3,22));
 	}
-
+	
 	/**
 	 * @see fko.tetris.tetriminos.Tetrimino#getShape()
 	 */
 	@Override
 	public TetriminoShape getShape() {
 		return TetriminoShape.L;
+	}
+
+	/**
+	 * @see fko.tetris.tetriminos.Tetrimino#clone()
+	 */
+	@Override
+	public Tetrimino clone() {
+		Tetrimino tnew = new L_Tetrimino();
+		// this field can be change from public
+		tnew._currentOrientation = this._currentOrientation;
+		return tnew;
 	}
 
 }
