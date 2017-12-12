@@ -46,9 +46,9 @@ public class PlayfieldPane extends Pane {
 	private static final Color GRID_COLOR = Color.LIGHTGRAY;
 	private static final Color FRAME_COLOR = Color.LIGHTGRAY;
 
-	private Playfield _playField; // the playField to draw
+	private Playfield _playField; // handle to the playField to draw
 	
-	private TetrisGUI_Controller _controller;
+	private TetrisGUI_Controller _controller; // handle to the UI controller to access options
 
 	// helper for an efficient draw()
 	private Line[] _hlines = new Line[Playfield.SKYLINE];
@@ -177,14 +177,14 @@ public class PlayfieldPane extends Pane {
 			}
 		}        
 
-		// draw Tetrimino
+		// draw current Tetrimino
 		// will draw over background so collision check needs to be done in model
 		final Tetrimino t = playField.getCurrentTetrimino();
 		if (t==null)
 			return; // if now game is running there are no Tetriminos
 
 		final int[][] tMatrix = t.getMatrix(t.getCurrentOrientation());
-		final Coordinates c = playField.getCurrentPosition();
+		final Coordinates c = t.getCurrentPosition();
 
 		// set the max height we want to see Tetriminos
 		int visibleHeight = Playfield.SKYLINE+1;
@@ -216,6 +216,14 @@ public class PlayfieldPane extends Pane {
 					this.getChildren().add(block);
 				}
 			}
+		}
+		
+		if (_controller.ghostPieceOption.isSelected()) {
+			Tetrimino ghost = t.clone();
+			
+			// drop the ghost as far as possible
+			
+			
 		}
 
 

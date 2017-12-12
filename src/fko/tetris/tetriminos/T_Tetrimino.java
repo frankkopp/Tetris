@@ -72,8 +72,9 @@ public class T_Tetrimino extends Tetrimino {
 	@Override
 	public Tetrimino clone() {
 		Tetrimino tnew = new T_Tetrimino();
-		// this field can be change from public
+		// this field can be changed from public
 		tnew._currentOrientation = this._currentOrientation;
+		tnew._currentPosition = this._currentPosition.clone();
 		return tnew;
 	};
 

@@ -478,7 +478,7 @@ public class TetrisGUI_Controller implements Observer {
     protected CheckMenuItem peekOption; // Value injected by FXMLLoader
     
     @FXML // fx:id="ghostPieceOption"
-    private CheckMenuItem ghostPieceOption; // Value injected by FXMLLoader
+    protected CheckMenuItem ghostPieceOption; // Value injected by FXMLLoader
     
 	/*
 	 * FXML checks

@@ -59,8 +59,8 @@ abstract public class Tetrimino {
 	/**
 	 * the start point for the left upper corner of the matrix
 	 */
-	final Coordinates _startPoint;
-
+	Coordinates _currentPosition;
+	
 	/**
 	 * the current orientation of this Tetrimino 
 	 */
@@ -73,7 +73,7 @@ abstract public class Tetrimino {
 		this._myName = myName;
 		this._myColor = myColor;
 		this._tMatrix = tMatrix;
-		this._startPoint = startPoint;
+		this._currentPosition = startPoint;
 	}
 	
 	/**
@@ -126,8 +126,15 @@ abstract public class Tetrimino {
 	/**
 	 * @return the _startPoint
 	 */
-	public Coordinates getStartPoint() {
-		return this._startPoint;
+	public Coordinates getCurrentPosition() {
+		return this._currentPosition;
+	}
+	
+	/**
+	 * @param _currentPosition the _currentPosition to set
+	 */
+	public void setCurrentPosition(Coordinates _currentPosition) {
+		this._currentPosition = _currentPosition;
 	}
 
 	public abstract TetriminoShape getShape();
