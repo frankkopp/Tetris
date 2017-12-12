@@ -416,6 +416,7 @@ public class Playfield {
 		return _currentPosition;
 	}
 
+	@SuppressWarnings("unused")
 	private void debugPrintMatrix(TetrisColor[][] m) {
 		for (int yi = _playfieldHeight-1; yi >= 0; yi--) {
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
