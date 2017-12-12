@@ -66,6 +66,8 @@ import javafx.stage.Stage;
  * ui updates and model actions. The UI calls the actions methods directly. The model signals via the Observer Interface 
  * @see java.util.Observer#update(java.util.Observable, java.lang.Object) that the model has changed and the UI 
  * should update its views.
+ * 
+ * TODO: NextQueue show option
  */
 public class TetrisGUI_Controller implements Observer {
 
@@ -121,14 +123,18 @@ public class TetrisGUI_Controller implements Observer {
 				if (_tetrisGame == null) return; // only when game is available
 
 				switch (event.getCode()) {
+				case ESCAPE: _tetrisGame.setPaused(_tetrisGame.isPaused() ? false : true); break;
 				case LEFT:	_tetrisGame.controlQueueAdd(TetrisControlEvents.LEFT); break;
 				case RIGHT:	_tetrisGame.controlQueueAdd(TetrisControlEvents.RIGHT); break;
-				case S:		_tetrisGame.controlQueueAdd(TetrisControlEvents.RTURN); break;
+				case X:
 				case UP:	_tetrisGame.controlQueueAdd(TetrisControlEvents.RTURN); break;
-				case A:		_tetrisGame.controlQueueAdd(TetrisControlEvents.LTURN); break;
+				case Y: // HACK_ in case of different keyboard layout
+				case Z:		
+				case CONTROL: _tetrisGame.controlQueueAdd(TetrisControlEvents.LTURN); break; 
 				case DOWN:	_tetrisGame.controlQueueAdd(TetrisControlEvents.SOFTDOWN); break;
 				case SPACE:	_tetrisGame.controlQueueAdd(TetrisControlEvents.HARDDOWN); break;
-				case D:		_tetrisGame.controlQueueAdd(TetrisControlEvents.HOLD); break;
+				case SHIFT:
+				case C:		_tetrisGame.controlQueueAdd(TetrisControlEvents.HOLD); break;
 				default:
 				}
 			}

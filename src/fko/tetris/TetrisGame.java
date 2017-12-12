@@ -32,6 +32,8 @@ import fko.tetris.tetriminos.Tetrimino;
 /**
  * This represents the state of a Tetris game. It holds all information necessary to represent a Tetris game at any 
  * point in time.
+ * TODO: Highscore Ranking
+ * TODO: Hold Queue
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
 
@@ -60,7 +62,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	
 	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<>();
 		
-	private int _numberOfLastClearedLines;
+	private int _lastClearedLinesCount = 0;
+	private int _lastHardDropLineCount = 0;
+	private int _lastSoftDropLineCount = 0;
 	
 	/**
 	 * Creates a Tetris game with default values
@@ -88,7 +92,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_startLevel 	= startLevel;
 		_currentLevel 	= startLevel;
 		_score 			= 0;
-		_lineCount 		= 0;
+		_lineCount 		= (startLevel-1) * 10; // if started with a higher level assume appropriate line count 
 		_tetrisesCount 	= 0;
 	}
 
@@ -206,6 +210,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				/*
 				 * Here, any animation scripts are executed within the Matrix. The Tetris Engine moves on to the 
 				 * Eliminate Phase once all animation scripts have been run.
+				 * TODO: Add Sounds and maybe animations
 				 */
 				_phaseState = TetrisPhase.ELIMINATE; // not implemented
 				break;
@@ -246,7 +251,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			setChanged();
 			notifyObservers("After PHASE loop");
 
-			// TODO: improve to also pause during the phases
 			waitIfPaused();
 
 		} while (_gameStopped == false);
@@ -281,7 +285,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private void fallingPhase() {
 		
 		// Start falling timer
-		// TODO: make time depended of level
 		_fallingTimer = new TetrisTimer(calculateFallingTime());
 		_fallingTimer.addObserver(this);
 		_fallingTimer.start();
@@ -302,6 +305,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				event = _controlQueue.take();
 			} catch (InterruptedException e) { /* empty*/ }
 
+			waitIfPaused();
+			
 			// event handling
 			switch(event) {
 			case LEFT:	
@@ -318,9 +323,12 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				break;
 			case SOFTDOWN:				
 				_playfield.moveDown();	// ignored if no move possible
+				_lastSoftDropLineCount+=1;
 				break;
 			case HARDDOWN:				
+				_lastHardDropLineCount=0;
 				while (!_playfield.moveDown()) {
+					_lastHardDropLineCount++;
 					// -- tell the view that model has changed
 					setChanged();
 					notifyObservers("During FALLING after HARDWON");
@@ -382,6 +390,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				event = _controlQueue.take();
 			} catch (InterruptedException e) { /* empty*/ }
 
+			waitIfPaused();
+			
 			// event handling
 			switch(event) {
 			case LEFT:	
@@ -463,17 +473,24 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * ELIMINATE phase
 	 * This phase removes all lines from the playfield which were marked for clearance.<br/>
 	 * Also handles game statistics like scoring, bonus scores, etc.
-	 * no score for SOFTDROP and HARDDROP
 	 * TODO: BackToBack Bonus, SPIN Bonus
 	 */
 	private void eliminatePhase() {
-		//System.out.println("Enter ELIMINATE phase");
+
+		// clear lines
+		_lastClearedLinesCount = _playfield.clearMarkedLines();
 		
-		_numberOfLastClearedLines = _playfield.clearMarkedLines();
-		
-		_score += calculateNewScore(_numberOfLastClearedLines);
-		_lineCount += _numberOfLastClearedLines;
-		if (_numberOfLastClearedLines == 4) _tetrisesCount++;
+		// score
+		_score += calculateLineClearScore(_lastClearedLinesCount);
+		_score += _lastSoftDropLineCount; // soft drop points 1 x number of lines
+		_score += _lastHardDropLineCount * 2; // hard drop points 2 x number of lines
+		_lineCount += _lastClearedLinesCount;
+		_lastHardDropLineCount = 0;
+		_lastSoftDropLineCount = 0;
+		_lastClearedLinesCount = 0;
+
+		// other statistics
+		if (_lastClearedLinesCount == 4) _tetrisesCount++;
 				
 		_phaseState = TetrisPhase.COMPLETION;
 	}
@@ -486,8 +503,11 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private void completionPhase() {
 		//System.out.println("Enter COMPLETION phase");
 		
-		// TODO
-		if (_lineCount > 0 && _numberOfLastClearedLines > 0 && _lineCount%10 == 0)_currentLevel++;
+		// set level - FIXED GOAL SYSTEM
+		// TODO: implement VARIABLE GOAL SYSTEM
+		if (_lineCount > 0 && _lastClearedLinesCount > 0) {
+			_currentLevel = _lineCount/10 +1;
+		}
 		
 		_phaseState = TetrisPhase.GENERATION;
 	}
@@ -496,7 +516,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * @param numberOfClearedLines
 	 * @return score for the last placement
 	 */
-	private int calculateNewScore(int numberOfClearedLines) {
+	private int calculateLineClearScore(int numberOfClearedLines) {
 		int score = 0;
 		switch (numberOfClearedLines) {
 		case 0: break;

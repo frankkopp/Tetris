@@ -73,10 +73,7 @@ public class TetrisTimerTest {
 		assertTrue(timer.isRunning());
 		try {
 			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (InterruptedException e) {/* nothing */}
 		timer.stop();
 		long t = timer.getRemainingTime();
 		assertTrue(t < 2000);
@@ -86,10 +83,7 @@ public class TetrisTimerTest {
 		assertTrue(timer.isRunning());
 		try {
 			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (InterruptedException e) {/* nothing */}
 		assertTrue(timer.getRemainingTime() < t);
 		timer.stop();
 		assertFalse(timer.isRunning());
@@ -113,10 +107,7 @@ public class TetrisTimerTest {
 		
 		try {
 			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (InterruptedException e) {/* nothing */}
 		
 		timer.stop();
 		long rt = timer.getRemainingTime();

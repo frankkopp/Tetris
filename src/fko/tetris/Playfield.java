@@ -263,7 +263,6 @@ public class Playfield {
 	/**
 	 * Turns a Tetrimino after collision checks.<br/> 
 	 * Uses Classic Rotation System. 
-	 * TODO: Implement Super Rotation System
 	 * @param direction
 	 * @return true if turn would cause collision - Tetrimino is then not turned
 	 */
