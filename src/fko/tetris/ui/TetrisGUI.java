@@ -94,7 +94,10 @@ public class TetrisGUI extends Application {
 			// set the minimum size
 			_primaryStage.setMinWidth(785);
 			_primaryStage.setMinHeight(795);
+			_primaryStage.setMaxWidth(785);
+			_primaryStage.setMaxHeight(795);
 
+			
             // get last window position and size from window state file
             double windowLocX = Double.parseDouble(
                     TetrisGUI_Controller.getWindowState().getProperty("windowLocationX", "100"));

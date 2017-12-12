@@ -23,9 +23,6 @@ SOFTWARE.
  */
 package fko.tetris.ui;
 
-import java.util.ListIterator;
-
-import fko.tetris.NextQueue;
 import fko.tetris.tetriminos.Tetrimino;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -36,26 +33,26 @@ import javafx.scene.shape.Rectangle;
 /**
  * 
  */
-public class NextQueuePane extends Pane {
+public class HoldPane extends Pane {
 	@SuppressWarnings("unused")
-	private static final double HEIGHT = 400;
+	private static final double HEIGHT = 150;
 	private static final double WIDTH = 150;
 
 	private static final Color BACKGROUND_COLOR = Color.DARKGRAY;
 	
-	private NextQueue _nextQueue; // handle to NextQueue object
+	private Tetrimino _holdTetrimino; // handle to Tetrimino object
 	
 	/**
 	 * Initialize the nextQueuedPanel
 	 */
-	public NextQueuePane() {
+	public HoldPane() {
 		super();
 		
 		// set up the pane
         this.setBackground(new Background(new BackgroundFill(BACKGROUND_COLOR,null,null)));
         // set size
-        /*      
- 		this.setMinWidth(WIDTH);
+        /*
+        this.setMinWidth(WIDTH);
         this.setMinHeight(HEIGHT);
         this.setMaxWidth(WIDTH);
         this.setMaxHeight(HEIGHT);
@@ -68,39 +65,20 @@ public class NextQueuePane extends Pane {
 	/**
 	 * @param _nextQueue the _nextQueue to set
 	 */
-	public void setNextQueue(NextQueue _nextQueue) {
-		this._nextQueue = _nextQueue;
+	public void setHoldTetrimino(Tetrimino hold) {
+		this._holdTetrimino = hold;
 	}
 
 	/**
 	 * 
 	 */
 	public void draw() {
-		if (_nextQueue == null) {
+		if (_holdTetrimino == null) {
 			// clear the node to redraw everything
 			this.getChildren().clear();
 			return;
 		}
-		draw(_nextQueue);
-	}
-
-	/**
-	 * Draw all Tetriminos in NextQueue
-	 * @param _nextQueue
-	 */
-	private void draw(NextQueue nextQueue) {
-		
-		// clear the node to redraw everything
-		this.getChildren().clear();
-		
-		ListIterator<Tetrimino> iterator = _nextQueue.getListIterator();
-		
-		int position = 0; // draw Tetriominos from top downwards
-		while (iterator.hasNext()) {
-			draw(position, iterator.next());
-			position++;
-		}
-		
+		draw(_holdTetrimino);
 	}
 
 	/**
@@ -108,7 +86,7 @@ public class NextQueuePane extends Pane {
 	 * @param position
 	 * @param next
 	 */
-	private void draw(int position, Tetrimino next) {
+	private void draw(Tetrimino next) {
 
 		int[][] tMatrix = next.getMatrix(Tetrimino.Facing.NORTH); // get north facing matrix
 		
@@ -116,7 +94,7 @@ public class NextQueuePane extends Pane {
 		
 		double h = (WIDTH/6); // height and width of cells based on pane width
 		double start_x = h;	// start with a offset of one cell width
-		double start_y = h + 5*h*position; 	// start with an offset of one cell height
+		double start_y = h + 5*h; 	// start with an offset of one cell height
 											// position draws the n-th cell lower
 		
 		for(int y=0; y<tMatrix.length;y++) {

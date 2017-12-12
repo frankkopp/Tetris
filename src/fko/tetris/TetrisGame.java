@@ -61,7 +61,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	
 	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<>();
 		
-	private int _numberOfLinesToBeCleared; // stores the number of lines to be cleared after the PATTERN phase
 	private int _numberOfLastClearedLines;
 	
 	/**
@@ -77,8 +76,21 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_score 			= 0;
 		_lineCount 		= 0;
 		_tetrisesCount 	= 0;
+	}
 
-		completionPhase();
+	/**
+	 * @param startLevel
+	 */
+	public TetrisGame(int startLevel) {
+		_playfield 		= new Playfield();
+		_bag 			= new Bag();
+		_nextQueue		= new NextQueue(_bag, 3);
+		_holdQueue 		= null;
+		_startLevel 	= startLevel;
+		_currentLevel 	= startLevel;
+		_score 			= 0;
+		_lineCount 		= 0;
+		_tetrisesCount 	= 0;
 	}
 
 	/**
@@ -246,7 +258,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	}
 
 	/*
-	 * 
+	 * GENERATION phase 
 	 */
 	private void generationPhase() {
 		// Generation Phase
@@ -255,12 +267,17 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// collision detected - "BLOCK OUT" GAME OVER CONDITION
 			_phaseState = TetrisPhase.GAMEOVER;
 		} else {
+			// Immediately fall into visible area and check for collision
+			if (_playfield.moveDown()) {
+				// collision detected - "BLOCK OUT" GAME OVER CONDITION
+				_phaseState = TetrisPhase.LOCK;
+			}
 			_phaseState = TetrisPhase.FALLING;
 		}
 	}
 
 	/*
-	 * 
+	 * FALLING phase
 	 */
 	private void fallingPhase() {
 		
@@ -337,7 +354,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	}
 
 	/*
-	 * Runs id state is LOCK
+	 * LOCK phase
 	 * Implements the INFINITE PLACEMENT LOCK DOWN	
 	 * TODO: Implement EXTENDED LOCK DOWN and CLASSIC LOCKDOWN
 	 */
@@ -429,6 +446,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	}
 
 	/*
+	 * PATTERN phase
 	 * This phase marks all lines for clearance in the ELIMINATE phase.
 	 */
 	private void patternPhase() {
@@ -443,11 +461,11 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	}
 
 	/*
+	 * ELIMINATE phase
 	 * This phase removes all lines from the playfield which were marked for clearance.<br/>
 	 * Also handles game statistics like scoring, bonus scores, etc.
 	 * no score for SOFTDROP and HARDDROP
 	 * TODO: BackToBack Bonus, SPIN Bonus
-	 * 
 	 */
 	private void eliminatePhase() {
 		//System.out.println("Enter ELIMINATE phase");
@@ -462,6 +480,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	}
 
 	/*
+	 * COMPLETION phase
 	 * This is where any updates to information fields on the Tetris playfield are updated, such as the Score and Time. 
 	 * The Level Up condition is also checked to see if it is necessary to advance the game level.
 	 */
@@ -474,9 +493,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_phaseState = TetrisPhase.GENERATION;
 	}
 
-	/**
+	/*
 	 * @param numberOfClearedLines
-	 * @return
+	 * @return score for the last placement
 	 */
 	private int calculateNewScore(int numberOfClearedLines) {
 		int score = 0;
@@ -490,8 +509,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		return score;
 	}
 
-	/**
-	 * @return
+	/*
+	 * @return the falling time for the current level
 	 */
 	private long calculateFallingTime() {
 		switch (_currentLevel) {
@@ -513,18 +532,21 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		}
 		return 1000;
 	}
-
+	
+	/**
+	 * This is called from the ui to add control events (e.g. key press) to our queue.
+	 * @param e
+	 */
 	public void controlQueueAdd(TetrisControlEvents e) {
 		_controlQueue.add(e);
 	}
 
+	/**
+	 * This is called from the timer to wake us from waiting for a key event
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
 	@Override
 	public void update(Observable o, Object arg) {
-//		if (o ==_fallingTimer)
-//			System.out.println("Update from FALLING timer time is out!");
-//		else 
-//			System.out.println("Update from LOCK timer time is out!");
-		
 		_controlQueue.add(TetrisControlEvents.NONE);
 	}
 
@@ -536,7 +558,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			while (_isPaused && _gameStopped == false) {
 				//System.out.println("PAUSED "+LocalDateTime.now());
 				try {
-					Thread.sleep(1000);
+					synchronized (_gameThread) {
+						_gameThread.wait();
+					}
+					//Thread.sleep(1000);
 				} catch (InterruptedException e) { /* nothing */ }
 			}
 		}
@@ -558,7 +583,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	public void setPaused(boolean _isPaused) {
 		this._isPaused = _isPaused;
-		_gameThread.interrupt();
+		synchronized (_gameThread) {
+			_gameThread.notify();
+		}
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game paused: "+_isPaused);
@@ -581,8 +608,15 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	/**
 	 * @return the _startLevel
 	 */
-	public int get_startLevel() {
+	public int getStartLevel() {
 		return _startLevel;
+	}
+
+	/**
+	 * @param _startLevel the _startLevel to set
+	 */
+	public void setStartLevel(int _startLevel) {
+		this._startLevel = _startLevel;
 	}
 
 	/**

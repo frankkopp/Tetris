@@ -37,6 +37,7 @@ import fko.tetris.Tetris;
 import fko.tetris.TetrisControlEvents;
 import fko.tetris.TetrisGame;
 import fko.tetris.util.HelperTools;
+import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -46,13 +47,16 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.KeyCode;
+import javafx.scene.control.Slider;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 /**
@@ -70,6 +74,7 @@ public class TetrisGUI_Controller implements Observer {
 	private TetrisGame _tetrisGame; // holds a running tetrisGame
 	private PlayfieldPane _playfieldPane; // handle to PlayfieldPane
 	private NextQueuePane _nextQueuePane; // handle to NextQueuePane
+	private HoldPane _holdPane; // handle to NextQueuePane
 
 	/**
 	 * This method is called by the FXMLLoader when initialization is complete
@@ -82,27 +87,39 @@ public class TetrisGUI_Controller implements Observer {
 		addMemLabelUpdater(); // add constantly updated memory info into status panel
 		addPlayfieldPane(); // add the playfield pane 
 		addNextQueuePane(); // add the next queue pane
+		addHoldPane(); // add the hold Tetrimino pane
+		
+		// howto Text
+		Text howToText = new Text(String.format(
+				  "L Arrow to move left.%n"
+				+ "R Arrow to move right.%n"
+				+ "DOWN Arrow to soft drop.%n"
+				+ "SPACE to hard drop.%n"
+				+ "A to turn left.%n"
+				+ "S to turn right.%n"
+				+ "UP Arrow to turn right."));
+		howToText.setStyle("-fx-font-family: Comic Sans MS Bold; -fx-fill: red; -fx-font-size: 8pt");
+		howtoText.getChildren().add(howToText);
+		
+		// change the startLevelLabel when the slider changes
+		startLevelLabel.textProperty().bind(
+	            Bindings.format(
+	                "%.0f",
+	                startLevelSlider.valueProperty()
+	            )
+	        );
 	}
 
+	/**
+	 * Handles keyboard events - call from Main gui class
+	 */
 	protected void addKeyEventHandler() {
-		
-		// HACK: JavaFX Scene Builder claims the SPACE bar for pressing the highlighted Button
-		// consuming the SPACE bar in the normal handler below does not work - it still presses a button first 
-		// in this case it is the Stop button which stops the game :(
-		_primaryStage.addEventFilter(KeyEvent.KEY_PRESSED, k -> {
-	        if ( k.getCode() == KeyCode.SPACE){
-	        	if (_tetrisGame != null) // only when game is available
-	        		_tetrisGame.controlQueueAdd(TetrisControlEvents.HARDDOWN);
-	            k.consume();
-	        }
-	    });
-
 		_primaryStage.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				//System.out.println("Key Pressed: "+event.getCode().toString());
 				if (_tetrisGame == null) return; // only when game is available
-				
+
 				switch (event.getCode()) {
 				case LEFT:	_tetrisGame.controlQueueAdd(TetrisControlEvents.LEFT); break;
 				case RIGHT:	_tetrisGame.controlQueueAdd(TetrisControlEvents.RIGHT); break;
@@ -122,7 +139,7 @@ public class TetrisGUI_Controller implements Observer {
 	 * Creates a PlayfieldPane and adds it to the root panel  
 	 */
 	private void addPlayfieldPane() {
-		_playfieldPane = new PlayfieldPane();
+		_playfieldPane = new PlayfieldPane(this);
 		rootPanel.setCenter(_playfieldPane);
 	}
 
@@ -131,9 +148,27 @@ public class TetrisGUI_Controller implements Observer {
 	 */
 	private void addNextQueuePane() {
 		_nextQueuePane = new NextQueuePane();
-		rootPanel.setRight(_nextQueuePane);
+		AnchorPane.setTopAnchor(_nextQueuePane, 0.0);
+		AnchorPane.setBottomAnchor(_nextQueuePane, 0.0);
+		AnchorPane.setLeftAnchor(_nextQueuePane, 0.0);
+		AnchorPane.setRightAnchor(_nextQueuePane, 0.0);
+		nextQueueBox.getChildren().add(_nextQueuePane);
+		
 	}
 
+	/*
+	 * Creates a NextQueuePane and adds it to the root panel  
+	 */
+	private void addHoldPane() {
+		_holdPane = new HoldPane();
+		AnchorPane.setTopAnchor(_holdPane, 0.0);
+		AnchorPane.setBottomAnchor(_holdPane, 0.0);
+		AnchorPane.setLeftAnchor(_holdPane, 0.0);
+		AnchorPane.setRightAnchor(_holdPane, 0.0);
+		holdBox.getChildren().add(_holdPane);
+		
+	}
+	
 	/*
 	 * Adds an updater to the mem label in the status bar
 	 */
@@ -318,7 +353,8 @@ public class TetrisGUI_Controller implements Observer {
 
 	@FXML
 	void newGame_Action(ActionEvent event) {
-		_tetrisGame = new TetrisGame();
+		_playfieldPane.requestFocus();
+		_tetrisGame = new TetrisGame((int)startLevelSlider.getValue());
 		_tetrisGame.addObserver(this);
 		_tetrisGame.startTetrisGame();
 	}
@@ -429,6 +465,18 @@ public class TetrisGUI_Controller implements Observer {
 	@FXML // fx:id="resumeGame_button"
 	private Button resumeGame_button; // Value injected by FXMLLoader
 
+    @FXML // fx:id="startLevelSlider"
+    private Slider startLevelSlider; // Value injected by FXMLLoader
+	
+    @FXML // fx:id="nextQueueBox"
+    private Pane nextQueueBox; // Value injected by FXMLLoader
+    
+    @FXML // fx:id="howtoText"
+    private Pane howtoText; // Value injected by FXMLLoader
+    
+    @FXML // fx:id="peekOption"
+    protected CheckMenuItem peekOption; // Value injected by FXMLLoader
+    
 	/*
 	 * FXML checks
 	 */
@@ -458,6 +506,10 @@ public class TetrisGUI_Controller implements Observer {
 		assert rootPanel != null : "fx:id=\"rootPanel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert tetrisCountLabel != null : "fx:id=\"tetrisCountLabel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert resumeGame_button != null : "fx:id=\"resumeGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert startLevelSlider != null : "fx:id=\"startLevelSlider\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert nextQueueBox != null : "fx:id=\"nextQueueBox\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert howtoText != null : "fx:id=\"howtoText\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert peekOption != null : "fx:id=\"peekOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }

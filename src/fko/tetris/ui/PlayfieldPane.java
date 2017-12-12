@@ -47,6 +47,8 @@ public class PlayfieldPane extends Pane {
 	private static final Color FRAME_COLOR = Color.LIGHTGRAY;
 
 	private Playfield _playField; // the playField to draw
+	
+	private TetrisGUI_Controller _controller;
 
 	// helper for an efficient draw()
 	private Line[] _hlines = new Line[Playfield.SKYLINE];
@@ -56,10 +58,13 @@ public class PlayfieldPane extends Pane {
 
 	/**
 	 * Initialize the playfieldPanel
+	 * @param tetrisGUI_Controller 
 	 */
-	public PlayfieldPane() {
+	public PlayfieldPane(TetrisGUI_Controller tetrisGUI_Controller) {
 		super();
 
+		this._controller = tetrisGUI_Controller;
+		
 		// set up the pane
 		this.setBackground(new Background(new BackgroundFill(BACKGROUND_COLOR,null,null)));
 		// set size
@@ -181,17 +186,27 @@ public class PlayfieldPane extends Pane {
 		final int[][] tMatrix = t.getMatrix(t.getCurrentOrientation());
 		final Coordinates c = playField.getCurrentPosition();
 
-		// loop through the Tetrimino matrix
+		// set the max height we want to see Tetriminos
+		int visibleHeight = Playfield.SKYLINE+1;
+		if (!_controller.peekOption.isSelected()) {
+			visibleHeight = Playfield.SKYLINE;
+		} 
+		
 		cr = 0; // counter for the prepared rectangle objects
+		
+		// loop through the Tetrimino matrix
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
 				if (tMatrix[yi][xi] == 1) { // only draw when 1
 
-					int backgroundX = c.x + xi;
-					int BackgroundY = c.y - yi;
+					int bx = c.x + xi;
+					int by = c.y - yi;
+					
+					// if not visible skip drawing
+					if (by > visibleHeight) break;
 
-					double offset_h = HEIGHT -(h*BackgroundY); // height is measured top down were as our playField is buttom up 
-					double offset_w = w * backgroundX;
+					double offset_h = HEIGHT -(h*by); // height is measured top down were as our playField is buttom up 
+					double offset_w = w * bx;
 					Rectangle block = _tblock[cr++];
 					block.setFill(t.getColor().toColor());
 					block.setX(offset_w+1); // +1 to not overdraw the lines
