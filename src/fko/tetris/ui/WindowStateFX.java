@@ -56,10 +56,10 @@ public class WindowStateFX extends java.util.Properties {
             this.load(in);
         } catch (FileNotFoundException e) {
             System.err.println("Properties file " + propertiesFile + " not found!");
-            e.printStackTrace();
+            //e.printStackTrace();
         } catch (IOException e) {
             System.err.println("Properties file " + propertiesFile + " could not be loaded!");
-            e.printStackTrace();
+            //e.printStackTrace();
         } finally {
             if (in!=null) {
                 try {
