@@ -27,12 +27,14 @@ import fko.tetris.Playfield;
 import fko.tetris.TetrisColor;
 import fko.tetris.tetriminos.Tetrimino;
 import fko.tetris.util.Coordinates;
+import javafx.scene.effect.Bloom;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeType;
 
 /**
  * 
@@ -47,7 +49,7 @@ public class PlayfieldPane extends Pane {
 	private static final Color FRAME_COLOR = Color.LIGHTGRAY;
 
 	private Playfield _playField; // handle to the playField to draw
-	
+
 	private TetrisGUI_Controller _controller; // handle to the UI controller to access options
 
 	// helper for an efficient draw()
@@ -55,6 +57,7 @@ public class PlayfieldPane extends Pane {
 	private Line[] _vlines = new Line[Playfield.PLAYFIELD_WIDTH];
 	private Rectangle[] _block = new Rectangle[(Playfield.BUFFERZONE+Playfield.SKYLINE)*Playfield.PLAYFIELD_WIDTH];
 	private Rectangle[] _tblock = new Rectangle[16];
+	private Rectangle[] _gblock = new Rectangle[16];
 
 	/**
 	 * Initialize the playfieldPanel
@@ -64,7 +67,7 @@ public class PlayfieldPane extends Pane {
 		super();
 
 		this._controller = tetrisGUI_Controller;
-		
+
 		// set up the pane
 		this.setBackground(new Background(new BackgroundFill(BACKGROUND_COLOR,null,null)));
 		// set size
@@ -86,6 +89,7 @@ public class PlayfieldPane extends Pane {
 		}
 		for (int i=0; i<16; i++) {
 			_tblock[i] = new Rectangle();
+			_gblock[i] = new Rectangle();
 		}
 
 		// draw initial board
@@ -155,9 +159,11 @@ public class PlayfieldPane extends Pane {
 		final double h = (HEIGHT/Playfield.SKYLINE);
 		final double w = (WIDTH/Playfield.PLAYFIELD_WIDTH);
 
+		int cr = 0; // counter for the prepared drawing objects
+		
 		// draw background cells
 		// iterate through all cells a initialize with zero
-		int cr = 0; // counter for the prepared rectangle objects
+
 		for (int yi = 0; yi < Playfield.SKYLINE+1; yi++) { // we only draw the visible part therefore only to SKYLINE
 			for (int xi = 0; xi < Playfield.PLAYFIELD_WIDTH; xi++) {
 				final TetrisColor bc = _playField.getBackgroundColor(xi,yi);
@@ -180,54 +186,92 @@ public class PlayfieldPane extends Pane {
 		// draw current Tetrimino
 		// will draw over background so collision check needs to be done in model
 		final Tetrimino t = playField.getCurrentTetrimino();
-		if (t==null)
-			return; // if now game is running there are no Tetriminos
-
-		final int[][] tMatrix = t.getMatrix(t.getCurrentOrientation());
-		final Coordinates c = t.getCurrentPosition();
-
-		// set the max height we want to see Tetriminos
-		int visibleHeight = Playfield.SKYLINE+1;
-		if (!_controller.peekOption.isSelected()) {
-			visibleHeight = Playfield.SKYLINE;
-		} 
 		
-		cr = 0; // counter for the prepared rectangle objects
-		
-		// loop through the Tetrimino matrix
-		for (int yi = 0; yi < tMatrix.length; yi++) {
-			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
-				if (tMatrix[yi][xi] == 1) { // only draw when 1
+		if (t!=null) { // if no game is running there are no Tetriminos
+			
+			// set the max height we want to see Tetriminos
+			int visibleHeight = Playfield.SKYLINE+1;
+			if (!_controller.peekOption.isSelected()) {
+				visibleHeight = Playfield.SKYLINE;
+			} 
 
-					int bx = c.x + xi;
-					int by = c.y - yi;
-					
-					// if not visible skip drawing
-					if (by > visibleHeight) break;
+			Coordinates c;
+			cr = 0;  
 
-					double offset_h = HEIGHT -(h*by); // height is measured top down were as our playField is buttom up 
-					double offset_w = w * bx;
-					Rectangle block = _tblock[cr++];
-					block.setFill(t.getColor().toColor());
-					block.setX(offset_w+1); // +1 to not overdraw the lines
-					block.setY(offset_h+1);
-					block.setWidth(w-1); // -1 to not overdraw the lines
-					block.setHeight(h-1);
-					this.getChildren().add(block);
+			// draw ghost tetrimino
+			if (_controller.ghostPieceOption.isSelected()) {
+				// copy the real tetrimino as we will change the position of the ghost
+				final Tetrimino ghost = t.clone(); 
+
+				// drop the ghost as far as possible
+				while (!_playField.moveDown(ghost)) {}
+
+				final int[][] gMatrix = ghost.getMatrix(ghost.getCurrentOrientation());
+
+				c = ghost.getCurrentPosition(); // Convenience 
+
+				cr = 0; // counter for the p
+
+				// loop through the Tetrimino matrix
+				for (int yi = 0; yi < gMatrix.length; yi++) {
+					for (int xi = 0; xi < gMatrix[yi].length; xi++) {
+						if (gMatrix[yi][xi] == 1) { // only draw when 1
+							int bx = c.x + xi;
+							int by = c.y - yi;
+							// if not visible skip drawing
+							if (by > visibleHeight) break;
+							double offset_h = HEIGHT -(h*by); // height is measured top down were as our playField is buttom up 
+							double offset_w = w * bx;
+							Rectangle block = _gblock[cr++];
+							block.setFill(BACKGROUND_COLOR);
+							block.setStroke(ghost.getColor().toColor());
+							block.setStrokeType(StrokeType.OUTSIDE);
+							block.setStrokeWidth(2.0);
+							Bloom bloom = new Bloom();
+							bloom.setThreshold(0.1);
+							block.setEffect(bloom);
+							//block.setOpacity(0.5);
+							block.setArcHeight(5.0);
+							block.setArcWidth(5.0);
+							block.setX(offset_w+1); // +1 to not overdraw the lines
+							block.setY(offset_h+1);
+							block.setWidth(w-1); // -1 to not overdraw the lines
+							block.setHeight(h-1);
+							this.getChildren().add(block);
+						}
+					}
 				}
 			}
-		}
-		
-		if (_controller.ghostPieceOption.isSelected()) {
-			Tetrimino ghost = t.clone();
+
+			cr = 0; 
 			
-			// drop the ghost as far as possible
+			final int[][] tMatrix = t.getMatrix(t.getCurrentOrientation());
+			c = t.getCurrentPosition();
 			
-			
-		}
+			// draw the real Tetrimino
+			for (int yi = 0; yi < tMatrix.length; yi++) {
+				for (int xi = 0; xi < tMatrix[yi].length; xi++) {
+					if (tMatrix[yi][xi] == 1) { // only draw when 1
+						int bx = c.x + xi;
+						int by = c.y - yi;
+						// if not visible skip drawing
+						if (by > visibleHeight) break;
+						double offset_h = HEIGHT -(h*by); // height is measured top down were as our playField is buttom up 
+						double offset_w = w * bx;
+						Rectangle block = _tblock[cr++];
+						block.setFill(t.getColor().toColor());
+						block.setArcHeight(5.0);
+						block.setArcWidth(5.0);
+						block.setX(offset_w+1); // +1 to not overdraw the lines
+						block.setY(offset_h+1);
+						block.setWidth(w-1); // -1 to not overdraw the lines
+						block.setHeight(h-1);
+						this.getChildren().add(block);
+					}
+				}
+			}
 
 
+		}
 	}
-
-
 }

@@ -127,6 +127,8 @@ public class NextQueuePane extends Pane {
 				double relY = y*h;
 				Rectangle block = new Rectangle();
 				block.setFill(c);
+				block.setArcHeight(5.0);
+				block.setArcWidth(5.0);
 				block.setX(start_x+relX);
 				block.setY(start_y+relY);
 				block.setWidth(h); 
