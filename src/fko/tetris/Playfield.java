@@ -172,20 +172,16 @@ public class Playfield {
 	 */
 	public boolean canMoveDown(Tetrimino tetrimino) {
 		int[][] tMatrix = tetrimino.getMatrix(tetrimino.getCurrentOrientation());
-		//System.out.println(_currentTetrimino.getShape().toString());
 		// loop through the Tetrimino matrix and check for surface below 
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
-				// System.out.print(tMatrix[yi][xi]+" ");
 				// check for collision in cell below => -2 instead of -1
 				if (tMatrix[yi][xi] == 1 
 						&& (tetrimino.getCurrentPosition().y-yi-2 < 0 
 						|| _backgroundMatrix[tetrimino.getCurrentPosition().x+xi][tetrimino.getCurrentPosition().y-yi-2] != TetrisColor.EMPTY)) {
-					//System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
 					return false; // collision
 				}
 			}
-			//System.out.println();
 		}
 		return true; // no collisions so we can move down
 	}
@@ -224,33 +220,27 @@ public class Playfield {
 	 * @return true if move is possible, false if landed on surface
 	 */
 	public boolean canMoveLeft(int direction, Tetrimino tetrimino) {
-		int[][] tMatrix = _currentTetrimino.getMatrix(_currentTetrimino.getCurrentOrientation());
-//		System.out.println(_currentTetrimino.getShape().toString());
+		int[][] tMatrix = tetrimino.getMatrix(tetrimino.getCurrentOrientation());
 		// loop through the Tetrimino matrix and check for surface on the left
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
-//				System.out.print(tMatrix[yi][xi]+" ");
 				// check for collision in cell left 
 				if (tMatrix[yi][xi] == 1) { // check for all filled parts of the matrix
 					if (direction < 0) { // left wall
 						if (tetrimino.getCurrentPosition().x+xi  <= 0) {
-//							System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi+direction)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
 							return false;
 						}
 					} else if (direction > 0) { // right wall
 						if (tetrimino.getCurrentPosition().x+xi  >= PLAYFIELD_WIDTH-1) {
-//							System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi+direction)+":"+(_currentPosition.y-yi-1)+" "+_currentTetrimino.getShape());
 							return false;
 						}
 					}
 					// other piece is blocking the way
 					if (_backgroundMatrix[tetrimino.getCurrentPosition().x+xi+direction][tetrimino.getCurrentPosition().y-yi-1] != TetrisColor.EMPTY) {
-//						System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
 						return false;
 					}
 				}
 			}
-//			System.out.println();
 		}
 		return true; // no collisions so we can move down
 	}
@@ -343,29 +333,25 @@ public class Playfield {
 	 */
 	public void merge() {
 		merge(_currentTetrimino);
+		_currentTetrimino = null; // erase the current tetrimino
 	}
 
 	/**
 	 * Merges a Tetrimino in play into the background
 	 */
 	public void merge(Tetrimino tetrimino) {
-		int[][] tMatrix = tetrimino.getMatrix(_currentTetrimino.getCurrentOrientation());
-		//System.out.println(_currentTetrimino.getShape().toString());
+		int[][] tMatrix = tetrimino.getMatrix(tetrimino.getCurrentOrientation());
 		// loop through the Tetrimino matrix and check for surface on the left
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
-				//System.out.print(tMatrix[yi][xi]+" ");
 				// check for collision in cell left 
 				if (tMatrix[yi][xi] == 1) { // check for all filled parts of the matrix
 					assert _backgroundMatrix[tetrimino.getCurrentPosition().x+xi][tetrimino.getCurrentPosition().y-yi-1] == TetrisColor.EMPTY;
 					// write to background
-					_backgroundMatrix[tetrimino.getCurrentPosition().x+xi][tetrimino.getCurrentPosition().y-yi-1] = _currentTetrimino.getColor(); 
-					//System.out.println("CANNOT MOVE TO: "+(_currentPosition.x+xi)+":"+(_currentPosition.y-yi-2)+" "+_currentTetrimino.getShape());
+					_backgroundMatrix[tetrimino.getCurrentPosition().x+xi][tetrimino.getCurrentPosition().y-yi-1] = tetrimino.getColor(); 
 				}
 			}
 		}
-		_currentTetrimino = null; // erase the current tetrimino
-		//			System.out.println();
 	}
 
 	/**
