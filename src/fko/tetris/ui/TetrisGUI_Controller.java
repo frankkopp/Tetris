@@ -477,6 +477,9 @@ public class TetrisGUI_Controller implements Observer {
     @FXML // fx:id="peekOption"
     protected CheckMenuItem peekOption; // Value injected by FXMLLoader
     
+    @FXML // fx:id="ghostPieceOption"
+    private CheckMenuItem ghostPieceOption; // Value injected by FXMLLoader
+    
 	/*
 	 * FXML checks
 	 */
@@ -510,6 +513,7 @@ public class TetrisGUI_Controller implements Observer {
 		assert nextQueueBox != null : "fx:id=\"nextQueueBox\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert howtoText != null : "fx:id=\"howtoText\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert peekOption != null : "fx:id=\"peekOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert ghostPieceOption != null : "fx:id=\"ghostPieceOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }
