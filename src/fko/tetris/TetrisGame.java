@@ -37,6 +37,12 @@ import fko.tetris.tetriminos.Tetrimino;
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
 
+	/**
+	 * Sets how many Tetriminos are in the next queue . Not necessarily the same as how 
+	 * many are shown in the ui.
+	 */
+	public static final int NEXTQUEUE_SIZE = 7;
+	
 	// Tetris state
 	private Playfield 	_playfield;		// matrix with all cells
 	private Bag			_bag;			// bag with all 7 Tetriminos - randomly shuffled to the next queue
@@ -72,7 +78,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	public TetrisGame() {
 		_playfield 		= new Playfield();
 		_bag 			= new Bag();
-		_nextQueue		= new NextQueue(_bag, 3);
+		_nextQueue		= new NextQueue(_bag, NEXTQUEUE_SIZE);
 		_holdQueue 		= null;
 		_startLevel 	= 1;
 		_currentLevel 	= 1;
@@ -87,7 +93,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	public TetrisGame(int startLevel) {
 		_playfield 		= new Playfield();
 		_bag 			= new Bag();
-		_nextQueue		= new NextQueue(_bag, 3);
+		_nextQueue		= new NextQueue(_bag, NEXTQUEUE_SIZE);
 		_holdQueue 		= null;
 		_startLevel 	= startLevel;
 		_currentLevel 	= startLevel;
