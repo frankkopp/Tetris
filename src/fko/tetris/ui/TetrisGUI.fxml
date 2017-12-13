@@ -170,10 +170,6 @@
                      <font>
                         <Font name="Comic Sans MS Bold" size="14.0" />
                      </font></Label>
-                  <Label text="Time in Play" GridPane.rowIndex="4">
-                     <font>
-                        <Font name="Comic Sans MS Bold" size="14.0" />
-                     </font></Label>
 
                   <Label fx:id="scoreLabel" text="0" GridPane.columnIndex="1">
                      <font>
@@ -188,10 +184,6 @@
                         <Font name="Comic Sans MS Bold" size="14.0" />
                      </font></Label>
                   <Label fx:id="tetrisCountLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                     <font>
-                        <Font name="Comic Sans MS Bold" size="14.0" />
-                     </font></Label>
-                  <Label fx:id="timeInPlayLabel" text="00:00:00" GridPane.columnIndex="1" GridPane.rowIndex="4">
                      <font>
                         <Font name="Comic Sans MS Bold" size="14.0" />
                      </font></Label>
