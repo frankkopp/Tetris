@@ -1,5 +1,7 @@
 # Tetris® (© 1985~2017 Tetris Holding)
-Java based Tetris implementation as a learning project
+(© 1985~2017 Tetris Holding)
+
+## Java 8 and JavaFX based Tetris implementation as a learning project
 
 Tetris Specification: http://tetris.wikia.com/wiki/Tetris_Guideline
 
