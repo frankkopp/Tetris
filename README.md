@@ -1,4 +1,4 @@
-# Tetris® (© 1985~2017 Tetris Holding)
+# Tetris® 
 (© 1985~2017 Tetris Holding)
 
 ## Java 8 and JavaFX based Tetris implementation as a learning project
