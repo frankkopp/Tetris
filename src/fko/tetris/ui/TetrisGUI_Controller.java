@@ -227,11 +227,13 @@ public class TetrisGUI_Controller implements Observer {
 		if (_tetrisGame != null && _tetrisGame.isRunning()) { // game is running
 			_playfieldPane.setPlayField(_tetrisGame.getPlayfield());
 			_nextQueuePane.setNextQueue(_tetrisGame.getNextQueue());
+			_holdPane.setHoldTetrimino(_tetrisGame.getHoldTetrimino());
 			PlatformUtil.platformRunAndWait(() -> setUItoGameRunning()); // setup ui
 			PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		} else { // no game 
 			_playfieldPane.setPlayField(null);
 			_nextQueuePane.setNextQueue(null);
+			_holdPane.setHoldTetrimino(null);
 			PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning()); // setup ui 
 			PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		}
@@ -243,6 +245,7 @@ public class TetrisGUI_Controller implements Observer {
 	private void draw() {
 		_playfieldPane.draw();
 		_nextQueuePane.draw();
+		_holdPane.draw();
 		_updateInfoDraw();
 	}
 

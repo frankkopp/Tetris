@@ -38,7 +38,7 @@ import fko.tetris.tetriminos.Tetrimino;
 public class TetrisGame extends Observable implements Runnable, Observer {
 
 	/**
-	 * Sets how many Tetriminos are in the next queue . Not necessarily the same as how 
+	 * Sets how many Tetriminos are in the next queue. Not necessarily the same as how 
 	 * many are shown in the ui.
 	 */
 	public static final int NEXTQUEUE_SIZE = 7;
@@ -68,6 +68,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	
 	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<>();
 		
+	private boolean _holdAllowed = true; // using hold is only allowed once between LOCK phases
+	
 	private int _lastClearedLinesCount = 0;
 	private int _lastHardDropLineCount = 0;
 	private int _lastSoftDropLineCount = 0;
@@ -136,7 +138,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	@Override
 	public void run() {
 		_gameStopped = false;
-
+		
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread started");
@@ -291,8 +293,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private void fallingPhase() {
 		
 		// Start falling timer
-		_fallingTimer.setTimer(calculateFallingTime());
 		_fallingTimer.addObserver(this);
+		_fallingTimer.setTimer(calculateFallingTime());
 		_fallingTimer.start();
 		
 		// clear the control queue
@@ -337,12 +339,26 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 					_lastHardDropLineCount++;
 					// -- tell the view that model has changed
 					setChanged();
-					notifyObservers("During FALLING after HARDWON");
+					notifyObservers("During FALLING after HARDOWN");
 				}
 				breakFlag = true;
 				break;
 			case HOLD:
-				// ignore for now
+				if (_holdAllowed) {
+					Tetrimino toField = _holdQueue == null ? _nextQueue.getNext() : _holdQueue;
+					try { // to reset start coordinates we use a new object - avoids a long switch statement :)
+						_holdQueue = _playfield.getCurrentTetrimino().getClass().newInstance();
+					} catch (InstantiationException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					} 
+					_playfield.spawn(toField);
+					// -- tell the view that model has changed
+					setChanged();
+					notifyObservers("During FALLING after HOLD");
+				}
+				_holdAllowed = false; 
 				break;
 			case NONE:
 				break;
@@ -427,7 +443,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				breakFlag = true;
 				break;
 			case HOLD:
-				// ignore for now
+				// ignore in LOCK
 				break;
 			case NONE:
 				break;
@@ -449,6 +465,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 		// stop the timer just to make sure
 		_lockTimer.stop();
+		
+		// allow new holds
+		_holdAllowed = true;
 		
 		// merge Tetrimino into background
 		if (_phaseState == TetrisPhase.LOCK) {// only merge if we are still in phase LOCK
@@ -626,6 +645,13 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	public NextQueue getNextQueue() {
 		return _nextQueue;
+	}
+
+	/**
+	 * @return the Tetrimino in hold
+	 */
+	public Tetrimino getHoldTetrimino() {
+		return _holdQueue;
 	}
 
 	/**

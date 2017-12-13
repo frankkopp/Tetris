@@ -130,7 +130,7 @@
    <left>
       <VBox minWidth="200.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: c0c0c0;" BorderPane.alignment="CENTER">
          <children>
-            <AnchorPane fx:id="holdBox" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: cccccc;">
+            <AnchorPane fx:id="holdBox" prefHeight="126.0" prefWidth="180.0" style="-fx-background-color: cccccc;">
                <effect>
                   <InnerShadow />
                </effect>

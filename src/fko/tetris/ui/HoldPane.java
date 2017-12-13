@@ -34,13 +34,12 @@ import javafx.scene.shape.Rectangle;
  * 
  */
 public class HoldPane extends Pane {
-	@SuppressWarnings("unused")
-	private static final double HEIGHT = 150;
-	private static final double WIDTH = 150;
-
 	private static final Color BACKGROUND_COLOR = Color.DARKGRAY;
 	
 	private Tetrimino _holdTetrimino; // handle to Tetrimino object
+
+	private double _offSetY;
+	private double _minoHeight;
 	
 	/**
 	 * Initialize the nextQueuedPanel
@@ -50,15 +49,8 @@ public class HoldPane extends Pane {
 		
 		// set up the pane
         this.setBackground(new Background(new BackgroundFill(BACKGROUND_COLOR,null,null)));
-        // set size
-        /*
-        this.setMinWidth(WIDTH);
-        this.setMinHeight(HEIGHT);
-        this.setMaxWidth(WIDTH);
-        this.setMaxHeight(HEIGHT);
-        */
-        
-        // draw initial queue
+
+        // draw initial hold
         draw();
 	}
 
@@ -88,31 +80,54 @@ public class HoldPane extends Pane {
 	 */
 	private void draw(Tetrimino next) {
 
+		// clear the node to redraw everything
+		this.getChildren().clear();
+		
+		_minoHeight = (this.getWidth()/6); // height and width of cells based on pane width
+		_offSetY = _minoHeight; // start with one mino height below the top
+		
 		int[][] tMatrix = next.getMatrix(Tetrimino.Facing.NORTH); // get north facing matrix
-		
+
 		Color color = next.getColor().toColor();
-		
-		double h = (WIDTH/6); // height and width of cells based on pane width
-		double start_x = h;	// start with a offset of one cell width
-		double start_y = h + 5*h; 	// start with an offset of one cell height
-											// position draws the n-th cell lower
+
+		// determine were to draw horizontally
+		double start_x;
+		switch (next.toString()) {
+		case "O": {
+			start_x = this.getWidth()/2 - _minoHeight; // 1 mino left of middle
+			break;
+		}
+		case "I": {
+			start_x = this.getWidth()/2 - (2*_minoHeight); // 2 minos left of middle
+			break;
+		}
+		default: {
+			start_x = this.getWidth()/2 - (_minoHeight+(_minoHeight/2)); // 1.5 minos left of middle
+			break;
+		}
+		}
 		
 		for(int y=0; y<tMatrix.length;y++) {
+			boolean hadMino = false;
 			for(int x=0; x<tMatrix[y].length;x++) {
-				// simply draw all cells but fill with background color when cell not part of Terinmino
-				Color c = tMatrix[y][x] == 1 ? color : BACKGROUND_COLOR;
-				double relX = x*h;
-				double relY = y*h;
-				Rectangle block = new Rectangle();
-				block.setFill(c);
-				block.setX(start_x+relX);
-				block.setY(start_y+relY);
-				block.setWidth(h); 
-				block.setHeight(h);
-				this.getChildren().add(block);
+				if (tMatrix[y][x] == 1 && _offSetY < this.getHeight() - _minoHeight) {
+					hadMino=true;
+					// at least one mino in this row
+					double relX = x*_minoHeight;
+					Rectangle block = new Rectangle();
+					block.setFill(color);
+					block.setArcHeight(5.0);
+					block.setArcWidth(5.0);
+					block.setX(start_x+relX);
+					block.setY(_offSetY);
+					block.setWidth(_minoHeight); 
+					block.setHeight(_minoHeight);
+					this.getChildren().add(block);
+				}
+			}
+			if (hadMino) {
+				_offSetY += _minoHeight; // remember position for next Tetrimino
 			}
 		}
 	}
-	
-	
 }
