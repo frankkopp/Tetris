@@ -119,9 +119,10 @@ public class TetrisTimer extends Observable {
 	}
 	
 	/**
-	 * Stops the timer, resets the time to initial time and restarts the timer
+	 * Starts the timer with its initial time delay.</br>
+	 * Stops the timer if it is currently running.
 	 */
-	public void stopResetRestart() {
+	public void restart() {
 		stop();
 		reset();
 		start();

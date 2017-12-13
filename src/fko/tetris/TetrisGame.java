@@ -376,7 +376,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 		// Start lock timer - lock time is always 500ms
 		_lockTimer.addObserver(this);
-		_lockTimer.stopResetRestart();
+		_lockTimer.restart();
 		
 		// clear the control queue
 		_controlQueue.clear();
@@ -400,20 +400,20 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			switch(event) {
 			case LEFT:	
 				if (!_playfield.moveSideway(-1)) { // if moved reset timer
-					_lockTimer.stopResetRestart();
+					_lockTimer.restart();
 				}
 				break;
 			case RIGHT:
 				if (!_playfield.moveSideway(1)) { // if moved reset timer
-					_lockTimer.stopResetRestart();				}
+					_lockTimer.restart();				}
 				break;
 			case RTURN:
 				if (!_playfield.turnMove(1)) { // if moved reset timer
-					_lockTimer.stopResetRestart();				}
+					_lockTimer.restart();				}
 				break;
 			case LTURN:
 				if (!_playfield.turnMove(-1)) { // if moved reset timer
-					_lockTimer.stopResetRestart();				}
+					_lockTimer.restart();				}
 				break;
 			case SOFTDOWN:		
 				// ignore in LOCK
