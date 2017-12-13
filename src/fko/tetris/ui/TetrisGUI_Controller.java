@@ -28,14 +28,19 @@ SOFTWARE.
 package fko.tetris.ui;
 
 import java.net.URL;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import fko.tetris.HighScoreData;
 import fko.tetris.Tetris;
 import fko.tetris.TetrisControlEvents;
 import fko.tetris.TetrisGame;
+import fko.tetris.TetrisSettings;
 import fko.tetris.util.HelperTools;
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
@@ -52,11 +57,17 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 /**
@@ -72,6 +83,8 @@ import javafx.stage.Stage;
 public class TetrisGUI_Controller implements Observer {
 
 	private static final WindowStateFX windowState = new WindowStateFX(); // to save and restore the last position of our window
+	private static final TetrisSettings settings = TetrisSettings.getInstance();
+	
 	private Stage _primaryStage; // handle to primary stage
 	private TetrisGame _tetrisGame; // holds a running tetrisGame
 	private PlayfieldPane _playfieldPane; // handle to PlayfieldPane
@@ -93,7 +106,8 @@ public class TetrisGUI_Controller implements Observer {
 		addNextQueuePane(); // add the next queue pane
 		addHoldPane(); // add the hold Tetrimino pane
 		addHowToText();
-		addHighScoreText();
+		updateHighScoreText();
+		updateStatus();
 		
 		// change the startLevelLabel when the slider changes
 		startLevelLabel.textProperty().bind(
@@ -102,6 +116,8 @@ public class TetrisGUI_Controller implements Observer {
 	                startLevelSlider.valueProperty()
 	            )
 	        );
+		
+		readSettings();
 	}
 
 	/**
@@ -167,16 +183,47 @@ public class TetrisGUI_Controller implements Observer {
 		
 	}
 	
-	/**
-	 * 
+	/*
+	 *	print the highscore list 
 	 */
-	private void addHighScoreText() {
+	private void updateHighScoreText() {
+
+		highScorePane.getChildren().clear();
+		highScorePane.getHeight();
+				
+		List<Text> textlines = new ArrayList<>(15);
+		
+		final Font font = Font.font(
+				"Lucida Console", 
+				FontWeight.NORMAL, 
+				FontPosture.REGULAR , 
+				10);
+		
 		// highscore Text
-		Text hishScoreText = new Text(String.format(
-				  "HIGHSCORE%n"
-				+ "========="));
-		hishScoreText.setStyle("-fx-font-family: Comic Sans MS Bold; -fx-fill: black; -fx-font-size: 10pt");
-		highScorePane.getChildren().add(hishScoreText);
+		Text highScoreText = new Text(String.format(
+				  "HIGHSCORE %n"
+				+ "===========%n"));
+		highScoreText.setFont(font);
+		highScoreText.setFill(Color.BLACK);
+		
+		textlines.add(highScoreText);
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
+
+		List<HighScoreData.HighScoreEntry> list = HighScoreData.getInstance().getList();
+		list.stream().limit(15).forEach((e) -> {
+			final String txt = String.format("%-12.12s: %,6d  %8s%n", e.name, e.score, e.date.format(formatter));
+			final Text tmp = new Text(txt);
+			tmp.setFont(font);
+			tmp.setFill(Color.BLACK);
+			textlines.add(tmp);
+		});
+		
+		TextFlow flow = new TextFlow();	
+		flow.getChildren().addAll(textlines);
+		
+		highScorePane.getChildren().add(flow);
+
 	}
 
 	/**
@@ -270,13 +317,38 @@ public class TetrisGUI_Controller implements Observer {
 		_playfieldPane.draw();
 		_nextQueuePane.draw();
 		_holdPane.draw();
-		_updateInfoDraw();
+		updateInfoDraw();
+		updateHighScoreText();
+		updateStatus();
+	}
+
+	/**
+	 * 
+	 */
+	private void updateStatus() {
+		if (_tetrisGame==null) {
+			statusbar_status_text.setText("No Game started");
+			return;
+		}
+		switch (_tetrisGame.getPhaseState()) {
+		case NOTSTARTED: statusbar_status_text.setText("No game started!"); break;
+		case GENERATION: statusbar_status_text.setText("Spawn Tetrimino!"); break;
+		case FALLING: statusbar_status_text.setText("Tetrimino falling!"); break;
+		case LOCK: statusbar_status_text.setText("Tetrimino locking!"); break;
+		case PATTERN:
+		case ITERATE:
+		case ANIMATE:
+		case ELIMINATE:
+		case COMPLETION: statusbar_status_text.setText("Game running!"); break;
+		case GAMEOVER: statusbar_status_text.setText("Game Over!"); break;
+		}
+		
 	}
 
 	/*
 	 * Updates all info fields. E.g. score, etc. 
 	 */
-	private void _updateInfoDraw() {
+	private void updateInfoDraw() {
 		if (_tetrisGame == null) {
 			scoreLabel.setText("0");
 			levelLabel.setText("1");
@@ -334,6 +406,15 @@ public class TetrisGUI_Controller implements Observer {
 		statusbar_status_text.setText("No Game");
 	}
 
+	/**
+	 * Return the window state object.
+	 * @return the window state
+	 */
+	public static WindowStateFX getWindowState() {
+		return windowState;
+	}
+	
+
 	/*
 	 * Save the current sizes and coordinates of all windows to restore them
 	 * when starting up the next time.
@@ -346,15 +427,27 @@ public class TetrisGUI_Controller implements Observer {
 		windowState.save();
 	}
 
-	/**
-	 * Return the window state object.
-	 * @return the window state
+	/*
+	 * Save settings to file 
 	 */
-	public static WindowStateFX getWindowState() {
-		return windowState;
+	private void saveSettings() {
+		settings.setProperty("player_name", playerNameField.getText());
+		settings.setProperty("peek_spawn", peekOption.isSelected() ? "on" : "off");
+		settings.setProperty("ghost_piece", ghostPieceOption.isSelected() ? "on" : "off");
+		//settings.setProperty("start_level", Double.toString((int)startLevelSlider.getValue()));
+		settings.save();
 	}
 
-
+	/**
+	 * Reads the settings and sets the controls
+	 */
+	private void readSettings() {
+		// read in settings
+		playerNameField.setText(settings.getProperty("player_name", "Unknown Player"));
+		peekOption.setSelected(settings.getProperty("peek_spawn", "on").equals("on") ? true : false);
+		ghostPieceOption.setSelected(settings.getProperty("ghost_piece", "on").equals("on") ? true : false);
+		//startLevelSlider.setValue(Double.parseDouble(settings.getProperty("start_level", "1.0")));
+	}
 
 	// #######################################################################
 	// Actions
@@ -376,16 +469,19 @@ public class TetrisGUI_Controller implements Observer {
 		Optional<ButtonType> result = alert.showAndWait();
 		if (result.get() == ButtonType.OK){
 			saveWindowStates();
+			saveSettings();
 			Tetris.exitTetris();
 		} else {
 			// ... user chose CANCEL or closed the dialog
 		}
 	}
 
+
 	@FXML
 	void newGame_Action(ActionEvent event) {
 		_playfieldPane.requestFocus();
 		_tetrisGame = new TetrisGame((int)startLevelSlider.getValue());
+		_tetrisGame.setPlayerName(playerNameField.getText());
 		_tetrisGame.addObserver(this);
 		_tetrisGame.startTetrisGame();
 	}
@@ -404,12 +500,26 @@ public class TetrisGUI_Controller implements Observer {
 	void resumeGame_action(ActionEvent event) {
 		_tetrisGame.setPaused(false);
 	}
+	
+	@FXML
+	void restoreFocusAction(ActionEvent event) {
+		rootPanel.requestFocus();
+	}
 
 	@FXML
 	void aboutDialogOpen_action(ActionEvent event) {
 		AboutDialog aboutDialogStage = new AboutDialog();
 		aboutDialogStage.showAndWait();
 	}
+	
+    @FXML
+    void playerNameChangeAction(ActionEvent event) {
+    	System.out.println("New Name: "+ playerNameField.getText());
+    	if (_tetrisGame!= null) {
+    		_tetrisGame.setPlayerName(playerNameField.getText());
+    	}
+    	rootPanel.requestFocus();
+    }
 
 	// #######################################################
 	// FXML Setup
@@ -511,6 +621,9 @@ public class TetrisGUI_Controller implements Observer {
     @FXML // fx:id="highScorePane"
     private Pane highScorePane; // Value injected by FXMLLoader
     
+    @FXML // fx:id="playerNameField"
+    private TextField playerNameField; // Value injected by FXMLLoader
+    
 	/*
 	 * FXML checks
 	 */
@@ -545,6 +658,7 @@ public class TetrisGUI_Controller implements Observer {
 		assert peekOption != null : "fx:id=\"peekOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert ghostPieceOption != null : "fx:id=\"ghostPieceOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert highScorePane != null : "fx:id=\"highScorePane\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert playerNameField != null : "fx:id=\"playerNameField\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }

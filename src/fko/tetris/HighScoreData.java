@@ -96,12 +96,28 @@ public class HighScoreData {
 	
 	/**
 	 * Put a new entry into the highscore table
+	 * @param name, score, date
+	 */
+	public void addEntry(String name, int score, LocalDateTime date) {
+		this.addEntry(new HighScoreEntry(name, score, date));
+	}	
+
+	/**
+	 * Put a new entry into the highscore table
 	 * @param newEntry
 	 */
 	public void addEntry(HighScoreEntry newEntry) {
 		_list.add(newEntry);
 		sortList();
 	}
+	
+	/**
+	 * Put a new entry into the highscore table
+	 * @param name, score, date
+	 */
+	public void addEntryAndSave(String name, int score, LocalDateTime date) {
+		this.addEntryAndSave(new HighScoreEntry(name, score, date));
+	}	
 	
 	/**
 	 * Put a new entry into the highscore table and save to file

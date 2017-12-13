@@ -1,0 +1,6 @@
+# Window state file for Tetris by Frank Kopp
+#Wed Dec 13 22:33:11 CET 2017
+peek_spawn=off
+player_name=Frank
+start_level=4.0
+ghost_piece=on

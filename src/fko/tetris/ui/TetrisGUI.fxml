@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.image.*?>
@@ -74,6 +75,9 @@
                   <Label fx:id="startLevelLabel" text="1" />
 
                   <Slider fx:id="startLevelSlider" blockIncrement="1.0" focusTraversable="false" majorTickUnit="1.0" max="15.0" min="1.0" minorTickCount="0" showTickMarks="true" snapToTicks="true" value="1.0" />
+                  <Separator halignment="LEFT" minWidth="-Infinity" orientation="VERTICAL" prefHeight="25.0" prefWidth="60.0" visible="false" />
+                  <Label text="Player Name:" />
+                  <TextField fx:id="playerNameField" focusTraversable="false" onAction="#playerNameChangeAction" onInputMethodTextChanged="#playerNameChangeAction" text="Unknown Player" />
               </items>
             </ToolBar>
          </children>
@@ -125,7 +129,10 @@
       </AnchorPane>
    </bottom>
    <center>
-      <Pane fx:id="playfieldPane" maxHeight="600.0" maxWidth="300.0" minHeight="600.0" minWidth="300.0" prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER" />
+      <Pane fx:id="playfieldPane" maxHeight="600.0" maxWidth="300.0" minHeight="600.0" minWidth="300.0" prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+         <children>
+            <AmbientLight color="CHARTREUSE" layoutX="55.0" layoutY="104.0" lightOn="true" />
+         </children></Pane>
    </center>
    <left>
       <VBox minWidth="200.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: c0c0c0;" BorderPane.alignment="CENTER">

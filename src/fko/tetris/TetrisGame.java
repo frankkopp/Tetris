@@ -23,6 +23,7 @@ SOFTWARE.
  */
 package fko.tetris;
 
+import java.time.LocalDateTime;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -30,9 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import fko.tetris.tetriminos.Tetrimino;
 
 /**
- * This represents the state of a Tetris game. It holds all information necessary to represent a Tetris game at any 
  * point in time.
- * TODO: Highscore Ranking
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
 
@@ -58,7 +57,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private boolean 	_gameStopped = true; 	// flag to stop a running game
 	private boolean 	_isPaused;
 
-	private TetrisPhase _phaseState;	// the state/phase the engine is currently in
+	private TetrisPhase _phaseState = TetrisPhase.NOTSTARTED; // the state/phase the engine is currently in
 	// this determines what inputs and actions are allowed and 
 	// which states can follow
 
@@ -72,20 +71,15 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private int _lastClearedLinesCount = 0;
 	private int _lastHardDropLineCount = 0;
 	private int _lastSoftDropLineCount = 0;
+
+	private HighScoreData _highScoreData; // Contains a List of high scores
+	private String _playerName = "Unknown Player";
 	
 	/**
 	 * Creates a Tetris game with default values
 	 */
 	public TetrisGame() {
-		_playfield 		= new Playfield();
-		_bag 			= new Bag();
-		_nextQueue		= new NextQueue(_bag, NEXTQUEUE_SIZE);
-		_holdQueue 		= null;
-		_startLevel 	= 1;
-		_currentLevel 	= 1;
-		_score 			= 0;
-		_lineCount 		= 0;
-		_tetrisesCount 	= 0;
+		this(0);
 	}
 
 	/**
@@ -101,6 +95,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_score 			= 0;
 		_lineCount 		= (startLevel-1) * 10; // if started with a higher level assume appropriate line count 
 		_tetrisesCount 	= 0;
+		
+		_highScoreData = HighScoreData.getInstance();
 	}
 
 	/**
@@ -125,6 +121,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			throw new IllegalStateException("stopTetrisGame(): Game thread is not running");
 		}
 		// set a flag to stop the game
+		_phaseState = TetrisPhase.GAMEOVER;
 		_gameStopped = true;
 		_gameThread.interrupt();
 	}
@@ -248,7 +245,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				completionPhase();
 				break;
 			case GAMEOVER:
-				System.out.println("GAME OVER");
 				_gameStopped=true;
 				break;
 			}
@@ -261,6 +257,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			waitIfPaused();
 
 		} while (_gameStopped == false);
+
+		// save highscore 
+		_highScoreData.addEntryAndSave(_playerName, _score, LocalDateTime.now());
 
 		// -- tell the view that model has changed
 		setChanged();
@@ -523,14 +522,11 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * The Level Up condition is also checked to see if it is necessary to advance the game level.
 	 */
 	private void completionPhase() {
-		//System.out.println("Enter COMPLETION phase");
-		
 		// set level - FIXED GOAL SYSTEM
 		// TODO: implement VARIABLE GOAL SYSTEM
-		if (_lineCount > 0 && _lastClearedLinesCount > 0) {
+		if (_lineCount > 0) {
 			_currentLevel = _lineCount/10 +1;
 		}
-		
 		_phaseState = TetrisPhase.GENERATION;
 	}
 
@@ -680,6 +676,13 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	public int getScore() {
 		return _score;
 	}
+	
+	/**
+	 * @return the _nextQueue
+	 */
+	public HighScoreData getHighScoreData() {
+		return _highScoreData;
+	}
 
 	/**
 	 * @return the _lineCount
@@ -693,6 +696,21 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	public int getTetrisesCount() {
 		return _tetrisesCount;
+	}
+
+	/**
+	 * @return the _phaseState
+	 */
+	public TetrisPhase getPhaseState() {
+		return _phaseState;
+	}
+
+	/**
+	 * @param text
+	 */
+	public void setPlayerName(String text) {
+		_playerName = text;
+		
 	}
 
 }

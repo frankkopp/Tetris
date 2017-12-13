@@ -28,6 +28,7 @@ package fko.tetris;
  */
 public enum TetrisPhase {
 	
+	NOTSTARTED,
 	GENERATION,
 	FALLING,
 	LOCK,
