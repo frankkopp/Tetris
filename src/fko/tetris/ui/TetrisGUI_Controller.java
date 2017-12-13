@@ -83,26 +83,17 @@ public class TetrisGUI_Controller implements Observer {
 	 */
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
+		
 		_primaryStage = TetrisGUI.getPrimaryStage(); // set convenience reference to primary stage
+		
 		assertFXML(); // FXML auto checks
 
 		addMemLabelUpdater(); // add constantly updated memory info into status panel
 		addPlayfieldPane(); // add the playfield pane 
 		addNextQueuePane(); // add the next queue pane
 		addHoldPane(); // add the hold Tetrimino pane
-		
-		// howto Text
-		Text howToText = new Text(String.format(
-				  "L Arrow to move left.%n"
-				+ "R Arrow to move right.%n"
-				+ "DOWN Arrow to soft drop.%n"
-				+ "SPACE to hard drop.%n"
-				+ "A to turn left.%n"
-				+ "S to turn right.%n"
-				+ "UP Arrow to turn right.%n"
-				+ "C to swap with Hold"));
-		howToText.setStyle("-fx-font-family: Comic Sans MS Bold; -fx-fill: red; -fx-font-size: 8pt");
-		howtoText.getChildren().add(howToText);
+		addHowToText();
+		addHighScoreText();
 		
 		// change the startLevelLabel when the slider changes
 		startLevelLabel.textProperty().bind(
@@ -176,6 +167,36 @@ public class TetrisGUI_Controller implements Observer {
 		
 	}
 	
+	/**
+	 * 
+	 */
+	private void addHighScoreText() {
+		// highscore Text
+		Text hishScoreText = new Text(String.format(
+				  "HIGHSCORE%n"
+				+ "========="));
+		hishScoreText.setStyle("-fx-font-family: Comic Sans MS Bold; -fx-fill: black; -fx-font-size: 10pt");
+		highScorePane.getChildren().add(hishScoreText);
+	}
+
+	/**
+	 * 
+	 */
+	private void addHowToText() {
+		// howto Text
+		Text howTo = new Text(String.format(
+				  "L Arrow to move left.%n"
+				+ "R Arrow to move right.%n"
+				+ "DOWN Arrow to soft drop.%n"
+				+ "SPACE to hard drop.%n"
+				+ "A to turn left.%n"
+				+ "S to turn right.%n"
+				+ "UP Arrow to turn right.%n"
+				+ "C to swap with Hold"));
+		howTo.setStyle("-fx-font-family: Comic Sans MS Bold; -fx-fill: red; -fx-font-size: 8pt");
+		howtoText.getChildren().add(howTo);
+	}
+
 	/*
 	 * Adds an updater to the mem label in the status bar
 	 */
@@ -232,7 +253,9 @@ public class TetrisGUI_Controller implements Observer {
 			PlatformUtil.platformRunAndWait(() -> setUItoGameRunning()); // setup ui
 			PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		} else { // no game 
-			_playfieldPane.setPlayField(null);
+			// if we just played a game continue to show the playfield after game over or game stopped
+			if (_tetrisGame != null) _playfieldPane.setPlayField(_tetrisGame.getPlayfield());
+			else _playfieldPane.setPlayField(null);
 			_nextQueuePane.setNextQueue(null);
 			_holdPane.setHoldTetrimino(null);
 			PlatformUtil.platformRunAndWait(() -> setUItoGameNotRunning()); // setup ui 
@@ -485,6 +508,9 @@ public class TetrisGUI_Controller implements Observer {
     @FXML // fx:id="ghostPieceOption"
     protected CheckMenuItem ghostPieceOption; // Value injected by FXMLLoader
     
+    @FXML // fx:id="highScorePane"
+    private Pane highScorePane; // Value injected by FXMLLoader
+    
 	/*
 	 * FXML checks
 	 */
@@ -518,6 +544,7 @@ public class TetrisGUI_Controller implements Observer {
 		assert howtoText != null : "fx:id=\"howtoText\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert peekOption != null : "fx:id=\"peekOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert ghostPieceOption != null : "fx:id=\"ghostPieceOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert highScorePane != null : "fx:id=\"highScorePane\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }

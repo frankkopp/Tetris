@@ -33,7 +33,6 @@ import fko.tetris.tetriminos.Tetrimino;
  * This represents the state of a Tetris game. It holds all information necessary to represent a Tetris game at any 
  * point in time.
  * TODO: Highscore Ranking
- * TODO: Hold Queue
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
 
