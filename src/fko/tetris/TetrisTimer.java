@@ -57,8 +57,7 @@ public class TetrisTimer extends Observable {
 	 * timer.addObserver() to be notified if timer runs out of time<br/>
 	 */
 	public TetrisTimer() {
-		_timerTime = 0;
-		_remaingTime = 0;
+		this(0);
 	}
 	
 	/**
@@ -105,6 +104,8 @@ public class TetrisTimer extends Observable {
 	public synchronized void stop() {
 		if (!_isStarted) return; // ignore
 		_remaingTime -= System.currentTimeMillis() - _lastSystemtime;
+		_remainingTimeTimer.shutdownNow(); // to cancel all waiting tasks
+		_remainingTimeTimer = Executors.newSingleThreadScheduledExecutor();
 		_isStarted = false;
 	}
 	

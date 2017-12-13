@@ -52,13 +52,6 @@ public class NextQueuePane extends Pane {
 
 		// set up the pane
 		this.setBackground(new Background(new BackgroundFill(BACKGROUND_COLOR,null,null)));
-		// set size
-		/*      
- 		this.setMinWidth(WIDTH);
-        this.setMinHeight(HEIGHT);
-        this.setMaxWidth(WIDTH);
-        this.setMaxHeight(HEIGHT);
-		 */
 
 		// draw initial queue
 		draw();

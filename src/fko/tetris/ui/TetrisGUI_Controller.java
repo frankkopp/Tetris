@@ -99,7 +99,8 @@ public class TetrisGUI_Controller implements Observer {
 				+ "SPACE to hard drop.%n"
 				+ "A to turn left.%n"
 				+ "S to turn right.%n"
-				+ "UP Arrow to turn right."));
+				+ "UP Arrow to turn right.%n"
+				+ "C to swap with Hold"));
 		howToText.setStyle("-fx-font-family: Comic Sans MS Bold; -fx-fill: red; -fx-font-size: 8pt");
 		howtoText.getChildren().add(howToText);
 		
