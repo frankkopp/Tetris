@@ -63,8 +63,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	// this determines what inputs and actions are allowed and 
 	// which states can follow
 
-	private TetrisTimer _fallingTimer; // timer to control falling time
-	private TetrisTimer _lockTimer;		// timer to control lock time
+	private TetrisTimer _fallingTimer = new TetrisTimer(1000); // timer to control falling time
+	private TetrisTimer _lockTimer = new TetrisTimer(500); // timer to control lock time
 	
 	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<>();
 		
@@ -291,7 +291,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private void fallingPhase() {
 		
 		// Start falling timer
-		_fallingTimer = new TetrisTimer(calculateFallingTime());
+		_fallingTimer.setTimer(calculateFallingTime());
 		_fallingTimer.addObserver(this);
 		_fallingTimer.start();
 		
@@ -374,11 +374,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private void lockPhase() {
 		//System.out.println("Enter LOCK phase");
 
-		// Start lock timer
-		// resets to 500ms every time the Tetrimino moves
-		_lockTimer = new TetrisTimer(500);
+		// Start lock timer - lock time is always 500ms
 		_lockTimer.addObserver(this);
-		_lockTimer.start();
+		_lockTimer.stopResetRestart();
 		
 		// clear the control queue
 		_controlQueue.clear();

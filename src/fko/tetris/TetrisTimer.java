@@ -24,8 +24,9 @@ SOFTWARE.
 package fko.tetris;
 
 import java.util.Observable;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class implements a timer which can be set for an arbitrary time.<br/>
@@ -36,11 +37,10 @@ import java.util.TimerTask;
  */
 public class TetrisTimer extends Observable {
 	
-	// timer to set alarm in the after remaining time
-	private Timer _remainingTimeTimer; 
+	ScheduledExecutorService _remainingTimeTimer =
+	        Executors.newSingleThreadScheduledExecutor();
 	
-	// when timer runs out all observers are notified
-	private TimerTask task;
+	TetrisTask _task = new TetrisTask();
 	
 	private long _timerTime;	// the initial time for this timer
 	private long _remaingTime;	// remaining time (e.g. after stop)
@@ -50,14 +50,38 @@ public class TetrisTimer extends Observable {
 	private boolean _isStarted = false; // flag to see if timer is running or stopped
 	
 	/**
-	 * Creates a timer with the specified countdown time.<br/>
+	 * Creates a reusable timer with 0ms countdown time.<br/>
 	 * timer.start() to start or resume the timer.<br/>
 	 * timer.stop() to stop/pause the timer.<br/>
 	 * timer.reset() to reset timer to initial time.<br/>
 	 * timer.addObserver() to be notified if timer runs out of time<br/>
-	 * @param time in ms
+	 */
+	public TetrisTimer() {
+		_timerTime = 0;
+		_remaingTime = 0;
+	}
+	
+	/**
+	 * Creates a reusable timer with the specified countdown time.<br/>
+	 * timer.start() to start or resume the timer.<br/>
+	 * timer.stop() to stop/pause the timer.<br/>
+	 * timer.reset() to reset timer to initial time.<br/>
+	 * timer.addObserver() to be notified if timer runs out of time<br/>
 	 */
 	public TetrisTimer(long t) {
+		_timerTime = t;
+		_remaingTime = t;
+	}
+	
+	/**
+	 * Sets the timer to the specified time in ms.</br>
+	 * Timer must be stopped before this is called otherwise it throws a RuntimeException. 
+	 * @param t - time delay for the timer
+	 * @throws RuntimeException if Timer is running
+	 */
+	public void setTimer(long t) {
+		if (_isStarted) 
+			throw new RuntimeException("Resetting a running timer is not allowed!");
 		_timerTime = t;
 		_remaingTime = t;
 	}
@@ -67,22 +91,10 @@ public class TetrisTimer extends Observable {
 	 * Is ignored if already started  
 	 */
 	public synchronized void start() {
-		//System.out.println("start() "+_remaingTime);
 		if (_isStarted) return; // ignore
 		if (_remaingTime <= 0) return;
 		_lastSystemtime = System.currentTimeMillis();
-		task =  new TimerTask() {
-		    @Override
-		    public void run() {
-		    	_remainingTimeTimer.cancel();
-				_isStarted = false;
-		    	_remaingTime = 0;
-		        setChanged();
-		        notifyObservers();
-		    }
-		};
-		_remainingTimeTimer = new Timer(true);
-		_remainingTimeTimer.schedule(task, _remaingTime);
+		_remainingTimeTimer.schedule(_task, _remaingTime, TimeUnit.MILLISECONDS);
 		_isStarted = true;
 	}
 	
@@ -92,9 +104,7 @@ public class TetrisTimer extends Observable {
 	 */
 	public synchronized void stop() {
 		if (!_isStarted) return; // ignore
-		_remainingTimeTimer.cancel();
 		_remaingTime -= System.currentTimeMillis() - _lastSystemtime;
-		//System.out.println("stop() "+_remaingTime);
 		_isStarted = false;
 	}
 	
@@ -105,7 +115,6 @@ public class TetrisTimer extends Observable {
 	public synchronized void reset() {
 		if (_isStarted) 
 			throw new RuntimeException("Resetting a running timer is not allowed!");
-
 		_remaingTime = _timerTime;
 	}
 	
@@ -135,6 +144,22 @@ public class TetrisTimer extends Observable {
 	 */
 	public synchronized boolean isRunning() {
 		return _isStarted; 
+	}
+
+	/**
+	 * This is the Task the Timer runs when it is started
+	 */
+	private final class TetrisTask implements Runnable  {
+		/**
+		 * @see java.util.concurrent.Callable#call()
+		 */
+		@Override
+		public void run() {
+			_isStarted = false;
+			_remaingTime = 0;
+		    setChanged();
+		    notifyObservers();
+		}
 	}
 
 }

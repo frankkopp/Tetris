@@ -255,14 +255,12 @@ public class TetrisGUI_Controller implements Observer {
 			levelLabel.setText("1");
 			linecountLabel.setText("0");
 			tetrisCountLabel.setText("0");
-			timeInPlayLabel.setText("00:00:00");
 			startLevelLabel.setText("not yet implemented"); // this is kept in UI as a property to menu or so
 		} else {
 			scoreLabel.setText(Integer.toString(_tetrisGame.getScore()));
 			levelLabel.setText(Integer.toString(_tetrisGame.getCurrentLevel()));
 			linecountLabel.setText(Integer.toString(_tetrisGame.getLineCount()));
 			tetrisCountLabel.setText(Integer.toString(_tetrisGame.getTetrisesCount()));
-			timeInPlayLabel.setText("not yet implemented");
 		}
 	}
 
@@ -411,9 +409,6 @@ public class TetrisGUI_Controller implements Observer {
 	@FXML // fx:id="linecountLabel"
 	private Label linecountLabel; // Value injected by FXMLLoader
 
-	@FXML // fx:id="timeInPlayLabel"
-	private Label timeInPlayLabel; // Value injected by FXMLLoader
-
 	@FXML // fx:id="about_menu"
 	private MenuItem about_menu; // Value injected by FXMLLoader
 
@@ -495,7 +490,6 @@ public class TetrisGUI_Controller implements Observer {
 		assert playfieldPane != null : "fx:id=\"playfieldPane\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert statusbar_copyright_test != null : "fx:id=\"statusbar_copyright_test\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert linecountLabel != null : "fx:id=\"linecountLabel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-		assert timeInPlayLabel != null : "fx:id=\"timeInPlayLabel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert about_menu != null : "fx:id=\"about_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert scoreLabel != null : "fx:id=\"scoreLabel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert levelLabel != null : "fx:id=\"levelLabel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";

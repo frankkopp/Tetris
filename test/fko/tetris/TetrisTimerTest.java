@@ -94,27 +94,46 @@ public class TetrisTimerTest {
 	 */
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
-	
+
 	@Test
 	public final void testReset() {
 		TetrisTimer timer = new TetrisTimer(2000);
 		timer.start();
-		
+
 		// resetting a timer while running causes exception
 		exception.expect(RuntimeException.class);
 		timer.reset();
 		exception.none();
-		
+
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {/* nothing */}
-		
+
 		timer.stop();
 		long rt = timer.getRemainingTime();
 		timer.reset();
 		assertTrue(timer.getRemainingTime() > rt);
 		assertTrue(timer.getRemainingTime() == 2000);
-		
+
+	}
+
+	@Test
+	public final void testLoop() {
+
+		TetrisTimer timer = new TetrisTimer(1000);
+		for(int i=0;i<100;i++ ) {
+			timer.start();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {/* nothing */}
+			timer.stop();
+			long rt = timer.getRemainingTime();
+			timer.reset();
+			assertTrue(timer.getRemainingTime() > rt);
+			assertTrue(timer.getRemainingTime() == 1000);
+		}
+
+
 	}
 
 }
