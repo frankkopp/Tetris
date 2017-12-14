@@ -247,6 +247,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			case GAMEOVER:
 				_gameStopped=true;
 				break;
+			case NOTSTARTED:
+				break;
+			default:
+				break;
 			}
 
 

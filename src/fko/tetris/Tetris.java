@@ -94,6 +94,15 @@ public class Tetris {
         Exception e = new Exception(message);
         e.printStackTrace();
     }
+    
+    /**
+     * Called when there is an unexpected but recoverable error.<br/>
+     * Prints a stack trace together with a provided message.<br/>
+     * @param message to be displayed with the exception message
+     */
+    public static void minorError(String message) {
+        System.err.println(message);
+    }
 	
 
 }

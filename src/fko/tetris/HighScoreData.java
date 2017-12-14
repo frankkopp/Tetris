@@ -32,6 +32,7 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,14 +51,15 @@ public class HighScoreData {
 	private static final int MAX_ENTRIES = 100; 
 	
 	/** default value for folder */
-	public String _folderPath = "./var/";
-	public String _fileNamePlain = "highscore.csv";
-	private Path _path;
+	static private final String folderPathPlain = "./var/";
+	private final Path _folderPath = FileSystems.getDefault().getPath(folderPathPlain);
+	static private final String fileNamePlain = "highscore.csv";
+	private final Path _filePath = FileSystems.getDefault().getPath(folderPathPlain, fileNamePlain);
 
 	private List<HighScoreEntry> _list;
 
 	/**
-	 * Return singleton instance of HIghScoreData 
+	 * Return singleton instance of HighScoreData 
 	 * @return
 	 */
 	static public HighScoreData getInstance() {
@@ -72,8 +74,51 @@ public class HighScoreData {
 	 * Reads the file and adds the entries to _list
 	 */
 	private HighScoreData() {
-		_path = FileSystems.getDefault().getPath(_folderPath, _fileNamePlain);
-		List<String> lines = readFile();
+		
+		// Check if folder exists and if not try to create it.
+		if (!Files.exists(_folderPath, LinkOption.NOFOLLOW_LINKS)) {
+			Tetris.minorError(String.format(
+					"While reading high score file: Path %s could not be found. Trying to create it."
+					,_folderPath.toString()
+					));
+			try {
+				Files.createDirectories(_folderPath);
+			} catch (IOException e) {
+				Tetris.fatalError(String.format(
+						"While reading high score file: Path %s could not be found. Trying to create it."
+						,_folderPath.toString()
+						));
+			}
+		}
+		
+		// Check if file exists and if not create a empty file
+		if (Files.notExists(_filePath, LinkOption.NOFOLLOW_LINKS)) {
+			Tetris.minorError(String.format(
+					"While reading high score file: File %s could not be found. Trying to create it."
+					,_filePath.getFileName().toString()
+					));
+			try {
+				Files.createFile(_filePath);
+			} catch (IOException e) {
+				Tetris.fatalError(String.format(
+						"While reading high score file: File %s could not be found. Trying to create it."
+						,_filePath.getFileName().toString()
+						));
+			}
+		}
+
+		// read all lines from file
+		Charset charset = Charset.forName("ISO-8859-1");
+		List<String> lines = null;
+		try {
+			lines = Files.readAllLines(_filePath, charset);
+		} catch (CharacterCodingException e) {
+			Tetris.criticalError("Highscore file '" + _filePath + "' has wrong charset (needs to be ISO-8859-1) - not loaded!");
+		} catch (IOException e) {
+			Tetris.fatalError("Highscore file '" + _filePath + "' could not be loaded!");
+		} 
+		
+		// create list of high score entries
 		_list = Collections.synchronizedList(new ArrayList<HighScoreEntry>(lines.size()));
 		lines.parallelStream().forEach(line -> {
 			String[] parts = line.split(";");
@@ -144,40 +189,24 @@ public class HighScoreData {
 	private boolean saveFile() {
 		Charset charset = Charset.forName("ISO-8859-1");
 		//Use try-with-resource to get auto-closeable writer instance
-		try (BufferedWriter writer = Files.newBufferedWriter(_path,charset))
+		try (BufferedWriter writer = Files.newBufferedWriter(_filePath,charset))
 		{
 			_list.stream().limit(MAX_ENTRIES).forEach((e) -> {
 					try {
 						writer.write(e.toString()+String.format("%n"));
 					} catch (IOException e1) {
-						Tetris.criticalError("Highscore file '" + _path + "' could not be saved!");
+						Tetris.criticalError("While saving high score file: Highscore file '" + _filePath + "' could not be saved!");
 						e1.printStackTrace();
 					}
 			});
 		} catch (IOException e) {
-			Tetris.criticalError("Highscore file '" + _path + "' could not be saved!");
+			Tetris.criticalError("While saving high score file: Highscore file '" + _filePath + "' could not be saved!");
 			e.printStackTrace();
 			return false;
 		}
 		return true;
 	}
 
-	/*
-	 * Read the file and return all lines
-	 */
-	private List<String> readFile() {
-		Charset charset = Charset.forName("ISO-8859-1");
-		List<String> lines = null;
-		try {
-			lines = Files.readAllLines(_path, charset);
-		} catch (CharacterCodingException e) {
-			Tetris.criticalError("Highscore file '" + _path + "' has wrong charset (needs to be ISO-8859-1) - not loaded!");
-		} catch (IOException e) {
-			Tetris.criticalError("Highscore file '" + _path + "' could not be loaded!");
-		}
-		return lines;
-	}
-	
 	/*
 	 * sort the list with the highest score first 
 	 */

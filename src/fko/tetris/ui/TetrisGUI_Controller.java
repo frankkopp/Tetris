@@ -75,14 +75,15 @@ import javafx.stage.Stage;
  * calls the Controller's initialize() method.<br/> 
  * The Controller also receives all input and events from the user interface and the model and executes the appropriate 
  * ui updates and model actions. The UI calls the actions methods directly. The model signals via the Observer Interface 
- * @see java.util.Observer#update(java.util.Observable, java.lang.Object) that the model has changed and the UI 
- * should update its views.
+ * that the model has changed and the UI should update its views.
  * 
- * TODO: Improve HIghscore List - maybe seperate window? More info, Level, Tetrises, etc.
+ * @see java.util.Observer#update(java.util.Observable, java.lang.Object) 
+ * 
+ * TODO: Improve Highscore List - maybe separate window? More info, Level, Tetrises, etc.
  */
 public class TetrisGUI_Controller implements Observer {
 
-	private static final WindowStateFX windowState = new WindowStateFX(); // to save and restore the last position of our window
+	private static final WindowStateFX windowState = WindowStateFX.getInstance(); // to save and restore the last position of our window
 	private static final TetrisSettings settings = TetrisSettings.getInstance();
 	
 	private Stage _primaryStage; // handle to primary stage
