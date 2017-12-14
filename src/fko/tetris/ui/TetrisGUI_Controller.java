@@ -315,7 +315,13 @@ public class TetrisGUI_Controller implements Observer {
 	 */
 	private void draw() {
 		_playfieldPane.draw();
-		_nextQueuePane.draw();
+		if (nextQueueOption.isSelected() ) {
+			_nextQueuePane.setNextQueue(_tetrisGame.getNextQueue());
+			_nextQueuePane.draw();
+		} else {
+			_nextQueuePane.setNextQueue(null);
+			_nextQueuePane.draw();
+		}
 		_holdPane.draw();
 		updateInfoDraw();
 		updateHighScoreText();
@@ -432,6 +438,7 @@ public class TetrisGUI_Controller implements Observer {
 	 */
 	private void saveSettings() {
 		settings.setProperty("player_name", playerNameField.getText());
+		settings.setProperty("next_queue_list", nextQueueOption.isSelected() ? "on" : "off");
 		settings.setProperty("peek_spawn", peekOption.isSelected() ? "on" : "off");
 		settings.setProperty("ghost_piece", ghostPieceOption.isSelected() ? "on" : "off");
 		//settings.setProperty("start_level", Double.toString((int)startLevelSlider.getValue()));
@@ -444,6 +451,7 @@ public class TetrisGUI_Controller implements Observer {
 	private void readSettings() {
 		// read in settings
 		playerNameField.setText(settings.getProperty("player_name", "Unknown Player"));
+		nextQueueOption.setSelected(settings.getProperty("next_queue_list", "on").equals("on") ? true : false);
 		peekOption.setSelected(settings.getProperty("peek_spawn", "on").equals("on") ? true : false);
 		ghostPieceOption.setSelected(settings.getProperty("ghost_piece", "on").equals("on") ? true : false);
 		//startLevelSlider.setValue(Double.parseDouble(settings.getProperty("start_level", "1.0")));
@@ -624,6 +632,9 @@ public class TetrisGUI_Controller implements Observer {
     @FXML // fx:id="playerNameField"
     private TextField playerNameField; // Value injected by FXMLLoader
     
+    @FXML // fx:id="nextQueueOption"
+    private CheckMenuItem nextQueueOption; // Value injected by FXMLLoader
+    
 	/*
 	 * FXML checks
 	 */
@@ -659,6 +670,7 @@ public class TetrisGUI_Controller implements Observer {
 		assert ghostPieceOption != null : "fx:id=\"ghostPieceOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert highScorePane != null : "fx:id=\"highScorePane\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert playerNameField != null : "fx:id=\"playerNameField\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert nextQueueOption != null : "fx:id=\"nextQueueOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }

@@ -49,6 +49,7 @@
                 </Menu>
                   <Menu mnemonicParsing="false" text="Options">
                     <items>
+                        <CheckMenuItem fx:id="nextQueueOption" mnemonicParsing="false" text="Next Queue" />
                         <CheckMenuItem fx:id="peekOption" mnemonicParsing="false" selected="true" text="Peek" />
                         <CheckMenuItem fx:id="ghostPieceOption" mnemonicParsing="false" selected="true" text="Ghost Piece" />
                     </items>
