@@ -59,7 +59,6 @@ public class Playfield {
 	// the internal data structure for the background matrix.
 	// All Tetriminos which are locked in place are merged into the background as Minos.
 	// A zero representing an empty field, a non-zero an occupied field.
-	// Non-zeros also determine the color (defined in Tetrimino class)
 	private TetrisColor[][] _backgroundMatrix;
 
 	// The current Tetrimino
@@ -78,35 +77,6 @@ public class Playfield {
 	public Playfield() {
 		this._backgroundMatrix = new TetrisColor[PLAYFIELD_WIDTH][_playfieldHeight];
 		clearMatrix(_backgroundMatrix);
-		
-		// DEBUG
-//		_backgroundMatrix[0][10] = TetrisColor.LBLUE;
-//		_backgroundMatrix[1][10] = TetrisColor.LBLUE;
-//		_backgroundMatrix[2][10] = TetrisColor.LBLUE;
-//		_backgroundMatrix[3][10] = TetrisColor.LBLUE;
-//		
-//		_backgroundMatrix[6][19] = TetrisColor.LBLUE;
-		
-//		_backgroundMatrix[0][0] = TetrisColor.BLUE;
-//		_backgroundMatrix[1][0] = TetrisColor.BLUE;
-//		_backgroundMatrix[2][0] = TetrisColor.BLUE;
-//		_backgroundMatrix[3][0] = TetrisColor.BLUE;
-//		_backgroundMatrix[4][0] = TetrisColor.PURPLE;
-//		_backgroundMatrix[5][0] = TetrisColor.PURPLE;
-//		_backgroundMatrix[6][0] = TetrisColor.PURPLE;
-//		_backgroundMatrix[7][0] = TetrisColor.YELLOW;
-//		_backgroundMatrix[8][0] = TetrisColor.YELLOW;
-//		_backgroundMatrix[9][0] = TetrisColor.YELLOW;
-//		_backgroundMatrix[0][1] = TetrisColor.BLUE;
-//		_backgroundMatrix[1][1] = TetrisColor.BLUE;
-//		_backgroundMatrix[2][1] = TetrisColor.BLUE;
-//		_backgroundMatrix[3][1] = TetrisColor.BLUE;
-//		_backgroundMatrix[4][1] = TetrisColor.PURPLE;
-//		_backgroundMatrix[5][1] = TetrisColor.PURPLE;
-//		_backgroundMatrix[6][1] = TetrisColor.PURPLE;
-//		_backgroundMatrix[7][1] = TetrisColor.YELLOW;
-//		_backgroundMatrix[8][1] = TetrisColor.YELLOW;
-//		_backgroundMatrix[9][1] = TetrisColor.YELLOW;
 	}
 
 	/**
@@ -121,26 +91,18 @@ public class Playfield {
 	 * @return true if collision detected - false otherwise
 	 */
 	public boolean spawn(Tetrimino next) {
-
 		int[][] tMatrix = next.getMatrix(Facing.NORTH);
-
 		// define spawn point - Tetrimino have a defined starting point which should be placed on 5:21
 		Coordinates startPoint = next.getCurrentPosition();
-
-		//System.out.println(next.getShape().toString());
-		
-		// loop through the Tetrimino matrix and check for collosion 
+		// loop through the Tetrimino matrix and check for collision 
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
-				//System.out.print(tMatrix[yi][xi]+" ");
 				// check for collision
 				if (tMatrix[yi][xi] == 1 
 						&& _backgroundMatrix[startPoint.x+xi][startPoint.y-yi-1] != TetrisColor.EMPTY) {
-					//System.out.println("COLLOSION: "+(startPoint.x+xi)+":"+(startPoint.y-yi-1)+" "+next.getShape());
 					return true; // collision
 				}
 			}
-			//System.out.println();
 		}
 		// no collision so set this as new current Tetrimino
 		_currentTetrimino = next;
@@ -174,7 +136,7 @@ public class Playfield {
 	}
 
 	/**
-	 * Check if aTetrimino can move down one cell<br/>
+	 * Check if a Tetrimino can move down one cell<br/>
 	 * @param _currentTetrimino2 
 	 * @return true if move is possible, false if landed on surface
 	 */
@@ -281,7 +243,6 @@ public class Playfield {
 	public boolean turnMove(int direction, Tetrimino tetrimino) {
 		// first create a temp copy of the current Tetrimino we can test turns with
 		Tetrimino tmp = tetrimino.clone();
-		
 		if (canTurn(tmp, direction)) {
 			tetrimino.turn(direction);
 		}
@@ -296,11 +257,8 @@ public class Playfield {
 	private boolean canTurn(Tetrimino tmp, int direction) {
 		// turn the Tetrimino
 		tmp.turn(direction);
-		
 		// check for collisions
 		int[][] tMatrix = tmp.getMatrix(tmp.getCurrentOrientation());
-		
-		// loop through the Tetrimino matrix and check for collisions
 		for (int yi = 0; yi < tMatrix.length; yi++) {
 			for (int xi = 0; xi < tMatrix[yi].length; xi++) {
 				// check for collision in cell left 

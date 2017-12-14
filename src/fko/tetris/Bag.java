@@ -39,7 +39,16 @@ import fko.tetris.tetriminos.Z_Tetrimino;
 /**
  * This class holds each of the 7 Tetriminos once. The getNext() method retrieves a Tetrimino until each Tetrimino has
  * been retrieved. Then the Bag shuffles 7 new instances of each Tetrimino and returns the next of this newly shuffled
- * batch 
+ * batch.<br/>
+ * 
+ * From Tetris Guidelines:<br/>
+ * Tetris uses a “bag” system to determine the sequence of Tetriminos that appear during game play. This system allows 
+ * for equal distribution among the seven Tetriminos. The seven different Tetriminos are placed into a virtual bag, 
+ * then shuffled into a random order. This order is the sequence that the bag “feeds” the Next Queue. Every time a new 
+ * Tetrimino is generated and starts its fall within the Matrix, the Tetrimino at the front of the line in the bag is 
+ * placed at the end of the Next Queue, pushing all Tetriminos in the Next Queue forward by one. The bag is refilled 
+ * and reshuffled once it is empty. 
+ *
  */
 public class Bag {
 	
@@ -66,7 +75,7 @@ public class Bag {
 	}
 
 	/*
-	 * fills the bag with all 7 Tetriminos und shuffles the order 
+	 * fills the bag with all 7 Tetriminos and shuffles the order 
 	 */
 	private void fillAndShuffle() {
 		_elements.add(new O_Tetrimino());

@@ -78,7 +78,7 @@ import javafx.stage.Stage;
  * @see java.util.Observer#update(java.util.Observable, java.lang.Object) that the model has changed and the UI 
  * should update its views.
  * 
- * TODO: NextQueue show option
+ * TODO: Improve HIghscore List - maybe seperate window? More info, Level, Tetrises, etc.
  */
 public class TetrisGUI_Controller implements Observer {
 

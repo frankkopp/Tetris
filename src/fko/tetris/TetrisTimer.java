@@ -32,8 +32,6 @@ import java.util.concurrent.TimeUnit;
  * This class implements a timer which can be set for an arbitrary time.<br/>
  * The timer can be queried for the remaining time.<br/>
  * The timer allows to be observed so Observer will be called via update() when time runs out.<br/>
- * Timer operations:<br/>
- * 	start, stop, reset, remaining time  
  */
 public class TetrisTimer extends Observable {
 	
@@ -152,9 +150,6 @@ public class TetrisTimer extends Observable {
 	 * This is the Task the Timer runs when it is started
 	 */
 	private final class TetrisTask implements Runnable  {
-		/**
-		 * @see java.util.concurrent.Callable#call()
-		 */
 		@Override
 		public void run() {
 			_isStarted = false;
