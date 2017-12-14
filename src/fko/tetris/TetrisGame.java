@@ -498,7 +498,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * ELIMINATE phase
 	 * This phase removes all lines from the playfield which were marked for clearance.<br/>
 	 * Also handles game statistics like scoring, bonus scores, etc.
-	 * TODO: BackToBack Bonus, SPIN Bonus
+	 * TODO: BackToBack Bonus
+	 * TODO: SPINS and SPIN Bonus
 	 */
 	private void eliminatePhase() {
 

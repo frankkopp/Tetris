@@ -97,7 +97,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label fx:id="statusbar_copyright_test" text="(c) Frank Kopp 2017">
+                  <Label fx:id="statusbar_copyright_text" text="Tetris(c) by Frank Kopp 2017">
                      <GridPane.margin>
                         <Insets left="5.0" />
                      </GridPane.margin>
