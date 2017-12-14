@@ -32,7 +32,11 @@ import fko.tetris.tetriminos.Tetrimino;
 import fko.tetris.ui.TetrisSounds;
 
 /**
+ * This represents the state of a Tetris game. It holds all information necessary to represent a Tetris game at any 
  * point in time.
+ * 
+ * TODO: Enable switching sound on and off
+ * 
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
 

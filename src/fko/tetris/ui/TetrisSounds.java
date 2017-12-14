@@ -52,12 +52,6 @@ import fko.tetris.Tetris;
  */
 public class TetrisSounds implements LineListener {
 
-//	public static void main(String[] args) {
-//		String audioFilePath = "E:/Test/Audio.wav";
-//		TetrisSounds player = new TetrisSounds();
-//		player.play(audioFilePath);
-//	}
-	
 	// folder to all sound files
 	public static final String SOUND_FOLDER = "./sounds/";
 	private final Path _folderPath = FileSystems.getDefault().getPath(SOUND_FOLDER);
