@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.image.*?>
@@ -12,7 +13,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="rootPanel" minHeight="755.0" minWidth="760.0" prefHeight="755.0" prefWidth="760.0" style="-fx-background-color: #000000; -fx-border-color: #000000; -fx-border-width: 2; -fx-background-radius: 2;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fko.tetris.ui.TetrisGUI_Controller">
+<BorderPane fx:id="rootPanel" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="755.0" minWidth="750.0" prefHeight="755.0" prefWidth="750.0" style="-fx-background-color: #000000; -fx-border-color: #000000; -fx-border-width: 2; -fx-background-radius: 2;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fko.tetris.ui.TetrisGUI_Controller">
    <top>
       <VBox minHeight="65.0" BorderPane.alignment="CENTER">
          <children>
@@ -46,10 +47,12 @@
                         <KeyCodeCombination alt="DOWN" code="G" control="UP" meta="UP" shift="UP" shortcut="UP" />
                      </accelerator>
                 </Menu>
-                  <Menu fx:id="menu_level" mnemonicParsing="false" text="Level">
-                     <accelerator>
-                        <KeyCodeCombination alt="DOWN" code="L" control="UP" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
+                  <Menu mnemonicParsing="false" text="Options">
+                    <items>
+                        <CheckMenuItem fx:id="nextQueueOption" mnemonicParsing="false" text="Next Queue" />
+                        <CheckMenuItem fx:id="peekOption" mnemonicParsing="false" selected="true" text="Peek" />
+                        <CheckMenuItem fx:id="ghostPieceOption" mnemonicParsing="false" selected="true" text="Ghost Piece" />
+                    </items>
                   </Menu>
                 <Menu fx:id="menu_help" mnemonicParsing="false" text="?">
                   <items>
@@ -63,11 +66,19 @@
             </MenuBar>
             <ToolBar maxHeight="-Infinity" minHeight="35.0" prefHeight="35.0">
               <items>
-                <Button fx:id="newGame_button" mnemonicParsing="false" onAction="#newGame_Action" text="New" />
+                <Button fx:id="newGame_button" focusTraversable="false" mnemonicParsing="false" onAction="#newGame_Action" text="New" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
-                  <Button fx:id="stopGame_button" disable="true" mnemonicParsing="false" onAction="#stopGame_action" text="Stop" />
-                  <Button fx:id="pauseGame_button" disable="true" mnemonicParsing="false" onAction="#pauseGame_action" text="Pause" />
-                  <Button fx:id="resumeGame_button" disable="true" mnemonicParsing="false" onAction="#resumeGame_action" text="Resume" />
+                  <Button fx:id="stopGame_button" disable="true" focusTraversable="false" mnemonicParsing="false" onAction="#stopGame_action" text="Stop" />
+                  <Button fx:id="pauseGame_button" disable="true" focusTraversable="false" mnemonicParsing="false" onAction="#pauseGame_action" text="Pause" />
+                  <Button fx:id="resumeGame_button" disable="true" focusTraversable="false" mnemonicParsing="false" onAction="#resumeGame_action" text="Resume" />
+                  <Separator prefWidth="10.0" />
+                  <Label text="Start Level:" />
+                  <Label fx:id="startLevelLabel" text="1" />
+
+                  <Slider fx:id="startLevelSlider" blockIncrement="1.0" focusTraversable="false" majorTickUnit="1.0" max="15.0" min="1.0" minorTickCount="0" showTickMarks="true" snapToTicks="true" value="1.0" />
+                  <Separator halignment="LEFT" minWidth="-Infinity" orientation="VERTICAL" prefHeight="25.0" prefWidth="60.0" visible="false" />
+                  <Label text="Player Name:" />
+                  <TextField fx:id="playerNameField" focusTraversable="false" onAction="#playerNameChangeAction" onInputMethodTextChanged="#playerNameChangeAction" text="Unknown Player" />
               </items>
             </ToolBar>
          </children>
@@ -118,13 +129,100 @@
          </children>
       </AnchorPane>
    </bottom>
+   <center>
+      <Pane fx:id="playfieldPane" maxHeight="600.0" maxWidth="300.0" minHeight="600.0" minWidth="300.0" prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+         <children>
+            <AmbientLight color="CHARTREUSE" layoutX="55.0" layoutY="104.0" lightOn="true" />
+         </children></Pane>
+   </center>
    <left>
-      <Pane minWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
+      <VBox minWidth="200.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: c0c0c0;" BorderPane.alignment="CENTER">
+         <children>
+            <AnchorPane fx:id="holdBox" prefHeight="126.0" prefWidth="180.0" style="-fx-background-color: cccccc;">
+               <effect>
+                  <InnerShadow />
+               </effect>
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </AnchorPane>
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="106.0" minWidth="10.0" prefWidth="106.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="85.0" minWidth="10.0" prefWidth="64.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Score">
+                     <font>
+                        <Font name="Comic Sans MS Bold" size="14.0" />
+                     </font></Label>
+                  <Label text="Level" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Comic Sans MS Bold" size="14.0" />
+                     </font></Label>
+                  <Label text="Linecount" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Comic Sans MS Bold" size="14.0" />
+                     </font></Label>
+                  <Label text="Tetris Count" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="Comic Sans MS Bold" size="14.0" />
+                     </font></Label>
+
+                  <Label fx:id="scoreLabel" text="0" GridPane.columnIndex="1">
+                     <font>
+                        <Font name="Comic Sans MS Bold" size="14.0" />
+                     </font></Label>
+                  <Label fx:id="levelLabel" text="1" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Comic Sans MS Bold" size="14.0" />
+                     </font></Label>
+                  <Label fx:id="linecountLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Comic Sans MS Bold" size="14.0" />
+                     </font></Label>
+                  <Label fx:id="tetrisCountLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="Comic Sans MS Bold" size="14.0" />
+                     </font></Label>
+               </children>
+               <VBox.margin>
+                  <Insets left="15.0" right="15.0" />
+               </VBox.margin>
+            </GridPane>
+            <Pane fx:id="highScorePane" prefHeight="200.0" prefWidth="180.0" VBox.vgrow="ALWAYS">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </Pane>
+         </children>
+      </VBox>
    </left>
    <right>
-      <Pane minWidth="200.0" style="-fx-background-color: #c0c0c0;" BorderPane.alignment="CENTER" />
+      <VBox minWidth="160.0" prefHeight="200.0" prefWidth="160.0" style="-fx-background-color: c0c0c0;" BorderPane.alignment="CENTER">
+         <children>
+            <AnchorPane fx:id="nextQueueBox" prefHeight="370.0" prefWidth="200.0" style="-fx-background-color: cccccc;">
+               <effect>
+                  <InnerShadow />
+               </effect>
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </AnchorPane>
+            <Pane fx:id="howtoText" prefHeight="250.0" prefWidth="140.0">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </Pane>
+         </children>
+      </VBox>
    </right>
-   <center>
-      <Pane fx:id="playfieldPane" maxHeight="600.0" maxWidth="300.0" minHeight="600.0" minWidth="300.0" prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER" />
-   </center>
 </BorderPane>
