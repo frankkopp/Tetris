@@ -186,49 +186,6 @@ public class TetrisGUI_Controller implements Observer {
 		
 	}
 	
-	/*
-	 *	print the highscore list 
-	 */
-	private void updateHighScoreText() {
-
-		highScorePane.getChildren().clear();
-		highScorePane.getHeight();
-				
-		List<Text> textlines = new ArrayList<>(15);
-		
-		final Font font = Font.font(
-				"Lucida Console", 
-				FontWeight.NORMAL, 
-				FontPosture.REGULAR , 
-				10);
-		
-		// highscore Text
-		Text highScoreText = new Text(String.format(
-				  "HIGHSCORE %n"
-				+ "===========%n"));
-		highScoreText.setFont(font);
-		highScoreText.setFill(Color.BLACK);
-		
-		textlines.add(highScoreText);
-		
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
-
-		List<HighScoreData.HighScoreEntry> list = HighScoreData.getInstance().getList();
-		list.stream().limit(15).forEach((e) -> {
-			final String txt = String.format("%-12.12s: %,6d  %8s%n", e.name, e.score, e.date.format(formatter));
-			final Text tmp = new Text(txt);
-			tmp.setFont(font);
-			tmp.setFill(Color.BLACK);
-			textlines.add(tmp);
-		});
-		
-		TextFlow flow = new TextFlow();	
-		flow.getChildren().addAll(textlines);
-		
-		highScorePane.getChildren().add(flow);
-
-	}
-
 	/**
 	 * 
 	 */
@@ -326,7 +283,7 @@ public class TetrisGUI_Controller implements Observer {
 			_nextQueuePane.draw();
 		}
 		_holdPane.draw();
-		updateInfoDraw();
+		updateScoreDraw();
 		updateHighScoreText();
 		updateStatus();
 	}
@@ -357,7 +314,7 @@ public class TetrisGUI_Controller implements Observer {
 	/*
 	 * Updates all info fields. E.g. score, etc. 
 	 */
-	private void updateInfoDraw() {
+	private void updateScoreDraw() {
 		if (_tetrisGame == null) {
 			scoreLabel.setText("0");
 			levelLabel.setText("1");
@@ -365,11 +322,54 @@ public class TetrisGUI_Controller implements Observer {
 			tetrisCountLabel.setText("0");
 			startLevelLabel.setText("not yet implemented"); // this is kept in UI as a property to menu or so
 		} else {
-			scoreLabel.setText(Integer.toString(_tetrisGame.getScore()));
+			scoreLabel.setText(String.format("%,d",_tetrisGame.getScore()));
 			levelLabel.setText(Integer.toString(_tetrisGame.getCurrentLevel()));
 			linecountLabel.setText(Integer.toString(_tetrisGame.getLineCount()));
 			tetrisCountLabel.setText(Integer.toString(_tetrisGame.getTetrisesCount()));
 		}
+	}
+
+	/*
+	 *	print the highscore list 
+	 */
+	private void updateHighScoreText() {
+	
+		highScorePane.getChildren().clear();
+		highScorePane.getHeight();
+				
+		List<Text> textlines = new ArrayList<>(15);
+		
+		final Font font = Font.font(
+				"Lucida Console", 
+				FontWeight.NORMAL, 
+				FontPosture.REGULAR , 
+				10);
+		
+		// highscore Text
+		Text highScoreText = new Text(String.format(
+				  "HIGHSCORE %n"
+				+ "===========%n"));
+		highScoreText.setFont(font);
+		highScoreText.setFill(Color.BLACK);
+		
+		textlines.add(highScoreText);
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
+	
+		List<HighScoreData.HighScoreEntry> list = HighScoreData.getInstance().getList();
+		list.stream().limit(15).forEach((e) -> {
+			final String txt = String.format("%-12.12s: %,6d  %8s%n", e.name, e.score, e.date.format(formatter));
+			final Text tmp = new Text(txt);
+			tmp.setFont(font);
+			tmp.setFill(Color.BLACK);
+			textlines.add(tmp);
+		});
+		
+		TextFlow flow = new TextFlow();	
+		flow.getChildren().addAll(textlines);
+		
+		highScorePane.getChildren().add(flow);
+	
 	}
 
 	/*
