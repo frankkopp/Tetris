@@ -25,15 +25,13 @@ package fko.tetris;
 
 import org.junit.Test;
 
-import fko.tetris.ui.TetrisSounds;
-
 /**
  * 
  */
 public class TetrisSoundsTest {
 
 	/**
-	 * Test method for {@link fko.tetris.ui.TetrisSounds#TetrisSounds()}.
+	 * Test method for {@link TetrisSounds#TetrisSounds()}.
 	 */
 	@Test
 	public final void testTetrisSounds() {

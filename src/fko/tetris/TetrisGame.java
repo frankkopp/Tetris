@@ -29,13 +29,13 @@ import java.util.Observer;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import fko.tetris.tetriminos.Tetrimino;
-import fko.tetris.ui.TetrisSounds;
 
 /**
  * This represents the state of a Tetris game. It holds all information necessary to represent a Tetris game at any 
  * point in time.
  * 
  * TODO: Enable switching sound on and off
+ * TODO: Should sound be in the model?
  * 
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
@@ -343,6 +343,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			case SOFTDOWN:				
 				_playfield.moveDown();	// ignored if no move possible
 				_lastSoftDropLineCount+=1;
+				sounds.play("SFX_PieceSoftDrop.wav");
 				break;
 			case HARDDOWN:				
 				_lastHardDropLineCount=0;
@@ -390,6 +391,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		if (_playfield.moveDown()) { 
 			// landed on surface
 			_phaseState = TetrisPhase.LOCK;
+			sounds.play("SFX_PieceTouchDown.wav");
 		}
 		sounds.play("SFX_PieceFall.wav");
 	}
@@ -485,6 +487,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		if (_phaseState == TetrisPhase.LOCK) {// only merge if we are still in phase LOCK
 			_playfield.merge();
 			_phaseState = TetrisPhase.PATTERN; // go to next phase
+			sounds.play("SFX_PieceLockdown.wav");
 		}
 
 	}

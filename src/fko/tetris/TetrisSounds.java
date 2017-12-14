@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package fko.tetris.ui;
+package fko.tetris;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,8 +42,6 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-
-import fko.tetris.Tetris;
 
 /**
  * This is an example program that demonstrates how to play back an audio file
@@ -90,15 +88,23 @@ public class TetrisSounds implements LineListener {
 	public void play(String file) {
 		play(_sounds.get(file));
 	}
+	
+	public void playAndWait(File audioFile) {
+		play(audioFile, true);		
+	}
+	
+	public void play(File audioFile) {
+		play(audioFile, false);		
+	}
 
 	/**
 	 * Play a given audio file.
 	 * @param audioFilePath Path of the audio file.
 	 */
-	public void play(File audioFile) {
+	public void play(File audioFile, boolean waiting) {
 		
 		// wait while another sound is still playing
-		while (isPlaying.get()) {
+		while (waiting && isPlaying.get()) {
 			// wait for the playback completes
 			try {
 				synchronized (LOCK) {
