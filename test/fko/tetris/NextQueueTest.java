@@ -43,7 +43,7 @@ public class NextQueueTest {
 		NextQueue nq = new NextQueue(bag, 3);
 		
 		for (int i=0; i<100; i++) {
-			
+			nq.getNext();
 		}
 		
 		

@@ -103,7 +103,7 @@ public class TetrisTimerTest {
 		// resetting a timer while running causes exception
 		exception.expect(RuntimeException.class);
 		timer.reset();
-		exception.none();
+		ExpectedException.none();
 
 		try {
 			Thread.sleep(100);
