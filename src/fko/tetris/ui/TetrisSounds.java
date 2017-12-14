@@ -25,6 +25,13 @@ package fko.tetris.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -35,6 +42,8 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import fko.tetris.Tetris;
 
 /**
  * This is an example program that demonstrates how to play back an audio file
@@ -51,45 +60,69 @@ public class TetrisSounds implements LineListener {
 	
 	// folder to all sound files
 	public static final String SOUND_FOLDER = "./sounds/";
-
+	private final Path _folderPath = FileSystems.getDefault().getPath(SOUND_FOLDER);
 
 	/**
 	 * this flag indicates whether the playback completes or not.
 	 */
-	boolean playCompleted;
+	AtomicBoolean isPlaying = new AtomicBoolean(false);
+	
+	Object LOCK = new Object();
+	
+	// available sounds
+	private Map<String, File> _sounds;
+	private Clip _audioClip;
+	
+	/**
+	 * Create an object with all tetris sounds available 
+	 */
+	public TetrisSounds() {
+		
+		_sounds = new HashMap<>();
+		
+		try {
+			Files.newDirectoryStream(_folderPath,
+			        path -> path.toString().endsWith(".wav"))
+			        .forEach((p) -> _sounds.put(p.getFileName().toString(), p.toFile()));
+		} catch (IOException e) {
+			Tetris.minorError(String.format(
+					"While reading sounds: Path %s could not be read."
+					,_folderPath.toString()
+					));
+		}
+		
+	}
+	
+	public void play(String file) {
+		play(_sounds.get(file));
+	}
 
 	/**
 	 * Play a given audio file.
 	 * @param audioFilePath Path of the audio file.
 	 */
-	void play(String audioFilePath) {
-		File audioFile = new File(audioFilePath);
-
+	public void play(File audioFile) {
+		
+		// wait while another sound is still playing
+		while (isPlaying.get()) {
+			// wait for the playback completes
+			try {
+				synchronized (LOCK) {
+					LOCK.wait();	
+				}
+			} catch (InterruptedException ex) {	/* ignore */ }
+		}
+		
 		try {
 			AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
 
 			AudioFormat format = audioStream.getFormat();
-
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
-
-			Clip audioClip = (Clip) AudioSystem.getLine(info);
-
-			audioClip.addLineListener(this);
-
-			audioClip.open(audioStream);
-
-			audioClip.start();
-
-			while (!playCompleted) {
-				// wait for the playback completes
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ex) {
-					ex.printStackTrace();
-				}
-			}
-
-			audioClip.close();
+			_audioClip = (Clip) AudioSystem.getLine(info);
+			_audioClip.addLineListener(this);
+			_audioClip.open(audioStream);
+			_audioClip.start();
+			isPlaying.set(true);
 
 		} catch (UnsupportedAudioFileException ex) {
 			System.out.println("The specified audio file is not supported.");
@@ -105,6 +138,13 @@ public class TetrisSounds implements LineListener {
 	}
 
 	/**
+	 * @return the _sounds
+	 */
+	public Map<String, File> getSounds() {
+		return Collections.unmodifiableMap(_sounds);
+	}
+	
+	/**
 	 * Listens to the START and STOP events of the audio line.
 	 */
 	@Override
@@ -112,11 +152,14 @@ public class TetrisSounds implements LineListener {
 		LineEvent.Type type = event.getType();
 
 		if (type == LineEvent.Type.START) {
-			System.out.println("Playback started.");
-
-		} else if (type == LineEvent.Type.STOP) {
-			playCompleted = true;
-			System.out.println("Playback completed.");
+			// ignore
+		} 
+		else if (type == LineEvent.Type.STOP) {
+			isPlaying.set(false);
+			_audioClip.close();
+			synchronized (LOCK) {
+				LOCK.notifyAll();	
+			}
 		}
 
 	}

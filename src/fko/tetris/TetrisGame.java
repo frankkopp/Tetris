@@ -29,6 +29,7 @@ import java.util.Observer;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import fko.tetris.tetriminos.Tetrimino;
+import fko.tetris.ui.TetrisSounds;
 
 /**
  * point in time.
@@ -40,6 +41,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * many are shown in the ui.
 	 */
 	public static final int NEXTQUEUE_SIZE = 7;
+	
+	// sounds are play at certain points ==> should this be in model or view??
+	private static final TetrisSounds sounds = new TetrisSounds();
 	
 	// Tetris state
 	private Playfield 	_playfield;		// matrix with all cells
@@ -245,6 +249,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				completionPhase();
 				break;
 			case GAMEOVER:
+				sounds.play("SFX_GameOver.wav");
 				_gameStopped=true;
 				break;
 			case NOTSTARTED:
@@ -264,7 +269,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 		// save highscore 
 		_highScoreData.addEntryAndSave(_playerName, _score, LocalDateTime.now());
-
+		
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread stopped");
@@ -382,6 +387,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// landed on surface
 			_phaseState = TetrisPhase.LOCK;
 		}
+		sounds.play("SFX_PieceFall.wav");
 	}
 
 	/*
@@ -532,7 +538,11 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// set level - FIXED GOAL SYSTEM
 		// TODO: implement VARIABLE GOAL SYSTEM
 		if (_lineCount > 0) {
+			int old = _currentLevel;
 			_currentLevel = _lineCount/10 +1;
+			if (_currentLevel > old) {
+				sounds.play("SFX_LevelUp.wav");
+			}
 		}
 		_phaseState = TetrisPhase.GENERATION;
 	}
