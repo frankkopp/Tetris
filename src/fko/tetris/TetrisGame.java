@@ -506,12 +506,14 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_score += _lastSoftDropLineCount; // soft drop points 1 x number of lines
 		_score += _lastHardDropLineCount * 2; // hard drop points 2 x number of lines
 		_lineCount += _lastClearedLinesCount;
-		_lastHardDropLineCount = 0;
-		_lastSoftDropLineCount = 0;
-		_lastClearedLinesCount = 0;
 
 		// other statistics
 		if (_lastClearedLinesCount == 4) _tetrisesCount++;
+		
+		// reset the counters
+		_lastHardDropLineCount = 0;
+		_lastSoftDropLineCount = 0;
+		_lastClearedLinesCount = 0;
 				
 		_phaseState = TetrisPhase.COMPLETION;
 	}
