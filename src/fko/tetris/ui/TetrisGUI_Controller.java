@@ -102,6 +102,8 @@ public class TetrisGUI_Controller implements Observer {
 		
 		assertFXML(); // FXML auto checks
 
+		statusbar_copyright_text.setText("Tetris(c) by Frank Kopp 2017 v"+Tetris.VERSION);
+		
 		addMemLabelUpdater(); // add constantly updated memory info into status panel
 		addPlayfieldPane(); // add the playfield pane 
 		addNextQueuePane(); // add the next queue pane
@@ -349,7 +351,7 @@ public class TetrisGUI_Controller implements Observer {
 		case COMPLETION: statusbar_status_text.setText("Game running!"); break;
 		case GAMEOVER: statusbar_status_text.setText("Game Over!"); break;
 		}
-		
+		if (_tetrisGame.isPaused()) statusbar_status_text.setText("Game paused.");
 	}
 
 	/*
@@ -550,7 +552,7 @@ public class TetrisGUI_Controller implements Observer {
 	private Pane playfieldPane; // Value injected by FXMLLoader
 
 	@FXML // fx:id="statusbar_copyright_test"
-	private Label statusbar_copyright_test; // Value injected by FXMLLoader
+	private Label statusbar_copyright_text; // Value injected by FXMLLoader
 
 	@FXML // fx:id="linecountLabel"
 	private Label linecountLabel; // Value injected by FXMLLoader
@@ -643,7 +645,7 @@ public class TetrisGUI_Controller implements Observer {
 		assert newGame_button != null : "fx:id=\"newGame_button\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert newGame_menu != null : "fx:id=\"newGame_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert playfieldPane != null : "fx:id=\"playfieldPane\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
-		assert statusbar_copyright_test != null : "fx:id=\"statusbar_copyright_test\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert statusbar_copyright_text != null : "fx:id=\"statusbar_copyright_test\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert linecountLabel != null : "fx:id=\"linecountLabel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert about_menu != null : "fx:id=\"about_menu\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert scoreLabel != null : "fx:id=\"scoreLabel\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
