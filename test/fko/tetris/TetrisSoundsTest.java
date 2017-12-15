@@ -25,7 +25,8 @@ package fko.tetris;
 
 import org.junit.Test;
 
-import fko.tetris.TetrisSounds.Clips;
+import fko.tetris.game.TetrisSounds.Clips;
+import fko.tetris.game.TetrisSounds;
 
 /**
  * 

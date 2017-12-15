@@ -1,7 +1,7 @@
 /**
  * 
  */
-package fko.tetris;
+package fko.tetris.game;
 
 /**
  * @author fkopp

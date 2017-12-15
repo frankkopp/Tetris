@@ -24,7 +24,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package fko.tetris;
+package fko.tetris.game;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -38,6 +38,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import fko.tetris.Tetris;
 
 /**
  * Reads and stores the highscore from and to file

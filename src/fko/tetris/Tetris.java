@@ -26,6 +26,9 @@
  */
 package fko.tetris;
 
+import fko.tetris.game.HighScoreData;
+import fko.tetris.game.TetrisGame;
+import fko.tetris.game.TetrisSettings;
 import fko.tetris.ui.TetrisGUI;
 
 /**

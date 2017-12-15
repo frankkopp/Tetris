@@ -39,11 +39,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import fko.tetris.HighScoreData;
+import fko.tetris.game.HighScoreData;
 import fko.tetris.Tetris;
-import fko.tetris.TetrisControlEvents;
-import fko.tetris.TetrisGame;
-import fko.tetris.TetrisSettings;
+import fko.tetris.game.TetrisControlEvents;
+import fko.tetris.game.TetrisGame;
+import fko.tetris.game.TetrisSettings;
 import fko.tetris.util.HelperTools;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;

@@ -30,7 +30,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import fko.tetris.HighScoreData.HighScoreEntry;
+import fko.tetris.game.HighScoreData.HighScoreEntry;
+import fko.tetris.game.HighScoreData;
 
 /**
  * 

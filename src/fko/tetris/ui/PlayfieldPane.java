@@ -23,8 +23,8 @@ SOFTWARE.
  */
 package fko.tetris.ui;
 
-import fko.tetris.Playfield;
-import fko.tetris.TetrisColor;
+import fko.tetris.game.Playfield;
+import fko.tetris.game.TetrisColor;
 import fko.tetris.tetriminos.Tetrimino;
 import fko.tetris.util.Coordinates;
 import javafx.scene.effect.Bloom;

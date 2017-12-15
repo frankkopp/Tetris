@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package fko.tetris;
+package fko.tetris.game;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,6 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Properties;
+
+import fko.tetris.Tetris;
 
 /**
  * <p>Properties class for Tetris.</p>

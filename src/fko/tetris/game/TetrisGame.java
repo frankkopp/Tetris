@@ -21,14 +21,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package fko.tetris;
+package fko.tetris.game;
 
 import java.time.LocalDateTime;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import fko.tetris.TetrisSounds.Clips;
+import fko.tetris.game.Bag;
+import fko.tetris.game.NextQueue;
+import fko.tetris.game.Playfield;
+import fko.tetris.game.TetrisSounds;
+import fko.tetris.game.TetrisSounds.Clips;
 import fko.tetris.tetriminos.Tetrimino;
 
 /**

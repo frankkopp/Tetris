@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package fko.tetris;
+package fko.tetris.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,9 +42,9 @@ import fko.tetris.tetriminos.Z_Tetrimino;
  * batch.<br/>
  * 
  * From Tetris Guidelines:<br/>
- * Tetris uses a “bag” system to determine the sequence of Tetriminos that appear during game play. This system allows 
+ * Tetris uses a "bag" system to determine the sequence of Tetriminos that appear during game play. This system allows 
  * for equal distribution among the seven Tetriminos. The seven different Tetriminos are placed into a virtual bag, 
- * then shuffled into a random order. This order is the sequence that the bag “feeds” the Next Queue. Every time a new 
+ * then shuffled into a random order. This order is the sequence that the bag ï¿½feedsï¿½ the Next Queue. Every time a new 
  * Tetrimino is generated and starts its fall within the Matrix, the Tetrimino at the front of the line in the bag is 
  * placed at the end of the Next Queue, pushing all Tetriminos in the Next Queue forward by one. The bag is refilled 
  * and reshuffled once it is empty. 

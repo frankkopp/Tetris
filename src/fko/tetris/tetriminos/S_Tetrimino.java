@@ -23,7 +23,7 @@ SOFTWARE.
  */
 package fko.tetris.tetriminos;
 
-import fko.tetris.TetrisColor;
+import fko.tetris.game.TetrisColor;
 import fko.tetris.util.Coordinates;
 
 /**

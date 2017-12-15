@@ -25,6 +25,7 @@ package fko.tetris;
 
 import org.junit.Test;
 
+import fko.tetris.game.Bag;
 import fko.tetris.tetriminos.Tetrimino;
 
 /**
