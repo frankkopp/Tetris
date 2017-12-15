@@ -71,14 +71,14 @@
                   <Button fx:id="stopGame_button" disable="true" focusTraversable="false" mnemonicParsing="false" onAction="#stopGame_action" text="Stop" />
                   <Button fx:id="pauseGame_button" disable="true" focusTraversable="false" mnemonicParsing="false" onAction="#pauseGame_action" text="Pause" />
                   <Button fx:id="resumeGame_button" disable="true" focusTraversable="false" mnemonicParsing="false" onAction="#resumeGame_action" text="Resume" />
-                  <Separator prefWidth="10.0" />
+                  <Separator />
                   <Label text="Start Level:" />
                   <Label fx:id="startLevelLabel" text="1" />
 
                   <Slider fx:id="startLevelSlider" blockIncrement="1.0" focusTraversable="false" majorTickUnit="1.0" max="15.0" min="1.0" minorTickCount="0" showTickMarks="true" snapToTicks="true" value="1.0" />
-                  <Separator halignment="LEFT" minWidth="-Infinity" orientation="VERTICAL" prefHeight="25.0" prefWidth="60.0" visible="false" />
-                  <Label text="Player Name:" />
-                  <TextField fx:id="playerNameField" focusTraversable="false" onAction="#playerNameChangeAction" onInputMethodTextChanged="#playerNameChangeAction" text="Unknown Player" />
+                  <Separator halignment="LEFT" orientation="VERTICAL" visible="false" />
+                  <Label text="Player:" />
+                  <TextField fx:id="playerNameField" focusTraversable="false" maxWidth="-Infinity" onAction="#playerNameChangeAction" onInputMethodTextChanged="#playerNameChangeAction" text="Unknown Player" />
               </items>
             </ToolBar>
          </children>
