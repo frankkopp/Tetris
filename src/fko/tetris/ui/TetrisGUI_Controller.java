@@ -41,12 +41,14 @@ import java.util.concurrent.TimeUnit;
 
 import fko.tetris.game.HighScoreData;
 import fko.tetris.Tetris;
+import fko.tetris.AI.Bot;
 import fko.tetris.game.TetrisControlEvents;
 import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisSettings;
 import fko.tetris.util.HelperTools;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -59,8 +61,11 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -97,7 +102,7 @@ public class TetrisGUI_Controller implements Observer {
 
 	// to use for scheduled updates of ui properties - e.g. mem status label
 	private final ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
-
+	
 	/**
 	 * This method is called by the FXMLLoader when initialization is complete
 	 */
@@ -127,17 +132,34 @@ public class TetrisGUI_Controller implements Observer {
 				);
 
 		readSettings();
+		
+		initializeBot();
+	}
+
+	private void initializeBot() {
+		if (botPlayerOption.isSelected()) {
+			final Toggle selectedToggle = bots.getSelectedToggle();
+			if (selectedToggle == simpleBotOption) {
+				System.out.println("SIMPLE BOT");
+			} else if (selectedToggle == minimaxBotOption) {
+				System.out.println("MINIMAX BOT");
+			} else {
+				System.out.println("NO BOT");
+			}
+		} else {
+			
+		}
 	}
 
 	/**
-	 * Handles keyboard events - call from Main gui class
+	 * Handles keyboard events - call from main gui class
 	 */
 	protected void addKeyEventHandler() {
+		// only when game is available and not a bot playing
 		_primaryStage.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				//System.out.println("Key Pressed: "+event.getCode().toString());
-				if (_tetrisGame == null) return; // only when game is available
+				if (_tetrisGame == null || botPlayerOption.isSelected()) return; 
 
 				switch (event.getCode()) {
 				case ESCAPE: _tetrisGame.setPaused(_tetrisGame.isPaused() ? false : true); break;
@@ -217,7 +239,7 @@ public class TetrisGUI_Controller implements Observer {
 			public void run() {
 				Platform.runLater(	() -> 
 				statusbar_mem_text.setText(HelperTools.getMBytes(Runtime.getRuntime().freeMemory()) + " MB / "
-							+ HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB"));
+						+ HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB"));
 			}
 		};
 		_executor.scheduleAtFixedRate(updater, 0, 250,TimeUnit.MILLISECONDS);
@@ -483,7 +505,6 @@ public class TetrisGUI_Controller implements Observer {
 		}
 	}
 
-
 	@FXML
 	void newGame_Action(ActionEvent event) {
 		_playfieldPane.requestFocus();
@@ -532,6 +553,16 @@ public class TetrisGUI_Controller implements Observer {
 		if (_tetrisGame!= null) {
 			_tetrisGame.setSoundOn(soundOnOption.isSelected() ? true : false);
 		}
+	}
+
+	@FXML
+	void botPlayerOptionAction(ActionEvent event) {
+		initializeBot();
+	}
+
+	@FXML
+	void botChooserAction(ActionEvent event) {
+		initializeBot();
 	}
 
 	// #######################################################
@@ -642,6 +673,19 @@ public class TetrisGUI_Controller implements Observer {
 
 	@FXML // fx:id="soundOnOption"
 	private CheckMenuItem soundOnOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="botPlayerOption"
+	private CheckMenuItem botPlayerOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="simpleBotOption"
+	private RadioMenuItem simpleBotOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="minimaxBotOption"
+	private RadioMenuItem minimaxBotOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="bots"
+	private ToggleGroup bots; // Value injected by FXMLLoader
+
 	/*
 	 * FXML checks
 	 */
@@ -679,6 +723,10 @@ public class TetrisGUI_Controller implements Observer {
 		assert playerNameField != null : "fx:id=\"playerNameField\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert nextQueueOption != null : "fx:id=\"nextQueueOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert soundOnOption != null : "fx:id=\"soundOnOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert botPlayerOption != null : "fx:id=\"botPlayerOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert minimaxBotOption != null : "fx:id=\"minimaxBotOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert simpleBotOption != null : "fx:id=\"simpleBotOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert bots != null : "fx:id=\"bots\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }

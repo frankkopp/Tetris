@@ -55,6 +55,18 @@
                         <CheckMenuItem fx:id="ghostPieceOption" mnemonicParsing="false" selected="true" text="Ghost Piece" />
                     </items>
                   </Menu>
+                  <Menu mnemonicParsing="false" text="Bots">
+                    <items>
+                        <CheckMenuItem fx:id="botPlayerOption" mnemonicParsing="false" onAction="#botPlayerOptionAction" text="Bot Player" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <RadioMenuItem fx:id="simpleBotOption" mnemonicParsing="false" onAction="#botChooserAction" selected="true" text="Simple Bot">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="bots" />
+                           </toggleGroup>
+                        </RadioMenuItem>
+                        <RadioMenuItem fx:id="minimaxBotOption" mnemonicParsing="false" onAction="#botChooserAction" text="MiniMax Bot" toggleGroup="$bots" />
+                    </items>
+                  </Menu>
                 <Menu fx:id="menu_help" mnemonicParsing="false" text="?">
                   <items>
                     <MenuItem fx:id="about_menu" mnemonicParsing="false" onAction="#aboutDialogOpen_action" text="About" />
