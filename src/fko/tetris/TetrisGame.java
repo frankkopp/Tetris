@@ -281,7 +281,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// game stopped
 		
 		// save highscore 
-		_highScoreData.addEntryAndSave(_playerName, _score, LocalDateTime.now());
+		_highScoreData.addEntryAndSave(_playerName, _score, _currentLevel, _tetrisesCount, LocalDateTime.now());
 
 		// -- tell the view that model has changed
 		setChanged();

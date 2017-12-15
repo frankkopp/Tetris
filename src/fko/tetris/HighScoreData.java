@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Reads and stores the highscore. 
+ * Reads and stores the highscore from and to file
  */
 public class HighScoreData {
 
@@ -50,7 +50,7 @@ public class HighScoreData {
 	// max number of entry to be written in db
 	private static final int MAX_ENTRIES = 100; 
 	
-	/** default value for folder */
+	/* default value for folder */
 	static private final String folderPathPlain = "./var/";
 	private final Path _folderPath = FileSystems.getDefault().getPath(folderPathPlain);
 	static private final String fileNamePlain = "highscore.csv";
@@ -124,8 +124,10 @@ public class HighScoreData {
 			String[] parts = line.split(";");
 			_list.add(new HighScoreEntry(
 					parts[0].trim(), 
-					Integer.parseInt(parts[1]), 
-					LocalDateTime.parse(parts[2].trim())
+					Integer.parseInt(parts[1]),
+					Integer.parseInt(parts[2]),
+					Integer.parseInt(parts[3]),
+					LocalDateTime.parse(parts[4].trim())
 							));
 		});
 		sortList();
@@ -143,8 +145,8 @@ public class HighScoreData {
 	 * Put a new entry into the highscore table
 	 * @param name, score, date
 	 */
-	public void addEntry(String name, int score, LocalDateTime date) {
-		this.addEntry(new HighScoreEntry(name, score, date));
+	public void addEntry(String name, int score, int level, int tetrises, LocalDateTime date) {
+		this.addEntry(new HighScoreEntry(name, score, level, tetrises, date));
 	}	
 
 	/**
@@ -160,8 +162,8 @@ public class HighScoreData {
 	 * Put a new entry into the highscore table
 	 * @param name, score, date
 	 */
-	public void addEntryAndSave(String name, int score, LocalDateTime date) {
-		this.addEntryAndSave(new HighScoreEntry(name, score, date));
+	public void addEntryAndSave(String name, int score, int level, int tetrises, LocalDateTime date) {
+		this.addEntryAndSave(new HighScoreEntry(name, score, level, tetrises, date));
 	}	
 	
 	/**
@@ -220,26 +222,30 @@ public class HighScoreData {
 	 */
 	public static class HighScoreEntry {
 		
-		final public String name;
-		final public int score;
-		final public LocalDateTime date;
+		public final String name;
+		public final int score;
+		public final LocalDateTime date;
+		public final int level;
+		public final int tetrises;
 		
 		/**
 		 * @param name
 		 * @param score
 		 * @param date
 		 */
-		public HighScoreEntry(String name, int score, LocalDateTime date) {
+		public HighScoreEntry(String name, int score, int level, int tetrises, LocalDateTime date) {
 			this.name = name;
 			this.score = score;
 			this.date = date;
+			this.level = level;
+			this.tetrises = tetrises;
 		}
 		/**
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
 		public String toString() {
-			return name+";"+score+";"+date.toString();
+			return name+";"+score+";"+level+";"+tetrises+";"+date.toString();
 		}
 	}
 }
