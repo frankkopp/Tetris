@@ -196,8 +196,8 @@ public class TetrisGUI_Controller implements Observer {
 		holdBox.getChildren().add(_holdPane);
 	}
 
-	/**
-	 * 
+	/*
+	 * Add HotToText to pane 
 	 */
 	private void addHowToText() {
 		// howto Text
@@ -218,7 +218,7 @@ public class TetrisGUI_Controller implements Observer {
 	 * Adds an updater to the mem label in the status bar
 	 */
 	private void addMemLabelUpdater() {
-		Runnable dynamicTimeTask = new Runnable() {
+		Runnable updater = new Runnable() {
 			@Override
 			public void run() {
 				Platform.runLater(	() -> 
@@ -226,7 +226,7 @@ public class TetrisGUI_Controller implements Observer {
 							+ HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB"));
 			}
 		};
-		_executor.scheduleAtFixedRate(dynamicTimeTask, 0, 250,TimeUnit.MILLISECONDS);
+		_executor.scheduleAtFixedRate(updater, 0, 250,TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -291,8 +291,8 @@ public class TetrisGUI_Controller implements Observer {
 		updateStatus();
 	}
 
-	/**
-	 * 
+	/*
+	 * Updates the status bar info 
 	 */
 	private void updateStatus() {
 		if (_tetrisGame==null) {
@@ -426,7 +426,6 @@ public class TetrisGUI_Controller implements Observer {
 		return windowState;
 	}
 
-
 	/*
 	 * Save the current sizes and coordinates of all windows to restore them
 	 * when starting up the next time.
@@ -540,7 +539,6 @@ public class TetrisGUI_Controller implements Observer {
 			_tetrisGame.setSoundOn(soundOnOption.isSelected() ? true : false);
 		}
 	}
-
 
 	// #######################################################
 	// FXML Setup

@@ -62,26 +62,32 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	// application fields
 	private Thread		_gameThread; 			// the thread where the Tetris game will run in
-	private boolean 	_gameStopped = true; 	// flag to stop a running game
-	private boolean 	_isPaused;
+	private boolean 		_gameStopped = true; 	// flag to stop a running game
+	private boolean 		_isPaused = false;		// flag to pause a running game
 
 	private TetrisPhase _phaseState = TetrisPhase.NOTSTARTED; // the state/phase the engine is currently in
 	// this determines what inputs and actions are allowed and 
 	// which states can follow
 
-	private TetrisTimer _fallingTimer = new TetrisTimer(1000); // timer to control falling time
-	private TetrisTimer _lockTimer = new TetrisTimer(500); // timer to control lock time
+	// Timers to control falling and locking time
+	private TetrisTimer _fallingTimer	= new TetrisTimer(1000); 
+	private TetrisTimer _lockTimer 		= new TetrisTimer(500); 
 
+	// queues control inputs from the ui
 	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<>();
 
 	private boolean _holdAllowed = true; // using hold is only allowed once between LOCK phases
 
+	// gane statistics
 	private int _lastClearedLinesCount = 0;
 	private int _lastHardDropLineCount = 0;
 	private int _lastSoftDropLineCount = 0;
 
-	private HighScoreData _highScoreData; // Contains a List of high scores
-	private String _playerName = "Unknown Player";
+	// Contains a List of high scores
+	private HighScoreData _highScoreData; 
+
+	// current player's name
+	private String _playerName = "Unknown Player"; 
 
 	/**
 	 * Creates a Tetris game with default values
@@ -91,6 +97,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	}
 
 	/**
+	 * Creates a Tetris game with a specified start level.
 	 * @param startLevel
 	 */
 	public TetrisGame(int startLevel) {
@@ -134,7 +141,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_gameThread.interrupt();
 	}
 
-
 	/**
 	 * Implements the Runnable interface
 	 * @see java.lang.Runnable#run()
@@ -148,9 +154,11 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		notifyObservers("Game Thread started");
 		_sounds.playClip(Clips.GAME_START);
 
+		// run completion phase one time to set level 
+		// completion will the go to generation phase
 		completionPhase();
 
-		// clear control queue
+		// clear control input queue
 		_controlQueue.clear();
 
 		do { // loop as long as game is running
@@ -162,13 +170,13 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			case GENERATION:
 				/*
 				 * Random Generation
-				 * Tetris uses a �bag� system to determine the sequence of Tetriminos that appear during game play. 
+				 * Tetris uses a "bag" system to determine the sequence of Tetriminos that appear during game play. 
 				 * This system allows for equal distribution among the seven Tetriminos.
 				 * The seven different Tetriminos are placed into a virtual bag, then shuffled into a random order. 
-				 * This order is the sequence that the bag �feeds� the Next Queue. Every time a new Tetrimino is 
+				 * This order is the sequence that the bag "feeds" the Next Queue. Every time a new Tetrimino is 
 				 * generated and starts its fall within the Matrix, the Tetrimino at the front of the line in the bag 
 				 * is placed at the end of the Next Queue, pushing all Tetriminos in the Next Queue forward by one. 
-				 * The bag is refilled and reshuffled once it is empty.
+				 * The bag is refilled and re-shuffled once it is empty.
 				 */
 				generationPhase();
 				break;
@@ -185,10 +193,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				 * Falling Phase, as long as the Tetrimino is not yet Locked down. A Tetrimino that is Hard Dropped 
 				 * Locks Down immediately. However, if a Tetrimino naturally falls or Soft Drops onto a landing 
 				 * Surface, it is given 0.5 seconds on a Lock Down Timer before it actually Locks Down.
-				 * Three rule sets �Infinite Placement, Extended, and Classic� dictate the conditions for Lock Down 
+				 * Three rule sets "Infinite Placement, Extended, and Classic" dictate the conditions for Lock Down 
 				 * 
 				 * Note: Using the Super Rotation System, rotating a Tetrimino often causes the y-coordinate of the 
-				 * Tetrimino to increase, i.e., it �lifts up� off the Surface it landed on. The Lock Down Timer does 
+				 * Tetrimino to increase, i.e., it "lifts up" off the Surface it landed on. The Lock Down Timer does 
 				 * not reset in this case, but it does stop counting down until the Tetrimino lands again on a Surface
 				 * that has the same (or higher) y-coordinate as it did before it was rotated. Only if it lands on a 
 				 * Surface with a lower y-coordinate will the timer reset.
@@ -256,6 +264,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				_gameStopped=true;
 				break;
 			case NOTSTARTED:
+				// do nothings
 				break;
 			default:
 				break;
@@ -269,6 +278,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 		} while (_gameStopped == false);
 
+		// game stopped
+		
 		// save highscore 
 		_highScoreData.addEntryAndSave(_playerName, _score, LocalDateTime.now());
 
@@ -281,8 +292,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * GENERATION phase 
 	 */
 	private void generationPhase() {
-		// Generation Phase
+		// get next Tetrimino from nextQueue
 		Tetrimino next = _nextQueue.getNext();
+		// spawn it on the playfield
 		if (_playfield.spawn(next)) {
 			// collision detected - "BLOCK OUT" GAME OVER CONDITION
 			_phaseState = TetrisPhase.GAMEOVER;
@@ -293,7 +305,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		} else {
 			// Immediately fall into visible area and check for collision
 			if (_playfield.moveDown()) {
-				// collision detected - "BLOCK OUT" GAME OVER CONDITION
+				// collision detected - LOCKING
 				_phaseState = TetrisPhase.LOCK;
 			}
 			_phaseState = TetrisPhase.FALLING;
@@ -318,15 +330,15 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
-		// we query an event blocking if necessary
-		// timer will wake us if no event
+		// we query a blocking queue and wait
+		// timer will wake us if no event happens
 		boolean breakFlag = false;
 		do {
 			// handle movement events
 			// Take next control event or wait until available
 			TetrisControlEvents event = TetrisControlEvents.NONE;
 			try { 
-				event = _controlQueue.take();
+				event = _controlQueue.take(); // blocks until an event is available
 			} catch (InterruptedException e) { /* empty*/ }
 
 			waitIfPaused();
@@ -365,14 +377,12 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			case SOFTDOWN:				
 				_playfield.moveDown();	// ignored if no move possible
 				_lastSoftDropLineCount+=1;
-				// -- tell the view that model has changed
 				_sounds.playClip(Clips.SOFTDROP);
 				break;
 			case HARDDOWN:				
 				_lastHardDropLineCount=0;
 				while (!_playfield.moveDown()) {
 					_lastHardDropLineCount++;
-					// -- tell the view that model has changed because of while loop
 					setChanged();
 					notifyObservers("During FALLING after HARDOWN");
 				}
@@ -637,7 +647,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	}
 
 	/**
-	 * This is called from the timer to wake us from waiting for a key event
+	 * This is called from the timer to wake us from waiting for a key event.
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	@Override
@@ -656,12 +666,15 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 					synchronized (_gameThread) {
 						_gameThread.wait();
 					}
-					//Thread.sleep(1000);
 				} catch (InterruptedException e) { /* nothing */ }
 			}
 		}
 	}
 
+	/**
+	 * Checks if the game is running
+	 * @return true if game is running
+	 */
 	public boolean isRunning() {
 		return !_gameStopped; 
 	}
