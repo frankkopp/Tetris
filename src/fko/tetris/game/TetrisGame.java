@@ -127,6 +127,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		if (_gameThread == null) {
 			_gameThread = new Thread(this, "TetrisGame");
 			_gameThread.start();
+			_gameStopped = false; 
 		} else {
 			throw new IllegalStateException("startTetrisGame(): Game thread already exists.");
 		}
@@ -151,8 +152,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	@Override
 	public void run() {
-		_gameStopped = false;
-
+		
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread started");

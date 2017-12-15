@@ -39,16 +39,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import fko.tetris.game.HighScoreData;
 import fko.tetris.Tetris;
 import fko.tetris.AI.Bot;
+import fko.tetris.AI.MiniMaxBot;
+import fko.tetris.AI.SimpleBot;
+import fko.tetris.game.HighScoreData;
 import fko.tetris.game.TetrisControlEvents;
 import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisSettings;
 import fko.tetris.util.HelperTools;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -103,6 +104,8 @@ public class TetrisGUI_Controller implements Observer {
 	// to use for scheduled updates of ui properties - e.g. mem status label
 	private final ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
 	
+	private Bot _currentBot;
+
 	/**
 	 * This method is called by the FXMLLoader when initialization is complete
 	 */
@@ -137,22 +140,25 @@ public class TetrisGUI_Controller implements Observer {
 	}
 
 	private void initializeBot() {
-		if (botPlayerOption.isSelected()) {
+		if (botPlayerOption.isSelected() && _tetrisGame != null && _tetrisGame.isRunning()) {
 			final Toggle selectedToggle = bots.getSelectedToggle();
+			if (_currentBot != null) _currentBot.stopBot();
 			if (selectedToggle == simpleBotOption) {
-				System.out.println("SIMPLE BOT");
+				_currentBot = new SimpleBot(_tetrisGame);
+				_currentBot.startBot();
 			} else if (selectedToggle == minimaxBotOption) {
-				System.out.println("MINIMAX BOT");
+				_currentBot = new MiniMaxBot(_tetrisGame);
+				_currentBot.startBot();
 			} else {
 				System.out.println("NO BOT");
 			}
 		} else {
-			
+			if (_currentBot!=null) _currentBot.stopBot();
 		}
 	}
 
 	/**
-	 * Handles keyboard events - call from main gui class
+	 * Handles keyboard events - call from Main gui class
 	 */
 	protected void addKeyEventHandler() {
 		// only when game is available and not a bot playing
@@ -505,6 +511,7 @@ public class TetrisGUI_Controller implements Observer {
 		}
 	}
 
+
 	@FXML
 	void newGame_Action(ActionEvent event) {
 		_playfieldPane.requestFocus();
@@ -512,11 +519,14 @@ public class TetrisGUI_Controller implements Observer {
 		_tetrisGame.setPlayerName(playerNameField.getText());
 		_tetrisGame.addObserver(this);
 		_tetrisGame.startTetrisGame();
+		initializeBot();
+		System.out.println("NEW GAME");
 	}
 
 	@FXML
 	void stopGame_action(ActionEvent event) {
 		_tetrisGame.stopTetrisGame();
+		initializeBot();
 	}
 
 	@FXML
