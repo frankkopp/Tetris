@@ -23,145 +23,121 @@ SOFTWARE.
  */
 package fko.tetris;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
-import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
  * This is an example program that demonstrates how to play back an audio file
  * using the Clip in Java Sound API.
  * @author www.codejava.net
  */
-public class TetrisSounds implements LineListener {
+public class TetrisSounds {
 
 	// folder to all sound files
-	public static final String SOUND_FOLDER = "./sounds/";
-	private final Path _folderPath = FileSystems.getDefault().getPath(SOUND_FOLDER);
+	public static final String SOUND_FOLDER = "sounds/";
 
 	/**
-	 * this flag indicates whether the playback completes or not.
+	 * All available audio clips of this class
 	 */
-	AtomicBoolean isPlaying = new AtomicBoolean(false);
-	
-	Object LOCK = new Object();
-	
-	// available sounds
-	private Map<String, File> _sounds;
-	private Clip _audioClip;
-	
+	public enum Clips {
+		// ENUM		Filename w/o .wav
+		FALLING 	("SFX_PieceFall"),
+		TOUCHDOWN 	("SFX_PieceTouchDown"),
+		LOCK 		("SFX_PieceLockdown"),
+		SOFTDROP	("SFX_PieceSoftDrop"),
+		HARDDROP	("SFX_PieceHardDrop"),
+		HOLD		("SFX_PieceHold"),
+		MOVE_LR		("SFX_PieceMoveLR"),
+		ROTATE_FAIL	("SFX_PieceRotateFail"),
+		ROTATE_LR	("SFX_PieceRotateLR"),
+		TOUCH_LR	("SFX_PieceTouchLR"),
+		TETRIS		("SFX_SpecialTetris"),
+		GAME_START 	("SFX_GameStart"),
+		GAME_OVER 	("SFX_GameOver");
+
+		private final String _name;
+
+		private Clips(String name) {
+			_name = name;
+		}
+	}
+
+	// to play sounds parallel
+	ExecutorService _executor = Executors.newScheduledThreadPool(3);
+
+	// available sounds mapped by the enum
+	private Map<Clips, URL> _sounds;
+
 	/**
 	 * Create an object with all tetris sounds available 
 	 */
 	public TetrisSounds() {
-		
 		_sounds = new HashMap<>();
-		
-		try {
-			Files.newDirectoryStream(_folderPath,
-			        path -> path.toString().endsWith(".wav"))
-			        .forEach((p) -> _sounds.put(p.getFileName().toString(), p.toFile()));
-		} catch (IOException e) {
-			Tetris.minorError(String.format(
-					"While reading sounds: Path %s could not be read."
-					,_folderPath.toString()
-					));
-		}
-		
-	}
-	
-	public void play(String file) {
-		play(_sounds.get(file));
-	}
-	
-	public void playAndWait(File audioFile) {
-		play(audioFile, true);		
-	}
-	
-	public void play(File audioFile) {
-		play(audioFile, false);		
-	}
-
-	/**
-	 * Play a given audio file.
-	 * @param audioFilePath Path of the audio file.
-	 */
-	public void play(File audioFile, boolean waiting) {
-		
-		// wait while another sound is still playing
-		while (waiting && isPlaying.get()) {
-			// wait for the playback completes
-			try {
-				synchronized (LOCK) {
-					LOCK.wait();	
-				}
-			} catch (InterruptedException ex) {	/* ignore */ }
-		}
-		
-		try {
-			AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-
-			AudioFormat format = audioStream.getFormat();
-			DataLine.Info info = new DataLine.Info(Clip.class, format);
-			_audioClip = (Clip) AudioSystem.getLine(info);
-			_audioClip.addLineListener(this);
-			_audioClip.open(audioStream);
-			_audioClip.start();
-			isPlaying.set(true);
-
-		} catch (UnsupportedAudioFileException ex) {
-			System.out.println("The specified audio file is not supported.");
-			ex.printStackTrace();
-		} catch (LineUnavailableException ex) {
-			System.out.println("Audio line for playing back is unavailable.");
-			ex.printStackTrace();
-		} catch (IOException ex) {
-			System.out.println("Error playing the audio file.");
-			ex.printStackTrace();
-		}
-
-	}
-
-	/**
-	 * @return the _sounds
-	 */
-	public Map<String, File> getSounds() {
-		return Collections.unmodifiableMap(_sounds);
-	}
-	
-	/**
-	 * Listens to the START and STOP events of the audio line.
-	 */
-	@Override
-	public void update(LineEvent event) {
-		LineEvent.Type type = event.getType();
-
-		if (type == LineEvent.Type.START) {
-			// ignore
-		} 
-		else if (type == LineEvent.Type.STOP) {
-			isPlaying.set(false);
-			_audioClip.close();
-			synchronized (LOCK) {
-				LOCK.notifyAll();	
+		// for all defined values in ENUM Clips
+		// read in the Clip and store them in the Map
+		Arrays.stream(Clips.values())
+		.forEach(c -> {
+			final String filename = SOUND_FOLDER + c._name+".wav";
+			final URL url = Tetris.class.getResource(filename);
+			//final File file = new File(SOUND_FOLDER+c._name+".wav");
+			// create AudioInputStream object
+			if (url != null) {
+				_sounds.put(c, url);
+			} else {
+				Tetris.criticalError("Sound file: "+filename+" cannot be loaded!");
 			}
-		}
-
+		});
 	}
 
+	/**
+	 * Plays the give clip once.
+	 * @param c enum from Clips
+	 */
+	public void playClip(Clips c) {
+		
+		// sound was not available
+		if (_sounds.get(c) == null) return;
+		
+		// execute in a new thread to play sound
+		_executor.execute(() -> {
+			 AudioInputStream audioIn = null;
+             try {
+                 audioIn = AudioSystem.getAudioInputStream(_sounds.get(c));
+             } catch (Exception e) {
+            	 e.printStackTrace();
+             }
+             if (audioIn == null) {
+                 return;
+             }
+             final Clip clip;
+             try {
+                 clip = AudioSystem.getClip();
+             } catch (LineUnavailableException e) {
+            	 e.printStackTrace();
+                 return;
+             }
+             try {
+                 clip.open(audioIn);
+             } catch (Exception e) {
+            	 e.printStackTrace();
+                 return;
+             }
+             clip.addLineListener(event -> {
+                 if (event.getType() == LineEvent.Type.STOP) {
+                     clip.close();
+                 }
+             });
+             clip.start();
+		});			
+	}
 }

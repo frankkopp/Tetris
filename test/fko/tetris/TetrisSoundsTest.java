@@ -25,21 +25,21 @@ package fko.tetris;
 
 import org.junit.Test;
 
+import fko.tetris.TetrisSounds.Clips;
+
 /**
  * 
  */
 public class TetrisSoundsTest {
 
-	/**
-	 * Test method for {@link TetrisSounds#TetrisSounds()}.
-	 */
 	@Test
-	public final void testTetrisSounds() {
+	public final void testPlay() throws InterruptedException {
 		TetrisSounds ts = new TetrisSounds();
-		ts.getSounds().forEach((v,k) -> {
-			System.out.println(v + " > " + k);
-			ts.play(k);
-		});
+		ts.playClip(Clips.TOUCHDOWN);
+		ts.playClip(Clips.GAME_OVER);
+		ts.playClip(Clips.FALLING);
+		ts.playClip(Clips.LOCK);
+		Thread.sleep(5000);
 	}
-
+	
 }

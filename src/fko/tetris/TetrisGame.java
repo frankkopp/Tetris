@@ -28,6 +28,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import fko.tetris.TetrisSounds.Clips;
 import fko.tetris.tetriminos.Tetrimino;
 
 /**
@@ -146,6 +147,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread started");
+		sounds.playClip(Clips.GAME_START);
 
 		completionPhase();
 
@@ -253,7 +255,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				completionPhase();
 				break;
 			case GAMEOVER:
-				sounds.play("SFX_GameOver.wav");
 				_gameStopped=true;
 				break;
 			case NOTSTARTED:
@@ -261,7 +262,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			default:
 				break;
 			}
-
 
 			// -- tell the view that model has changed
 			setChanged();
@@ -288,6 +288,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		if (_playfield.spawn(next)) {
 			// collision detected - "BLOCK OUT" GAME OVER CONDITION
 			_phaseState = TetrisPhase.GAMEOVER;
+			// -- tell the view that model has changed
+			setChanged();
+			notifyObservers("Game Over");
+			sounds.playClip(Clips.GAME_OVER);
 		} else {
 			// Immediately fall into visible area and check for collision
 			if (_playfield.moveDown()) {
@@ -295,6 +299,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				_phaseState = TetrisPhase.LOCK;
 			}
 			_phaseState = TetrisPhase.FALLING;
+			// -- tell the view that model has changed
+			setChanged();
+			notifyObservers("Generation finished");
 		}
 	}
 
@@ -329,30 +336,49 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// event handling
 			switch(event) {
 			case LEFT:	
-				_playfield.moveSideway(-1); // ignored if no move possible
+				if(_playfield.moveSideway(-1)) {
+					sounds.playClip(Clips.TOUCH_LR);
+				} else {
+					sounds.playClip(Clips.MOVE_LR);
+				}; 
+				
 				break;
 			case RIGHT:
-				_playfield.moveSideway(1); // ignored if no move possible
+				if(_playfield.moveSideway(1)) {
+					sounds.playClip(Clips.TOUCH_LR);
+				} else {
+					sounds.playClip(Clips.MOVE_LR);
+				}; 
 				break;
 			case RTURN:
-				_playfield.turnMove(1); // ignored if no move possible
+				if(_playfield.turnMove(1)) {
+					sounds.playClip(Clips.ROTATE_FAIL);
+				} else {
+					sounds.playClip(Clips.ROTATE_LR);
+				}; 
 				break;
 			case LTURN:
-				_playfield.turnMove(-1);  // ignored if no move possible
+				if(_playfield.turnMove(-1)) {
+					sounds.playClip(Clips.ROTATE_FAIL);
+				} else {
+					sounds.playClip(Clips.ROTATE_LR);
+				}; 
 				break;
 			case SOFTDOWN:				
 				_playfield.moveDown();	// ignored if no move possible
 				_lastSoftDropLineCount+=1;
-				sounds.play("SFX_PieceSoftDrop.wav");
+				// -- tell the view that model has changed
+				sounds.playClip(Clips.SOFTDROP);
 				break;
 			case HARDDOWN:				
 				_lastHardDropLineCount=0;
 				while (!_playfield.moveDown()) {
 					_lastHardDropLineCount++;
-					// -- tell the view that model has changed
+					// -- tell the view that model has changed because of while loop
 					setChanged();
 					notifyObservers("During FALLING after HARDOWN");
 				}
+				sounds.playClip(Clips.HARDDROP);
 				breakFlag = true;
 				break;
 			case HOLD:
@@ -366,9 +392,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 						e.printStackTrace();
 					} 
 					_playfield.spawn(toField);
-					// -- tell the view that model has changed
-					setChanged();
-					notifyObservers("During FALLING after HOLD");
+					sounds.playClip(Clips.HOLD);
 				}
 				_holdAllowed = false; 
 				break;
@@ -391,9 +415,12 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		if (_playfield.moveDown()) { 
 			// landed on surface
 			_phaseState = TetrisPhase.LOCK;
-			sounds.play("SFX_PieceTouchDown.wav");
+			// -- tell the view that model has changed
+			setChanged();
+			notifyObservers("During FALLING");
+			sounds.playClip(Clips.TOUCHDOWN);
 		}
-		sounds.play("SFX_PieceFall.wav");
+		sounds.playClip(Clips.FALLING);
 	}
 
 	/*
@@ -474,6 +501,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// -- tell the view that model has changed
 			setChanged();
 			notifyObservers("During LOCK");
+			sounds.playClip(Clips.LOCK);
 
 		} while (!breakFlag && _lockTimer.getRemainingTime() > 0);
 
@@ -487,7 +515,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		if (_phaseState == TetrisPhase.LOCK) {// only merge if we are still in phase LOCK
 			_playfield.merge();
 			_phaseState = TetrisPhase.PATTERN; // go to next phase
-			sounds.play("SFX_PieceLockdown.wav");
 		}
 
 	}
@@ -526,7 +553,13 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_lineCount += _lastClearedLinesCount;
 
 		// other statistics
-		if (_lastClearedLinesCount == 4) _tetrisesCount++;
+		if (_lastClearedLinesCount == 4) {
+			_tetrisesCount++;
+			// -- tell the view that model has changed
+			setChanged();
+			notifyObservers("TETRIS");
+			sounds.playClip(Clips.TETRIS);
+		}
 		
 		// reset the counters
 		_lastHardDropLineCount = 0;
@@ -548,7 +581,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			int old = _currentLevel;
 			_currentLevel = _lineCount/10 +1;
 			if (_currentLevel > old) {
-				sounds.play("SFX_LevelUp.wav");
+				//sounds.play("SFX_LevelUp.wav");
 			}
 		}
 		_phaseState = TetrisPhase.GENERATION;
