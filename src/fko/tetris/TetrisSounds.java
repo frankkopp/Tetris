@@ -51,16 +51,17 @@ public class TetrisSounds {
 	 */
 	public enum Clips {
 		// ENUM		Filename w/o .wav
-		FALLING 	("SFX_PieceFall"),
+		FALLING 		("SFX_PieceFall"),
 		TOUCHDOWN 	("SFX_PieceTouchDown"),
 		LOCK 		("SFX_PieceLockdown"),
-		SOFTDROP	("SFX_PieceSoftDrop"),
-		HARDDROP	("SFX_PieceHardDrop"),
-		HOLD		("SFX_PieceHold"),
+		SOFTDROP		("SFX_PieceSoftDrop"),
+		HARDDROP		("SFX_PieceHardDrop"),
+		HOLD			("SFX_PieceHold"),
 		MOVE_LR		("SFX_PieceMoveLR"),
 		ROTATE_FAIL	("SFX_PieceRotateFail"),
 		ROTATE_LR	("SFX_PieceRotateLR"),
-		TOUCH_LR	("SFX_PieceTouchLR"),
+		TOUCH_LR		("SFX_PieceTouchLR"),
+		LINECLEAR   ("lines"),
 		TETRIS		("SFX_SpecialTetris"),
 		GAME_START 	("SFX_GameStart"),
 		GAME_OVER 	("SFX_GameOver");
@@ -77,6 +78,9 @@ public class TetrisSounds {
 
 	// available sounds mapped by the enum
 	private Map<Clips, URL> _sounds;
+	
+	// sound on/off
+	private boolean soundOn = true;
 
 	/**
 	 * Create an object with all tetris sounds available 
@@ -106,7 +110,7 @@ public class TetrisSounds {
 	public void playClip(Clips c) {
 		
 		// sound was not available
-		if (_sounds.get(c) == null) return;
+		if (_sounds.get(c) == null || !soundOn) return;
 		
 		// execute in a new thread to play sound
 		_executor.execute(() -> {
@@ -140,4 +144,12 @@ public class TetrisSounds {
              clip.start();
 		});			
 	}
+	
+	public void soundOff() {
+		soundOn=false;
+	}
+	public void soundOn() {
+		soundOn=true;
+	}
+
 }

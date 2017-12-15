@@ -79,13 +79,14 @@ import javafx.stage.Stage;
  * 
  * @see java.util.Observer#update(java.util.Observable, java.lang.Object) 
  * 
+ * TODO: Fix highscore list on Mac
  * TODO: Improve Highscore List - maybe separate window? More info, Level, Tetrises, etc.
  */
 public class TetrisGUI_Controller implements Observer {
 
 	private static final WindowStateFX windowState = WindowStateFX.getInstance(); // to save and restore the last position of our window
 	private static final TetrisSettings settings = TetrisSettings.getInstance();
-	
+
 	private Stage _primaryStage; // handle to primary stage
 	private TetrisGame _tetrisGame; // holds a running tetrisGame
 	private PlayfieldPane _playfieldPane; // handle to PlayfieldPane
@@ -97,13 +98,13 @@ public class TetrisGUI_Controller implements Observer {
 	 */
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
-		
+
 		_primaryStage = TetrisGUI.getPrimaryStage(); // set convenience reference to primary stage
-		
+
 		assertFXML(); // FXML auto checks
 
 		statusbar_copyright_text.setText("Tetris(c) by Frank Kopp 2017 v"+Tetris.VERSION);
-		
+
 		addMemLabelUpdater(); // add constantly updated memory info into status panel
 		addPlayfieldPane(); // add the playfield pane 
 		addNextQueuePane(); // add the next queue pane
@@ -111,15 +112,15 @@ public class TetrisGUI_Controller implements Observer {
 		addHowToText();
 		updateHighScoreText();
 		updateStatus();
-		
+
 		// change the startLevelLabel when the slider changes
 		startLevelLabel.textProperty().bind(
-	            Bindings.format(
-	                "%.0f",
-	                startLevelSlider.valueProperty()
-	            )
-	        );
-		
+				Bindings.format(
+						"%.0f",
+						startLevelSlider.valueProperty()
+						)
+				);
+
 		readSettings();
 	}
 
@@ -170,7 +171,7 @@ public class TetrisGUI_Controller implements Observer {
 		AnchorPane.setLeftAnchor(_nextQueuePane, 0.0);
 		AnchorPane.setRightAnchor(_nextQueuePane, 0.0);
 		nextQueueBox.getChildren().add(_nextQueuePane);
-		
+
 	}
 
 	/*
@@ -183,23 +184,23 @@ public class TetrisGUI_Controller implements Observer {
 		AnchorPane.setLeftAnchor(_holdPane, 0.0);
 		AnchorPane.setRightAnchor(_holdPane, 0.0);
 		holdBox.getChildren().add(_holdPane);
-		
+
 	}
-	
+
 	/**
 	 * 
 	 */
 	private void addHowToText() {
 		// howto Text
 		Text howTo = new Text(String.format(
-				  "L Arrow to move left.%n"
-				+ "R Arrow to move right.%n"
-				+ "DOWN Arrow to soft drop.%n"
-				+ "SPACE to hard drop.%n"
-				+ "A to turn left.%n"
-				+ "S to turn right.%n"
-				+ "UP Arrow to turn right.%n"
-				+ "C to swap with Hold"));
+				"L Arrow to move left.%n"
+						+ "R Arrow to move right.%n"
+						+ "DOWN Arrow to soft drop.%n"
+						+ "SPACE to hard drop.%n"
+						+ "A to turn left.%n"
+						+ "S to turn right.%n"
+						+ "UP Arrow to turn right.%n"
+						+ "C to swap with Hold"));
 		howTo.setStyle("-fx-font-family: Comic Sans MS Bold; -fx-fill: red; -fx-font-size: 8pt");
 		howtoText.getChildren().add(howTo);
 	}
@@ -333,29 +334,29 @@ public class TetrisGUI_Controller implements Observer {
 	 *	print the highscore list 
 	 */
 	private void updateHighScoreText() {
-	
+
 		highScorePane.getChildren().clear();
 		highScorePane.getHeight();
-				
+
 		List<Text> textlines = new ArrayList<>(15);
-		
+
 		final Font font = Font.font(
 				"Lucida Console", 
 				FontWeight.NORMAL, 
 				FontPosture.REGULAR , 
 				10);
-		
+
 		// highscore Text
 		Text highScoreText = new Text(String.format(
-				  "HIGHSCORE %n"
-				+ "===========%n"));
+				"HIGHSCORE %n"
+						+ "===========%n"));
 		highScoreText.setFont(font);
 		highScoreText.setFill(Color.BLACK);
-		
+
 		textlines.add(highScoreText);
-		
+
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
-	
+
 		List<HighScoreData.HighScoreEntry> list = HighScoreData.getInstance().getList();
 		list.stream().limit(15).forEach((e) -> {
 			final String txt = String.format("%-12.12s: %,6d  %8s%n", e.name, e.score, e.date.format(formatter));
@@ -364,12 +365,12 @@ public class TetrisGUI_Controller implements Observer {
 			tmp.setFill(Color.BLACK);
 			textlines.add(tmp);
 		});
-		
+
 		TextFlow flow = new TextFlow();	
 		flow.getChildren().addAll(textlines);
-		
+
 		highScorePane.getChildren().add(flow);
-	
+
 	}
 
 	/*
@@ -422,7 +423,7 @@ public class TetrisGUI_Controller implements Observer {
 	public static WindowStateFX getWindowState() {
 		return windowState;
 	}
-	
+
 
 	/*
 	 * Save the current sizes and coordinates of all windows to restore them
@@ -511,7 +512,7 @@ public class TetrisGUI_Controller implements Observer {
 	void resumeGame_action(ActionEvent event) {
 		_tetrisGame.setPaused(false);
 	}
-	
+
 	@FXML
 	void restoreFocusAction(ActionEvent event) {
 		rootPanel.requestFocus();
@@ -522,15 +523,22 @@ public class TetrisGUI_Controller implements Observer {
 		AboutDialog aboutDialogStage = new AboutDialog();
 		aboutDialogStage.showAndWait();
 	}
-	
-    @FXML
-    void playerNameChangeAction(ActionEvent event) {
-    	System.out.println("New Name: "+ playerNameField.getText());
-    	if (_tetrisGame!= null) {
-    		_tetrisGame.setPlayerName(playerNameField.getText());
-    	}
-    	rootPanel.requestFocus();
-    }
+
+	@FXML
+	void playerNameChangeAction(ActionEvent event) {
+		if (_tetrisGame!= null) {
+			_tetrisGame.setPlayerName(playerNameField.getText());
+		}
+		rootPanel.requestFocus();
+	}
+
+	@FXML
+	void soundOnAction(ActionEvent event) {
+		if (_tetrisGame!= null) {
+			_tetrisGame.setSoundOn(soundOnOption.isSelected() ? true : false);
+		}
+	}
+
 
 	// #######################################################
 	// FXML Setup
@@ -614,30 +622,33 @@ public class TetrisGUI_Controller implements Observer {
 	@FXML // fx:id="resumeGame_button"
 	private Button resumeGame_button; // Value injected by FXMLLoader
 
-    @FXML // fx:id="startLevelSlider"
-    private Slider startLevelSlider; // Value injected by FXMLLoader
-	
-    @FXML // fx:id="nextQueueBox"
-    private Pane nextQueueBox; // Value injected by FXMLLoader
-    
-    @FXML // fx:id="howtoText"
-    private Pane howtoText; // Value injected by FXMLLoader
-    
-    @FXML // fx:id="peekOption"
-    protected CheckMenuItem peekOption; // Value injected by FXMLLoader
-    
-    @FXML // fx:id="ghostPieceOption"
-    protected CheckMenuItem ghostPieceOption; // Value injected by FXMLLoader
-    
-    @FXML // fx:id="highScorePane"
-    private Pane highScorePane; // Value injected by FXMLLoader
-    
-    @FXML // fx:id="playerNameField"
-    private TextField playerNameField; // Value injected by FXMLLoader
-    
-    @FXML // fx:id="nextQueueOption"
-    private CheckMenuItem nextQueueOption; // Value injected by FXMLLoader
-    
+	@FXML // fx:id="startLevelSlider"
+	private Slider startLevelSlider; // Value injected by FXMLLoader
+
+	@FXML // fx:id="nextQueueBox"
+	private Pane nextQueueBox; // Value injected by FXMLLoader
+
+	@FXML // fx:id="howtoText"
+	private Pane howtoText; // Value injected by FXMLLoader
+
+	@FXML // fx:id="peekOption"
+	protected CheckMenuItem peekOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="ghostPieceOption"
+	protected CheckMenuItem ghostPieceOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="highScorePane"
+	private Pane highScorePane; // Value injected by FXMLLoader
+
+	@FXML // fx:id="playerNameField"
+	private TextField playerNameField; // Value injected by FXMLLoader
+
+	@FXML // fx:id="nextQueueOption"
+	private CheckMenuItem nextQueueOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="soundOnOption"
+	private CheckMenuItem soundOnOption; // Value injected by FXMLLoader
+
 	/*
 	 * FXML checks
 	 */
@@ -674,6 +685,7 @@ public class TetrisGUI_Controller implements Observer {
 		assert highScorePane != null : "fx:id=\"highScorePane\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert playerNameField != null : "fx:id=\"playerNameField\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert nextQueueOption != null : "fx:id=\"nextQueueOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert soundOnOption != null : "fx:id=\"soundOnOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }

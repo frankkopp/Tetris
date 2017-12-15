@@ -36,7 +36,6 @@ import fko.tetris.tetriminos.Tetrimino;
  * point in time.
  * 
  * TODO: Enable switching sound on and off
- * TODO: Should sound be in the model?
  * 
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
@@ -46,10 +45,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * many are shown in the ui.
 	 */
 	public static final int NEXTQUEUE_SIZE = 7;
-	
+
 	// sounds are play at certain points ==> should this be in model or view??
-	private static final TetrisSounds sounds = new TetrisSounds();
-	
+	private static final TetrisSounds _sounds = new TetrisSounds();
+
 	// Tetris state
 	private Playfield 	_playfield;		// matrix with all cells
 	private Bag			_bag;			// bag with all 7 Tetriminos - randomly shuffled to the next queue
@@ -72,18 +71,18 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	private TetrisTimer _fallingTimer = new TetrisTimer(1000); // timer to control falling time
 	private TetrisTimer _lockTimer = new TetrisTimer(500); // timer to control lock time
-	
+
 	private LinkedBlockingQueue<TetrisControlEvents> _controlQueue = new LinkedBlockingQueue<>();
-		
+
 	private boolean _holdAllowed = true; // using hold is only allowed once between LOCK phases
-	
+
 	private int _lastClearedLinesCount = 0;
 	private int _lastHardDropLineCount = 0;
 	private int _lastSoftDropLineCount = 0;
 
 	private HighScoreData _highScoreData; // Contains a List of high scores
 	private String _playerName = "Unknown Player";
-	
+
 	/**
 	 * Creates a Tetris game with default values
 	 */
@@ -104,7 +103,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_score 			= 0;
 		_lineCount 		= (startLevel-1) * 10; // if started with a higher level assume appropriate line count 
 		_tetrisesCount 	= 0;
-		
+
 		_highScoreData = HighScoreData.getInstance();
 	}
 
@@ -143,11 +142,11 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	@Override
 	public void run() {
 		_gameStopped = false;
-		
+
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread started");
-		sounds.playClip(Clips.GAME_START);
+		_sounds.playClip(Clips.GAME_START);
 
 		completionPhase();
 
@@ -163,10 +162,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			case GENERATION:
 				/*
 				 * Random Generation
-				 * Tetris uses a “bag” system to determine the sequence of Tetriminos that appear during game play. 
+				 * Tetris uses a ï¿½bagï¿½ system to determine the sequence of Tetriminos that appear during game play. 
 				 * This system allows for equal distribution among the seven Tetriminos.
 				 * The seven different Tetriminos are placed into a virtual bag, then shuffled into a random order. 
-				 * This order is the sequence that the bag “feeds” the Next Queue. Every time a new Tetrimino is 
+				 * This order is the sequence that the bag ï¿½feedsï¿½ the Next Queue. Every time a new Tetrimino is 
 				 * generated and starts its fall within the Matrix, the Tetrimino at the front of the line in the bag 
 				 * is placed at the end of the Next Queue, pushing all Tetriminos in the Next Queue forward by one. 
 				 * The bag is refilled and reshuffled once it is empty.
@@ -186,10 +185,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				 * Falling Phase, as long as the Tetrimino is not yet Locked down. A Tetrimino that is Hard Dropped 
 				 * Locks Down immediately. However, if a Tetrimino naturally falls or Soft Drops onto a landing 
 				 * Surface, it is given 0.5 seconds on a Lock Down Timer before it actually Locks Down.
-				 * Three rule sets —Infinite Placement, Extended, and Classic— dictate the conditions for Lock Down 
+				 * Three rule sets ï¿½Infinite Placement, Extended, and Classicï¿½ dictate the conditions for Lock Down 
 				 * 
 				 * Note: Using the Super Rotation System, rotating a Tetrimino often causes the y-coordinate of the 
-				 * Tetrimino to increase, i.e., it “lifts up” off the Surface it landed on. The Lock Down Timer does 
+				 * Tetrimino to increase, i.e., it ï¿½lifts upï¿½ off the Surface it landed on. The Lock Down Timer does 
 				 * not reset in this case, but it does stop counting down until the Tetrimino lands again on a Surface
 				 * that has the same (or higher) y-coordinate as it did before it was rotated. Only if it lands on a 
 				 * Surface with a lower y-coordinate will the timer reset.
@@ -224,7 +223,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				/*
 				 * Here, any animation scripts are executed within the Matrix. The Tetris Engine moves on to the 
 				 * Eliminate Phase once all animation scripts have been run.
-				 * TODO: Add Sounds and maybe animations
 				 */
 				_phaseState = TetrisPhase.ELIMINATE; // not implemented
 				break;
@@ -238,7 +236,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				 * 
 				 * Game Statistics
 				 * Statistics such as the number of Singles, Doubles, Triples, Tetrises, and T-Spins can also be 
-				 * tracked in the Eliminate Phase. Ideally, some sort of High Score Table should record the player’s
+				 * tracked in the Eliminate Phase. Ideally, some sort of High Score Table should record the playerï¿½s
 				 * name, the highest level reached, his total score, and other statistics that can be tracked in 
 				 * this phase.
 				 */
@@ -273,7 +271,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 		// save highscore 
 		_highScoreData.addEntryAndSave(_playerName, _score, LocalDateTime.now());
-		
+
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread stopped");
@@ -291,7 +289,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// -- tell the view that model has changed
 			setChanged();
 			notifyObservers("Game Over");
-			sounds.playClip(Clips.GAME_OVER);
+			_sounds.playClip(Clips.GAME_OVER);
 		} else {
 			// Immediately fall into visible area and check for collision
 			if (_playfield.moveDown()) {
@@ -309,12 +307,12 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * FALLING phase
 	 */
 	private void fallingPhase() {
-		
+
 		// Start falling timer
 		_fallingTimer.addObserver(this);
 		_fallingTimer.setTimer(calculateFallingTime());
 		_fallingTimer.start();
-		
+
 		// clear the control queue
 		_controlQueue.clear();
 
@@ -332,43 +330,43 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			} catch (InterruptedException e) { /* empty*/ }
 
 			waitIfPaused();
-			
+
 			// event handling
 			switch(event) {
 			case LEFT:	
 				if(_playfield.moveSideway(-1)) {
-					sounds.playClip(Clips.TOUCH_LR);
+					_sounds.playClip(Clips.TOUCH_LR);
 				} else {
-					sounds.playClip(Clips.MOVE_LR);
+					_sounds.playClip(Clips.MOVE_LR);
 				}; 
-				
+
 				break;
 			case RIGHT:
 				if(_playfield.moveSideway(1)) {
-					sounds.playClip(Clips.TOUCH_LR);
+					_sounds.playClip(Clips.TOUCH_LR);
 				} else {
-					sounds.playClip(Clips.MOVE_LR);
+					_sounds.playClip(Clips.MOVE_LR);
 				}; 
 				break;
 			case RTURN:
 				if(_playfield.turnMove(1)) {
-					sounds.playClip(Clips.ROTATE_FAIL);
+					_sounds.playClip(Clips.ROTATE_FAIL);
 				} else {
-					sounds.playClip(Clips.ROTATE_LR);
+					_sounds.playClip(Clips.ROTATE_LR);
 				}; 
 				break;
 			case LTURN:
 				if(_playfield.turnMove(-1)) {
-					sounds.playClip(Clips.ROTATE_FAIL);
+					_sounds.playClip(Clips.ROTATE_FAIL);
 				} else {
-					sounds.playClip(Clips.ROTATE_LR);
+					_sounds.playClip(Clips.ROTATE_LR);
 				}; 
 				break;
 			case SOFTDOWN:				
 				_playfield.moveDown();	// ignored if no move possible
 				_lastSoftDropLineCount+=1;
 				// -- tell the view that model has changed
-				sounds.playClip(Clips.SOFTDROP);
+				_sounds.playClip(Clips.SOFTDROP);
 				break;
 			case HARDDOWN:				
 				_lastHardDropLineCount=0;
@@ -378,7 +376,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 					setChanged();
 					notifyObservers("During FALLING after HARDOWN");
 				}
-				sounds.playClip(Clips.HARDDROP);
+				_sounds.playClip(Clips.HARDDROP);
 				breakFlag = true;
 				break;
 			case HOLD:
@@ -392,7 +390,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 						e.printStackTrace();
 					} 
 					_playfield.spawn(toField);
-					sounds.playClip(Clips.HOLD);
+					_sounds.playClip(Clips.HOLD);
 				}
 				_holdAllowed = false; 
 				break;
@@ -418,9 +416,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// -- tell the view that model has changed
 			setChanged();
 			notifyObservers("During FALLING");
-			sounds.playClip(Clips.TOUCHDOWN);
+			_sounds.playClip(Clips.TOUCHDOWN);
 		}
-		sounds.playClip(Clips.FALLING);
+		_sounds.playClip(Clips.FALLING);
 	}
 
 	/*
@@ -434,10 +432,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// Start lock timer - lock time is always 500ms
 		_lockTimer.addObserver(this);
 		_lockTimer.restart();
-		
+
 		// clear the control queue
 		_controlQueue.clear();
-		
+
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
 		// we query an event blocking if necessary
@@ -452,7 +450,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			} catch (InterruptedException e) { /* empty*/ }
 
 			waitIfPaused();
-			
+
 			// event handling
 			switch(event) {
 			case LEFT:	
@@ -489,7 +487,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			case NONE:
 				break;
 			}
-			
+
 			// check if Tetrimino can move down
 			// if yes then go back to phase FALLING
 			if (_playfield.canMoveDown()) {
@@ -501,16 +499,16 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			// -- tell the view that model has changed
 			setChanged();
 			notifyObservers("During LOCK");
-			sounds.playClip(Clips.LOCK);
+			_sounds.playClip(Clips.LOCK);
 
 		} while (!breakFlag && _lockTimer.getRemainingTime() > 0);
 
 		// stop the timer just to make sure
 		_lockTimer.stop();
-		
+
 		// allow new holds
 		_holdAllowed = true;
-		
+
 		// merge Tetrimino into background
 		if (_phaseState == TetrisPhase.LOCK) {// only merge if we are still in phase LOCK
 			_playfield.merge();
@@ -525,12 +523,12 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	private void patternPhase() {
 		//System.out.println("Enter PATTERN phase");
-		
+
 		// look for LINE CLEAR
 		_playfield.markLinesToBeCleared();
-		
+
 		// currently no other patterns to look for 
-		
+
 		_phaseState = TetrisPhase.ITERATE;
 	}
 
@@ -545,7 +543,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 		// clear lines
 		_lastClearedLinesCount = _playfield.clearMarkedLines();
-		
+
 		// score
 		_score += calculateLineClearScore(_lastClearedLinesCount);
 		_score += _lastSoftDropLineCount; // soft drop points 1 x number of lines
@@ -553,19 +551,22 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_lineCount += _lastClearedLinesCount;
 
 		// other statistics
-		if (_lastClearedLinesCount == 4) {
-			_tetrisesCount++;
-			// -- tell the view that model has changed
-			setChanged();
-			notifyObservers("TETRIS");
-			sounds.playClip(Clips.TETRIS);
+		if (_lastClearedLinesCount > 0) {
+			_sounds.playClip(Clips.LINECLEAR);
+			if (_lastClearedLinesCount == 4) {
+				_tetrisesCount++;
+				// -- tell the view that model has changed
+				setChanged();
+				notifyObservers("TETRIS");
+				_sounds.playClip(Clips.TETRIS);
+			}
 		}
-		
+
 		// reset the counters
 		_lastHardDropLineCount = 0;
 		_lastSoftDropLineCount = 0;
 		_lastClearedLinesCount = 0;
-				
+
 		_phaseState = TetrisPhase.COMPLETION;
 	}
 
@@ -626,7 +627,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		}
 		return 1000;
 	}
-	
+
 	/**
 	 * This is called from the ui to add control events (e.g. key press) to our queue.
 	 * @param e
@@ -733,7 +734,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	public int getScore() {
 		return _score;
 	}
-	
+
 	/**
 	 * @return the _nextQueue
 	 */
@@ -767,7 +768,19 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	public void setPlayerName(String text) {
 		_playerName = text;
-		
+
+	}
+
+	/**
+	 * Turn sound on or off
+	 * @param b
+	 */
+	public void setSoundOn(boolean b) {
+		if (b) {
+			_sounds.soundOn();
+		} else {
+			_sounds.soundOff();
+		}
 	}
 
 }
