@@ -768,7 +768,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	public void setPlayerName(String text) {
 		_playerName = text;
-
 	}
 
 	/**

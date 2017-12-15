@@ -35,6 +35,11 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import fko.tetris.HighScoreData;
 import fko.tetris.Tetris;
@@ -42,7 +47,11 @@ import fko.tetris.TetrisControlEvents;
 import fko.tetris.TetrisGame;
 import fko.tetris.TetrisSettings;
 import fko.tetris.util.HelperTools;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -79,7 +88,6 @@ import javafx.stage.Stage;
  * 
  * @see java.util.Observer#update(java.util.Observable, java.lang.Object) 
  * 
- * TODO: Fix highscore list on Mac
  * TODO: Improve Highscore List - maybe separate window? More info, Level, Tetrises, etc.
  */
 public class TetrisGUI_Controller implements Observer {
@@ -92,6 +100,9 @@ public class TetrisGUI_Controller implements Observer {
 	private PlayfieldPane _playfieldPane; // handle to PlayfieldPane
 	private NextQueuePane _nextQueuePane; // handle to NextQueuePane
 	private HoldPane _holdPane; // handle to NextQueuePane
+
+	// to use for scheduled updates of ui properties - e.g. mem status label
+	private final ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
 
 	/**
 	 * This method is called by the FXMLLoader when initialization is complete
@@ -171,7 +182,6 @@ public class TetrisGUI_Controller implements Observer {
 		AnchorPane.setLeftAnchor(_nextQueuePane, 0.0);
 		AnchorPane.setRightAnchor(_nextQueuePane, 0.0);
 		nextQueueBox.getChildren().add(_nextQueuePane);
-
 	}
 
 	/*
@@ -184,7 +194,6 @@ public class TetrisGUI_Controller implements Observer {
 		AnchorPane.setLeftAnchor(_holdPane, 0.0);
 		AnchorPane.setRightAnchor(_holdPane, 0.0);
 		holdBox.getChildren().add(_holdPane);
-
 	}
 
 	/**
@@ -209,22 +218,15 @@ public class TetrisGUI_Controller implements Observer {
 	 * Adds an updater to the mem label in the status bar
 	 */
 	private void addMemLabelUpdater() {
-		Task<Void> dynamicTimeTask = new Task<Void>() {
+		Runnable dynamicTimeTask = new Runnable() {
 			@Override
-			protected Void call() throws Exception {
-				while (true) {
-					updateMessage(HelperTools.getMBytes(Runtime.getRuntime().freeMemory()) + " MB / "
-							+ HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB");
-					try {Thread.sleep(500);} catch (InterruptedException ex) {break;}
-				}
-				return null;
+			public void run() {
+				Platform.runLater(	() -> 
+				statusbar_mem_text.setText(HelperTools.getMBytes(Runtime.getRuntime().freeMemory()) + " MB / "
+							+ HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB"));
 			}
 		};
-		statusbar_mem_text.textProperty().bind(dynamicTimeTask.messageProperty());
-		Thread t2 = new Thread(dynamicTimeTask);
-		t2.setName("Statusbar Mem Labal Updater");
-		t2.setDaemon(true);
-		t2.start();
+		_executor.scheduleAtFixedRate(dynamicTimeTask, 0, 250,TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -341,7 +343,7 @@ public class TetrisGUI_Controller implements Observer {
 		List<Text> textlines = new ArrayList<>(15);
 
 		final Font font = Font.font(
-				"Lucida Console", 
+				"Courier New", 
 				FontWeight.NORMAL, 
 				FontPosture.REGULAR , 
 				10);
@@ -359,7 +361,7 @@ public class TetrisGUI_Controller implements Observer {
 
 		List<HighScoreData.HighScoreEntry> list = HighScoreData.getInstance().getList();
 		list.stream().limit(15).forEach((e) -> {
-			final String txt = String.format("%-12.12s: %,6d  %8s%n", e.name, e.score, e.date.format(formatter));
+			final String txt = String.format("%-11.11s %,7d  %8s%n", e.name+":", e.score, e.date.format(formatter));
 			final Text tmp = new Text(txt);
 			tmp.setFont(font);
 			tmp.setFill(Color.BLACK);
@@ -648,7 +650,6 @@ public class TetrisGUI_Controller implements Observer {
 
 	@FXML // fx:id="soundOnOption"
 	private CheckMenuItem soundOnOption; // Value injected by FXMLLoader
-
 	/*
 	 * FXML checks
 	 */
