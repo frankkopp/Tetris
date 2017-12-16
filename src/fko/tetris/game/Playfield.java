@@ -164,6 +164,18 @@ public class Playfield {
 	}
 
 	/**
+	 * Drops the Tetrimino and returns the lines dropped.
+	 * @return number of lines the Tetrimino was dropped
+	 */
+	public int drop() {
+		int counter = 0;
+		while (!moveDown()) {
+			counter++;
+		}
+		return counter;
+	}
+
+	/**
 	 * Move the current Tetrimino left (-1) or right (1) one cell, If blocked does not move and returns true<br/>
 	 * @return true if surface on the left or right
 	 * @param direction

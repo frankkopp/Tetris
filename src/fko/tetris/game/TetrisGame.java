@@ -28,10 +28,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import fko.tetris.game.Bag;
-import fko.tetris.game.NextQueue;
-import fko.tetris.game.Playfield;
-import fko.tetris.game.TetrisSounds;
 import fko.tetris.game.TetrisSounds.Clips;
 import fko.tetris.tetriminos.Tetrimino;
 
@@ -384,12 +380,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				_sounds.playClip(Clips.SOFTDROP);
 				break;
 			case HARDDOWN:				
-				_lastHardDropLineCount=0;
-				while (!_playfield.moveDown()) {
-					_lastHardDropLineCount++;
-					setChanged();
-					notifyObservers("During FALLING after HARDOWN");
-				}
+				_lastHardDropLineCount = _playfield.drop(); 
+				setChanged();
+				notifyObservers("During FALLING after HARDOWN");
 				_sounds.playClip(Clips.HARDDROP);
 				breakFlag = true;
 				break;

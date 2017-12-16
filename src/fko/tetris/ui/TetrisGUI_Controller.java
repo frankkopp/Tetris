@@ -105,6 +105,7 @@ public class TetrisGUI_Controller implements Observer {
 	private final ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
 	
 	private Bot _currentBot;
+	private String _oldPlayerName;
 
 	/**
 	 * This method is called by the FXMLLoader when initialization is complete
@@ -140,7 +141,9 @@ public class TetrisGUI_Controller implements Observer {
 	}
 
 	private void initializeBot() {
+
 		if (botPlayerOption.isSelected() && _tetrisGame != null && _tetrisGame.isRunning()) {
+			// start selected bot
 			final Toggle selectedToggle = bots.getSelectedToggle();
 			if (_currentBot != null) _currentBot.stopBot();
 			if (selectedToggle == simpleBotOption) {
@@ -150,10 +153,18 @@ public class TetrisGUI_Controller implements Observer {
 				_currentBot = new MiniMaxBot(_tetrisGame);
 				_currentBot.startBot();
 			} else {
-				System.out.println("NO BOT");
+				Tetris.criticalError("NO BOT SELECTED");
+				return;
 			}
+			
+			// change player name to bot name, save player name to restore later
+			_oldPlayerName = playerNameField.getText();
+			playerNameField.setText(_currentBot.getClass().getSimpleName());
+			_tetrisGame.setPlayerName(playerNameField.getText());
+			
 		} else {
 			if (_currentBot!=null) _currentBot.stopBot();
+			playerNameField.setText(_oldPlayerName);
 		}
 	}
 
@@ -468,6 +479,7 @@ public class TetrisGUI_Controller implements Observer {
 		settings.setProperty("next_queue_list", nextQueueOption.isSelected() ? "on" : "off");
 		settings.setProperty("peek_spawn", peekOption.isSelected() ? "on" : "off");
 		settings.setProperty("ghost_piece", ghostPieceOption.isSelected() ? "on" : "off");
+		settings.setProperty("bot_player", botPlayerOption.isSelected() ? "on" : "off");
 		//settings.setProperty("start_level", Double.toString((int)startLevelSlider.getValue()));
 		settings.save();
 	}
@@ -478,9 +490,11 @@ public class TetrisGUI_Controller implements Observer {
 	private void readSettings() {
 		// read in settings
 		playerNameField.setText(settings.getProperty("player_name", "Unknown Player"));
+		_oldPlayerName = playerNameField.getText();
 		nextQueueOption.setSelected(settings.getProperty("next_queue_list", "on").equals("on") ? true : false);
 		peekOption.setSelected(settings.getProperty("peek_spawn", "on").equals("on") ? true : false);
 		ghostPieceOption.setSelected(settings.getProperty("ghost_piece", "on").equals("on") ? true : false);
+		botPlayerOption.setSelected(settings.getProperty("bot_player", "off").equals("on") ? true : false);
 		//startLevelSlider.setValue(Double.parseDouble(settings.getProperty("start_level", "1.0")));
 	}
 
