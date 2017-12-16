@@ -480,6 +480,8 @@ public class TetrisGUI_Controller implements Observer {
 		settings.setProperty("peek_spawn", peekOption.isSelected() ? "on" : "off");
 		settings.setProperty("ghost_piece", ghostPieceOption.isSelected() ? "on" : "off");
 		settings.setProperty("bot_player", botPlayerOption.isSelected() ? "on" : "off");
+		settings.setProperty("simple_bot", simpleBotOption.isSelected() ? "on" : "off");
+		settings.setProperty("minimax_bot", minimaxBotOption.isSelected() ? "on" : "off");
 		//settings.setProperty("start_level", Double.toString((int)startLevelSlider.getValue()));
 		settings.save();
 	}
@@ -495,6 +497,8 @@ public class TetrisGUI_Controller implements Observer {
 		peekOption.setSelected(settings.getProperty("peek_spawn", "on").equals("on") ? true : false);
 		ghostPieceOption.setSelected(settings.getProperty("ghost_piece", "on").equals("on") ? true : false);
 		botPlayerOption.setSelected(settings.getProperty("bot_player", "off").equals("on") ? true : false);
+		simpleBotOption.setSelected(settings.getProperty("simple_bot", "off").equals("on") ? true : false);
+		minimaxBotOption.setSelected(settings.getProperty("minimax_bot", "off").equals("on") ? true : false);
 		//startLevelSlider.setValue(Double.parseDouble(settings.getProperty("start_level", "1.0")));
 	}
 
