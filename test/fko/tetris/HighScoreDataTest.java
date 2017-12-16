@@ -30,7 +30,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import fko.tetris.HighScoreData.HighScoreEntry;
+import fko.tetris.game.HighScoreData.HighScoreEntry;
+import fko.tetris.game.HighScoreData;
 
 /**
  * 
@@ -57,7 +58,7 @@ public class HighScoreDataTest {
 		assertTrue(hd!=null);
 		final List<HighScoreEntry> list = hd.getList();
 		assertTrue(list != null);
-		final HighScoreEntry newEntry = new HighScoreEntry("Test Name", 0, LocalDateTime.now());
+		final HighScoreEntry newEntry = new HighScoreEntry("Test Name", 0, 0, 0, LocalDateTime.now());
 		hd.addEntry(newEntry);
 		assertTrue(list.contains(newEntry));
 		list.stream().forEach((e) -> System.out.println(e.toString()));
@@ -71,7 +72,7 @@ public class HighScoreDataTest {
 		assertTrue(hd!=null);
 		final List<HighScoreEntry> list = hd.getList();
 		assertTrue(list != null);
-		final HighScoreEntry newEntry = new HighScoreEntry("Test Name", 0, LocalDateTime.now());
+		final HighScoreEntry newEntry = new HighScoreEntry("Test Name", 0, 0 , 0, LocalDateTime.now());
 		boolean result = hd.addEntryAndSave(newEntry);
 		assertTrue(list.contains(newEntry));
 		assertTrue(result);

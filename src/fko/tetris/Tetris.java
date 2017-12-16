@@ -26,18 +26,27 @@
  */
 package fko.tetris;
 
+import fko.tetris.game.HighScoreData;
+import fko.tetris.game.TetrisGame;
+import fko.tetris.game.TetrisSettings;
 import fko.tetris.ui.TetrisGUI;
 
 /**
- * Main class for Tetris app.
+ * Main class for Tetris app. Starts up the JavaFX ui and exits.
+ * 
+ * TODO: Implement self playing BOT
+ * TODO: Use resource files for internationalization
  */
 public class Tetris {
+
+	// VERSION
+	public static final String VERSION = "1.1"; 
 	
 	// pre-load the high score data and share it through the class as static
-	public final static HighScoreData _highScoreData = HighScoreData.getInstance();
+	public static final HighScoreData _highScoreData = HighScoreData.getInstance();
 	
 	// pre-load setting
-	public final static TetrisSettings _tetrisSettings = TetrisSettings.getInstance();
+	public static final TetrisSettings _tetrisSettings = TetrisSettings.getInstance();
 
 	/**
 	 * The handle to the user interface class
@@ -96,9 +105,9 @@ public class Tetris {
     }
     
     /**
-     * Called when there is an unexpected but recoverable error.<br/>
-     * Prints a stack trace together with a provided message.<br/>
-     * @param message to be displayed with the exception message
+     * Called when there is an unexpected minor error.<br/>
+     * Prints a provided message.<br/>
+     * @param message to be displayed
      */
     public static void minorError(String message) {
         System.err.println(message);

@@ -25,7 +25,7 @@ package fko.tetris.ui;
 
 import java.util.ListIterator;
 
-import fko.tetris.NextQueue;
+import fko.tetris.game.NextQueue;
 import fko.tetris.tetriminos.Tetrimino;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;

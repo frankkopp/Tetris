@@ -27,6 +27,8 @@ import java.util.ListIterator;
 
 import org.junit.Test;
 
+import fko.tetris.game.Bag;
+import fko.tetris.game.NextQueue;
 import fko.tetris.tetriminos.Tetrimino;
 
 /**
