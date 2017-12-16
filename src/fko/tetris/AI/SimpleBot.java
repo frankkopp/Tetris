@@ -67,6 +67,10 @@ public class SimpleBot extends AbstractBot {
 			} else {
 				_game.controlQueueAdd(TetrisControlEvents.RIGHT);
 			}
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+			}
 		}
 
 		// finally a hardrop
