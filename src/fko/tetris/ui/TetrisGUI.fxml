@@ -64,7 +64,7 @@
                               <ToggleGroup fx:id="bots" />
                            </toggleGroup>
                         </RadioMenuItem>
-                        <RadioMenuItem fx:id="minimaxBotOption" mnemonicParsing="false" onAction="#botChooserAction" text="MiniMax Bot" toggleGroup="$bots" />
+                        <RadioMenuItem fx:id="lookaheadBotOption" mnemonicParsing="false" onAction="#botChooserAction" text="LookAhead Bot" toggleGroup="$bots" />
                     </items>
                   </Menu>
                 <Menu fx:id="menu_help" mnemonicParsing="false" text="?">

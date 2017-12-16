@@ -65,7 +65,7 @@ public class Playfield {
 	private Tetrimino _currentTetrimino;
 	
 	// convenience field for SKYLINE+BUFFERZONE
-	private int _playfieldHeight = SKYLINE + BUFFERZONE;
+	private static final int PLAYFIELD_HEIGHT = SKYLINE + BUFFERZONE;
 
 	// lines marked for clearing - call clearMarkedLines() to delete these lines
 	private SimpleIntList _markedLineClears;
@@ -75,7 +75,7 @@ public class Playfield {
 	 * @param _backgroundMatrix
 	 */
 	public Playfield() {
-		this._backgroundMatrix = new TetrisColor[PLAYFIELD_WIDTH][_playfieldHeight];
+		this._backgroundMatrix = new TetrisColor[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
 		clearMatrix(_backgroundMatrix);
 	}
 
@@ -326,8 +326,8 @@ public class Playfield {
 	 */
 	public int markLinesToBeCleared() {
 		// loop through the Tetrimino matrix and check for full lines
-		_markedLineClears = new SimpleIntList(_playfieldHeight);
-		for (int yi = 0; yi < _playfieldHeight; yi++) {
+		_markedLineClears = new SimpleIntList(PLAYFIELD_HEIGHT);
+		for (int yi = 0; yi < PLAYFIELD_HEIGHT; yi++) {
 			boolean foundHole = false;
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
 				if (_backgroundMatrix[xi][yi] == TetrisColor.EMPTY) {
@@ -350,7 +350,7 @@ public class Playfield {
 		int clearedCounter = 0; // as we delete rows the rows of minos shift down and the index in the 
 								// _markedLinesCleares need to be decreased by 1
 		for (int i : _markedLineClears) {
-			for (int y=i-clearedCounter;y<_playfieldHeight-1;y++) {
+			for (int y=i-clearedCounter;y<PLAYFIELD_HEIGHT-1;y++) {
 				for(int x=0;x<PLAYFIELD_WIDTH;x++) {
 					// copy the cell above to the current cell
 					_backgroundMatrix[x][y] = _backgroundMatrix[x][y+1];
@@ -368,7 +368,7 @@ public class Playfield {
 	 */
 	private void clearMatrix(TetrisColor[][] m) {
 		// iterate through all cells and initialize with zero
-		for (int yi = 0; yi < _playfieldHeight; yi++) {
+		for (int yi = 0; yi < PLAYFIELD_HEIGHT; yi++) {
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
 				m[xi][yi] = TetrisColor.EMPTY;
 			}
@@ -399,15 +399,34 @@ public class Playfield {
 		return _currentTetrimino;
 	}
 
-	@SuppressWarnings("unused")
-	private void debugPrintMatrix(TetrisColor[][] m) {
-		for (int yi = _playfieldHeight-1; yi >= 0; yi--) {
+	public void debugPrintMatrix() {
+		for (int yi = PLAYFIELD_HEIGHT-1; yi >= 0; yi--) {
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
-				System.out.print(m[xi][yi].ordinal()+" ");
+				System.out.print(_backgroundMatrix[xi][yi].ordinal()+" ");
 			}
 			System.out.println();
 		}
 	}
+
+	/**
+	 * Deep copy of the playfield. 
+	 */
+	@Override
+	public Playfield clone() {
+		Playfield newP = new Playfield();
+		// copy the matrix
+		TetrisColor[][] newM = new TetrisColor[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
+		for(int x=0; x < _backgroundMatrix.length;x++) {
+			System.arraycopy(_backgroundMatrix[x], 0, newM[x], 0, _backgroundMatrix[x].length);
+		}
+		newP._backgroundMatrix = newM;
+		newP._currentTetrimino = _currentTetrimino == null ? null : _currentTetrimino.clone();
+		newP._markedLineClears = _markedLineClears == null ? null : _markedLineClears.clone();
+
+		return newP;
+	}
+	
+	
 
 
 

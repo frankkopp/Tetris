@@ -1,15 +1,13 @@
 package fko.tetris.AI;
 
-import java.util.Random;
-
 import fko.tetris.game.Playfield;
 import fko.tetris.game.TetrisControlEvents;
 import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisPhase;
 
-public class MiniMaxBot extends AbstractBot {
+public class LockAheadBot extends AbstractBot {
 
-	public MiniMaxBot(TetrisGame game) {
+	public LockAheadBot(TetrisGame game) {
 		super(game);
 		System.out.println("MINIMAX BOT CREATED");
 	}
@@ -49,25 +47,21 @@ public class MiniMaxBot extends AbstractBot {
 	 * Calculate the control commands for playing Tetris 
 	 */
 	private void placeTetrimino() {
-		
-		Random rand = new Random();
 
-		for(int i=0;i<10;i++) { // 5 moves sideways
-			if (rand.nextInt(2) == 1) {
-				_game.controlQueueAdd(TetrisControlEvents.LEFT);
-			} else {
-				_game.controlQueueAdd(TetrisControlEvents.RIGHT);
-			}
-			if (rand.nextInt(2) == 1) {
-				_game.controlQueueAdd(TetrisControlEvents.LEFT);
-			} else {
-				_game.controlQueueAdd(TetrisControlEvents.RIGHT);
-			}
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-			}
-		}
+		// make copy playfield
+		Playfield copy = _game.getPlayfield().clone();
+		
+		// generate all permutations for current tetrimino
+		// and make the drop,
+		
+		
+		// then recursively do this for all nextQueue Tetriminos
+		// therefore generation a tree of all possibilities for the the visible 
+		// Tetriminos.
+		
+		// call an evaluation function to play the best possible drop 
+		
+		
 
 		// finally a hardrop
 		_game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
