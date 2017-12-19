@@ -483,7 +483,6 @@ public class TetrisGUI_Controller implements Observer {
 		settings.setProperty("simple_bot", simpleBotOption.isSelected() ? "on" : "off");
 		settings.setProperty("lookahead_bot", lookaheadBotOption.isSelected() ? "on" : "off");
 		settings.setProperty("sound", soundOnOption.isSelected() ? "on" : "off");
-		//settings.setProperty("start_level", Double.toString((int)startLevelSlider.getValue()));
 		settings.save();
 	}
 
@@ -501,7 +500,6 @@ public class TetrisGUI_Controller implements Observer {
 		simpleBotOption.setSelected(settings.getProperty("simple_bot", "off").equals("on") ? true : false);
 		lookaheadBotOption.setSelected(settings.getProperty("lookahead_bot", "off").equals("on") ? true : false);
 		soundOnOption.setSelected(settings.getProperty("sound", "off").equals("on") ? true : false);
-		//startLevelSlider.setValue(Double.parseDouble(settings.getProperty("start_level", "1.0")));
 	}
 
 	// #######################################################################
@@ -537,6 +535,7 @@ public class TetrisGUI_Controller implements Observer {
 		_playfieldPane.requestFocus();
 		_tetrisGame = new TetrisGame((int)startLevelSlider.getValue());
 		_tetrisGame.setPlayerName(playerNameField.getText());
+		_tetrisGame.setSoundOn(soundOnOption.isSelected());
 		_tetrisGame.addObserver(this);
 		_tetrisGame.startTetrisGame();
 		initializeBot();
