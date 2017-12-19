@@ -24,7 +24,6 @@ SOFTWARE.
 package fko.tetris.game;
 
 import fko.tetris.tetriminos.Tetrimino;
-import fko.tetris.tetriminos.Tetrimino.Facing;
 import fko.tetris.util.Coordinates;
 import fko.tetris.util.SimpleIntList;
 
@@ -91,7 +90,7 @@ public class Playfield {
 	 * @return true if collision detected - false otherwise
 	 */
 	public boolean spawn(Tetrimino next) {
-		int[][] tMatrix = next.getMatrix(Facing.NORTH);
+		int[][] tMatrix = next.getMatrix(next.getCurrentOrientation());
 		// define spawn point - Tetrimino have a defined starting point which should be placed on 5:21
 		Coordinates startPoint = next.getCurrentPosition();
 		// loop through the Tetrimino matrix and check for collision 
@@ -422,7 +421,6 @@ public class Playfield {
 		newP._backgroundMatrix = newM;
 		newP._currentTetrimino = _currentTetrimino == null ? null : _currentTetrimino.clone();
 		newP._markedLineClears = _markedLineClears == null ? null : _markedLineClears.clone();
-
 		return newP;
 	}
 	
