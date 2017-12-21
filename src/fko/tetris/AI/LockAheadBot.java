@@ -6,6 +6,8 @@ import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisPhase;
 
 public class LockAheadBot extends AbstractBot {
+	
+	private static final int MAX_VISIBLE_NEXTQUEUE = 1;
 
 	public LockAheadBot(TetrisGame game) {
 		super(game);
@@ -19,7 +21,6 @@ public class LockAheadBot extends AbstractBot {
 			try {
 
 				final TetrisPhase phaseState = _game.getPhaseState();
-				final Playfield playfield = _game.getPlayfield();
 				System.out.println(phaseState.toString());
 
 				switch(phaseState) {
@@ -31,8 +32,6 @@ public class LockAheadBot extends AbstractBot {
 				default: break;
 				}
 				
-				// System.out.println(_game.getPlayfield().toString());
-
 				// do something
 				Thread.sleep(100);
 
@@ -48,23 +47,72 @@ public class LockAheadBot extends AbstractBot {
 	 */
 	private void placeTetrimino() {
 
-		// make copy playfield
-		Playfield copy = _game.getPlayfield().clone();
+		// for each permutation of move position and turn position get a score
+		int best_turn = 0;
+		int best_move = 0;
+		int best_score = 0;
 		
-		// generate all permutations for current tetrimino
-		// and make the drop,
-		
-		
-		// then recursively do this for all nextQueue Tetriminos
-		// therefore generation a tree of all possibilities for the the visible 
-		// Tetriminos.
-		
-		// call an evaluation function to play the best possible drop 
-		
-		
-
-		// finally a hardrop
+		for (int turn=0; turn<4; turn++) {
+			Playfield pf = _game.getPlayfield().clone();
+			for (int i=0; i<turn; i++) pf.turnMove(1); // make the turn
+			// determine max moves right and left
+			int moveR=0;
+			while (!pf.moveSideway(1)) {
+				moveR++;
+			}
+			int moveL=moveR;
+			while (!pf.moveSideway(-1)) {
+				moveL--;
+			}
+			// now we are on the left - for each position horizontally make the drop a call recursive function
+			for (int m = moveL; m <= moveR; m++) {
+				Playfield pfm = pf.clone();
+				pfm.drop();
+				pfm.merge();
+				pfm.markLinesToBeCleared();
+				int clearedLines = pfm.clearMarkedLines();
+				pfm.spawn(_game.getNextQueue().get(0).clone());
+				int score = bruteForceTree(pfm, 1);
+			}
+		}
+	
+		// finally a hard drop
 		_game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
 	}
 
+	private int bruteForceTree(Playfield playfield, int nextQueueIndex) {
+		if (nextQueueIndex >= MAX_VISIBLE_NEXTQUEUE) {
+			int score =  evalutation(playfield);
+		}
+		
+		for (int turn=0; turn<4; turn++) {
+			Playfield pf = playfield;
+			for (int i=0; i<turn; i++) pf.turnMove(1); // make the turn
+			// determine max moves right and left
+			int moveR=0;
+			while (!pf.moveSideway(1)) {
+				moveR++;
+			}
+			int moveL=moveR;
+			while (!pf.moveSideway(-1)) {
+				moveL--;
+			}
+			// now we are on the left - for each position horizontally make the drop a call recursive function
+			for (int m = moveL; m <= moveR; m++) {
+				Playfield pfm = pf.clone();
+				pfm.drop();
+				pfm.merge();
+				pfm.markLinesToBeCleared();
+				int clearedLines = pfm.clearMarkedLines();
+				pfm.spawn(_game.getNextQueue().get(0).clone());
+				int score = bruteForceTree(pfm, 1);
+			}
+		}
+		return 0;
+	}
+	
+	private int evalutation(Playfield pf) {
+		return 0;
+	}
+	
 }
