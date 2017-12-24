@@ -102,6 +102,11 @@ public class LockAheadBot extends AbstractBot {
 		System.out.println("Best Score: "+best_score);
 		System.out.println("Turn: "+best_turn+" Move: "+best_move);
 		
+		// now turn to the best position
+		for (int i=0; i<best_turn; i++) {
+			_game.controlQueueAdd(TetrisControlEvents.RTURN);
+		}
+		
 		// now move to the best position
 		for (int i=0; i < Math.abs(best_move); i++) {
 			if (best_move < 0) {
