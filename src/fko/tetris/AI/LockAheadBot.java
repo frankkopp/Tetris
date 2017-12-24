@@ -1,13 +1,20 @@
 package fko.tetris.AI;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fko.tetris.game.Playfield;
+import fko.tetris.game.TetrisColor;
 import fko.tetris.game.TetrisControlEvents;
 import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisPhase;
+import fko.tetris.tetriminos.Tetrimino;
 
 public class LockAheadBot extends AbstractBot {
 	
-	private static final int MAX_VISIBLE_NEXTQUEUE = 2;
+	private static final int MAX_VISIBLE_NEXTQUEUE = 3;
+	
+	private List<Tetrimino> _nextQueue = new ArrayList<Tetrimino>(); 
 
 	public LockAheadBot(TetrisGame game) {
 		super(game);
@@ -22,9 +29,13 @@ public class LockAheadBot extends AbstractBot {
 
 				final TetrisPhase phaseState = _game.getPhaseState();
 				System.out.println(phaseState.toString());
-
+				
 				switch(phaseState) {
 				case FALLING: {
+					_nextQueue.clear();
+					for (int i=0; i<=MAX_VISIBLE_NEXTQUEUE; i++) {
+						_nextQueue.add(_game.getNextQueue().get(i));
+					}
 					placeTetrimino();
 					break;
 				}
@@ -32,7 +43,7 @@ public class LockAheadBot extends AbstractBot {
 				default: break;
 				}
 				
-				// do something
+				// slow down a bit
 				Thread.sleep(100);
 
 			} catch (InterruptedException e) {
@@ -47,11 +58,11 @@ public class LockAheadBot extends AbstractBot {
 	 */
 	private void placeTetrimino() {
 
-		// for each permutation of move position and turn position get a score
 		int best_turn = 0;
 		int best_move = 0;
 		int best_score = 0;
-		
+
+		// for each permutation of move position and turn position get a score
 		for (int turn=0; turn<4; turn++) {
 			Playfield pf = _game.getPlayfield().clone();
 			for (int i=0; i<turn; i++) pf.turnMove(1); // make the turn
@@ -75,13 +86,31 @@ public class LockAheadBot extends AbstractBot {
 				pfm.merge();
 				pfm.markLinesToBeCleared();
 				int clearedLines = pfm.clearMarkedLines();
-				pfm.spawn(_game.getNextQueue().get(0).clone());
+				if (pfm.spawn(_nextQueue.get(0).clone())) {
+					return; // game over
+				}
 				int score = bruteForceTree(pfm, 1);
 				
-				System.out.println("SCORE: "+score);
+				if (score > best_score) {
+					best_turn = turn;
+					best_move = m;
+					best_score = score;
+				}
 			}
 		}
-	
+
+		System.out.println("Best Score: "+best_score);
+		System.out.println("Turn: "+best_turn+" Move: "+best_move);
+		
+		// now move to the best position
+		for (int i=0; i < Math.abs(best_move); i++) {
+			if (best_move < 0) {
+				_game.controlQueueAdd(TetrisControlEvents.LEFT);
+			} else if (best_move > 0) {
+				_game.controlQueueAdd(TetrisControlEvents.RIGHT);
+			}
+		}
+		
 		// finally a hard drop
 		System.out.println("BOT MAKES MOVE");
 		_game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
@@ -93,8 +122,7 @@ public class LockAheadBot extends AbstractBot {
 			return score;
 		}
 		
-playfield.debugPrintMatrix();
-System.out.println();
+		int best_score = 0;
 		
 		for (int turn=0; turn<4; turn++) {
 			Playfield pf = playfield.clone();
@@ -119,18 +147,39 @@ System.out.println();
 				pfm.merge();
 				pfm.markLinesToBeCleared();
 				int clearedLines = pfm.clearMarkedLines();
-				pfm.spawn(_game.getNextQueue().get(0).clone());
-				int score = bruteForceTree(pfm, nextQueueIndex+1);
+				if (pfm.spawn(_nextQueue.get(nextQueueIndex).clone())) {
+					return -99; // game_over
+				};
 				
-pfm.debugPrintMatrix();
-System.out.println();
+				final int score = bruteForceTree(pfm, nextQueueIndex+1);
+				if (score > best_score) best_score = score;
+				
 			}
 		}
-		return 0;
+		return best_score;
 	}
 	
 	private int evalutation(Playfield pf) {
-		return 33;
+		int score = 0;
+		
+		// highest tetrimino - points 20 - highest y
+		for (int y=0; y<pf.SKYLINE+pf.BUFFERZONE; y++) {
+			boolean found = false;
+			for (int x=0; x<pf.PLAYFIELD_WIDTH;x++) {
+				if (pf.getCell(x,y) != TetrisColor.EMPTY) {
+					found=true;
+					break;
+				}
+			}
+			if (!found) { // we did not find a Mino in this row so this was the highest. 
+				score += 20 - y;
+				break;
+			}
+		}
+		
+//		pf.debugPrintMatrix();
+//		System.out.println("SCORE: "+score);
+		return score;
 	}
 	
 }
