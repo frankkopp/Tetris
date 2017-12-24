@@ -15,6 +15,8 @@ public class LockAheadBot extends AbstractBot {
 	private static final int MAX_VISIBLE_NEXTQUEUE = 3;
 	
 	private List<Tetrimino> _nextQueue = new ArrayList<Tetrimino>(); 
+	
+	private int _numberOfEvaluations = 0;
 
 	public LockAheadBot(TetrisGame game) {
 		super(game);
@@ -32,6 +34,7 @@ public class LockAheadBot extends AbstractBot {
 				
 				switch(phaseState) {
 				case FALLING: {
+					_numberOfEvaluations = 0;
 					_nextQueue.clear();
 					for (int i=0; i<=MAX_VISIBLE_NEXTQUEUE; i++) {
 						_nextQueue.add(_game.getNextQueue().get(i));
@@ -99,9 +102,6 @@ public class LockAheadBot extends AbstractBot {
 			}
 		}
 
-		System.out.println("Best Score: "+best_score);
-		System.out.println("Turn: "+best_turn+" Move: "+best_move);
-		
 		// now turn to the best position
 		for (int i=0; i<best_turn; i++) {
 			_game.controlQueueAdd(TetrisControlEvents.RTURN);
@@ -117,6 +117,7 @@ public class LockAheadBot extends AbstractBot {
 		}
 		
 		// finally a hard drop
+		System.out.println(String.format("Evaluations: %,d",_numberOfEvaluations));
 		System.out.println("BOT MAKES MOVE");
 		_game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
 	}
@@ -152,19 +153,22 @@ public class LockAheadBot extends AbstractBot {
 				pfm.merge();
 				pfm.markLinesToBeCleared();
 				int clearedLines = pfm.clearMarkedLines();
+				int score = 0;
 				if (pfm.spawn(_nextQueue.get(nextQueueIndex).clone())) {
-					return -99; // game_over
+					score = -99; // game_over
+				} else {
+					score = bruteForceTree(pfm, nextQueueIndex+1);
 				};
-				
-				final int score = bruteForceTree(pfm, nextQueueIndex+1);
 				if (score > best_score) best_score = score;
-				
 			}
 		}
 		return best_score;
 	}
 	
 	private int evalutation(Playfield pf) {
+		
+		_numberOfEvaluations++;
+		
 		int score = 0;
 		
 		// highest tetrimino - points 20 - highest y
