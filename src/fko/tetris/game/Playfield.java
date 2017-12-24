@@ -423,6 +423,16 @@ public class Playfield {
 		newP._markedLineClears = _markedLineClears == null ? null : _markedLineClears.clone();
 		return newP;
 	}
+
+	/**
+	 * Returns the TetrisColor of a specified cell.
+	 * @param x - starts at 0 to width-1
+	 * @param y - starts at 0 to height-1
+	 * @return TetrisCOlor of cell
+	 */
+	public TetrisColor getCell(int x, int y) {
+		return _backgroundMatrix[x][y];
+	}
 	
 	
 
