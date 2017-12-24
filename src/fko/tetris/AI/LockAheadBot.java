@@ -7,7 +7,7 @@ import fko.tetris.game.TetrisPhase;
 
 public class LockAheadBot extends AbstractBot {
 	
-	private static final int MAX_VISIBLE_NEXTQUEUE = 1;
+	private static final int MAX_VISIBLE_NEXTQUEUE = 2;
 
 	public LockAheadBot(TetrisGame game) {
 		super(game);
@@ -67,26 +67,37 @@ public class LockAheadBot extends AbstractBot {
 			// now we are on the left - for each position horizontally make the drop a call recursive function
 			for (int m = moveL; m <= moveR; m++) {
 				Playfield pfm = pf.clone();
+				// move right
+				for (int i=0; i<m-moveL; i++) {
+					pfm.moveSideway(1);
+				}
 				pfm.drop();
 				pfm.merge();
 				pfm.markLinesToBeCleared();
 				int clearedLines = pfm.clearMarkedLines();
 				pfm.spawn(_game.getNextQueue().get(0).clone());
 				int score = bruteForceTree(pfm, 1);
+				
+				System.out.println("SCORE: "+score);
 			}
 		}
 	
 		// finally a hard drop
+		System.out.println("BOT MAKES MOVE");
 		_game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
 	}
 
 	private int bruteForceTree(Playfield playfield, int nextQueueIndex) {
 		if (nextQueueIndex >= MAX_VISIBLE_NEXTQUEUE) {
-			int score =  evalutation(playfield);
+			final int score =  evalutation(playfield);
+			return score;
 		}
 		
+playfield.debugPrintMatrix();
+System.out.println();
+		
 		for (int turn=0; turn<4; turn++) {
-			Playfield pf = playfield;
+			Playfield pf = playfield.clone();
 			for (int i=0; i<turn; i++) pf.turnMove(1); // make the turn
 			// determine max moves right and left
 			int moveR=0;
@@ -100,19 +111,26 @@ public class LockAheadBot extends AbstractBot {
 			// now we are on the left - for each position horizontally make the drop a call recursive function
 			for (int m = moveL; m <= moveR; m++) {
 				Playfield pfm = pf.clone();
+				// move right
+				for (int i=0; i<m-moveL; i++) {
+					pfm.moveSideway(1);
+				}
 				pfm.drop();
 				pfm.merge();
 				pfm.markLinesToBeCleared();
 				int clearedLines = pfm.clearMarkedLines();
 				pfm.spawn(_game.getNextQueue().get(0).clone());
-				int score = bruteForceTree(pfm, 1);
+				int score = bruteForceTree(pfm, nextQueueIndex+1);
+				
+pfm.debugPrintMatrix();
+System.out.println();
 			}
 		}
 		return 0;
 	}
 	
 	private int evalutation(Playfield pf) {
-		return 0;
+		return 33;
 	}
 	
 }
