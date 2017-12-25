@@ -9,9 +9,16 @@ import fko.tetris.game.TetrisControlEvents;
 import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisPhase;
 import fko.tetris.tetriminos.Tetrimino;
-import fko.tetris.util.HelperTools;
 
-
+/**
+ * A bit capable of looking several Tetriminos ahead using the NextQueue<br>
+ * It evaluates absolute height, aggregated height, unevenness, holes, blocker (Minos over holes).<br>
+ * It can't play with a lookahead of 3+ in higher levels (12+) as it takes too long to calculate.<br>
+ * 
+ * TODO: Optimize performance to be able to look ahead more
+ * TODO: Use LOCK moves to lose holes (side movements when Tetrimino locks)
+ * TODO: Optimize for Score instead only maximum clearing
+ */
 public class LockAheadBot extends AbstractBot {
 
 	private static final int MAX_VISIBLE_NEXTQUEUE = 2;
@@ -43,14 +50,14 @@ public class LockAheadBot extends AbstractBot {
 
 				switch(phaseState) {
 				case FALLING: {
-					long time = System.currentTimeMillis();
+//					long time = System.currentTimeMillis();
 					_numberOfEvaluations = 0;
 					_nextQueue.clear();
 					for (int i=0; i<=MAX_VISIBLE_NEXTQUEUE; i++) {
 						_nextQueue.add(_game.getNextQueue().get(i));
 					}
 					placeTetrimino();
-					System.out.println("Bot took "+HelperTools.formatTime(System.currentTimeMillis()-time, true));
+//					System.out.println("Bot took "+HelperTools.formatTime(System.currentTimeMillis()-time, true));
 					break;
 				}
 				case GAMEOVER: Thread.currentThread().interrupt(); break;
@@ -132,8 +139,8 @@ public class LockAheadBot extends AbstractBot {
 		// finally a hard drop
 //		System.out.println("BEST TURN: "+best_turn+" BEST MOVE: "+best_move);
 //		System.out.println("BEST SCORE: "+best_score);
-		System.out.println(String.format("Evaluations: %,d",_numberOfEvaluations));
-		System.out.println(">>>>>>>>>>>>>>>>>>>> BOT MAKES MOVE <<<<<<<<<<<<<<<<<<<<<<<<<<");
+//		System.out.println(String.format("Evaluations: %,d",_numberOfEvaluations));
+//		System.out.println(">>>>>>>>>>>>>>>>>>>> BOT MAKES MOVE <<<<<<<<<<<<<<<<<<<<<<<<<<");
 		
 	}
 
@@ -168,7 +175,7 @@ public class LockAheadBot extends AbstractBot {
 				pfm.drop();
 				pfm.merge();
 				pfm.markLinesToBeCleared();
-				int clearedLines = pfm.clearMarkedLines();
+				pfm.clearMarkedLines();
 				int score = 0;
 				//score += (clearedLines-1)*2;
 				if (pfm.spawn(_nextQueue.get(nextQueueIndex).clone())) {
@@ -186,17 +193,17 @@ public class LockAheadBot extends AbstractBot {
 
 		_numberOfEvaluations++;
 
-		if (_numberOfEvaluations%100000 == 0) {
-			System.out.println(String.format("%,d",_numberOfEvaluations));
-		}
+//		if (_numberOfEvaluations%100000 == 0) {
+//			System.out.println(String.format("%,d",_numberOfEvaluations));
+//		}
 
 		int score = 0;
 
 		final double weightabsolutHeight 	= -1.0;	// Absolute height - higher is worse
 		final double weightAggregatedHeight 	= -1.0;	// Aggregated height - higher is worse
-		final double weightUnevenness 		= -1.0;	// unevenness of stacks - higher is worse
-		final double weightHoles				= -2.0;	// holes - higher is worse
-		final double weightBlocker			= -3.0;	// minos blocking a hole - higher is worse
+		final double weightUnevenness 		= -1.0;	// Unevenness of stacks - higher is worse
+		final double weightHoles				= -2.0;	// Holes - higher is worse
+		final double weightBlocker			= -3.0;	// Minos blocking a hole - higher is worse
 
 		//pf.debugPrintMatrix();
 
