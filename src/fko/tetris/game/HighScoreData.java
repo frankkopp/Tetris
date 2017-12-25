@@ -129,7 +129,8 @@ public class HighScoreData {
 					Integer.parseInt(parts[1]),
 					Integer.parseInt(parts[2]),
 					Integer.parseInt(parts[3]),
-					LocalDateTime.parse(parts[4].trim())
+					Integer.parseInt(parts[4]),
+					LocalDateTime.parse(parts[5].trim())
 							));
 		});
 		sortList();
@@ -147,8 +148,8 @@ public class HighScoreData {
 	 * Put a new entry into the highscore table
 	 * @param name, score, date
 	 */
-	public void addEntry(String name, int score, int level, int tetrises, LocalDateTime date) {
-		this.addEntry(new HighScoreEntry(name, score, level, tetrises, date));
+	public void addEntry(String name, int score, int level, int tetrises, int lines, LocalDateTime date) {
+		this.addEntry(new HighScoreEntry(name, score, level, tetrises, lines, date));
 	}	
 
 	/**
@@ -164,8 +165,8 @@ public class HighScoreData {
 	 * Put a new entry into the highscore table
 	 * @param name, score, date
 	 */
-	public void addEntryAndSave(String name, int score, int level, int tetrises, LocalDateTime date) {
-		this.addEntryAndSave(new HighScoreEntry(name, score, level, tetrises, date));
+	public void addEntryAndSave(String name, int score, int level, int tetrises, int lines, LocalDateTime date) {
+		this.addEntryAndSave(new HighScoreEntry(name, score, level, tetrises, lines, date));
 	}	
 	
 	/**
@@ -229,25 +230,29 @@ public class HighScoreData {
 		public final LocalDateTime date;
 		public final int level;
 		public final int tetrises;
+		public final int lines;
 		
 		/**
 		 * @param name
 		 * @param score
 		 * @param date
+		 * @param lines 
 		 */
-		public HighScoreEntry(String name, int score, int level, int tetrises, LocalDateTime date) {
+		public HighScoreEntry(String name, int score, int level, int tetrises, int lines, LocalDateTime date) {
 			this.name = name;
 			this.score = score;
-			this.date = date;
 			this.level = level;
 			this.tetrises = tetrises;
+			this.lines = lines;
+			this.date = date;
 		}
+		
 		/**
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
 		public String toString() {
-			return name+";"+score+";"+level+";"+tetrises+";"+date.toString();
+			return name+";"+score+";"+level+";"+tetrises+";"+lines+";"+date.toString();
 		}
 	}
 }

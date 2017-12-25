@@ -34,9 +34,6 @@ import fko.tetris.tetriminos.Tetrimino;
 /**
  * This represents the state of a Tetris game. It holds all information necessary to represent a Tetris game at any 
  * point in time.
- * 
- * TODO: Enable switching sound on and off
- * 
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
 
@@ -78,7 +75,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	private boolean _holdAllowed = true; // using hold is only allowed once between LOCK phases
 
-	// gane statistics
+	// game statistics
 	private int _lastClearedLinesCount = 0;
 	private int _lastHardDropLineCount = 0;
 	private int _lastSoftDropLineCount = 0;
@@ -281,14 +278,14 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// game stopped
 		
 		// save highscore 
-		_highScoreData.addEntryAndSave(_playerName, _score, _currentLevel, _tetrisesCount, LocalDateTime.now());
+		_highScoreData.addEntryAndSave(_playerName, _score, _currentLevel, _tetrisesCount, _lineCount, LocalDateTime.now());
 
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread stopped");
 	}
 
-	/*
+	/**
 	 * GENERATION phase 
 	 */
 	private void generationPhase() {
@@ -315,7 +312,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		}
 	}
 
-	/*
+	/**
 	 * FALLING phase
 	 */
 	private void fallingPhase() {
@@ -428,7 +425,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_sounds.playClip(Clips.FALLING);
 	}
 
-	/*
+	/**
 	 * LOCK phase
 	 * Implements the INFINITE PLACEMENT LOCK DOWN	
 	 * TODO: Implement EXTENDED LOCK DOWN and CLASSIC LOCKDOWN
@@ -524,7 +521,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	}
 
-	/*
+	/**
 	 * PATTERN phase
 	 * This phase marks all lines for clearance in the ELIMINATE phase.
 	 */
@@ -539,7 +536,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_phaseState = TetrisPhase.ITERATE;
 	}
 
-	/*
+	/**
 	 * ELIMINATE phase
 	 * This phase removes all lines from the playfield which were marked for clearance.<br/>
 	 * Also handles game statistics like scoring, bonus scores, etc.
@@ -577,7 +574,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_phaseState = TetrisPhase.COMPLETION;
 	}
 
-	/*
+	/**
 	 * COMPLETION phase
 	 * This is where any updates to information fields on the Tetris playfield are updated, such as the Score and Time. 
 	 * The Level Up condition is also checked to see if it is necessary to advance the game level.
@@ -596,7 +593,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_phaseState = TetrisPhase.GENERATION;
 	}
 
-	/*
+	/**
 	 * @param numberOfClearedLines
 	 * @return score for the last placement
 	 */
@@ -612,7 +609,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		return score;
 	}
 
-	/*
+	/**
 	 * @return the falling time for the current level
 	 */
 	private long calculateFallingTime() {
