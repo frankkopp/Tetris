@@ -23,7 +23,7 @@ SOFTWARE.
  */
 package fko.tetris.ui;
 
-import fko.tetris.game.Playfield;
+import fko.tetris.game.Matrix;
 import fko.tetris.game.TetrisColor;
 import fko.tetris.tetriminos.Tetrimino;
 import fko.tetris.util.Coordinates;
@@ -48,14 +48,14 @@ public class PlayfieldPane extends Pane {
 	private static final Color GRID_COLOR = Color.LIGHTGRAY;
 	private static final Color FRAME_COLOR = Color.LIGHTGRAY;
 
-	private Playfield _playField; // handle to the playField to draw
+	private Matrix _playField; // handle to the playField to draw
 
 	private TetrisGUI_Controller _controller; // handle to the UI controller to access options
 
 	// helper for an efficient draw()
-	private Line[] _hlines = new Line[Playfield.SKYLINE];
-	private Line[] _vlines = new Line[Playfield.PLAYFIELD_WIDTH];
-	private Rectangle[] _block = new Rectangle[(Playfield.BUFFERZONE+Playfield.SKYLINE)*Playfield.PLAYFIELD_WIDTH];
+	private Line[] _hlines = new Line[Matrix.SKYLINE];
+	private Line[] _vlines = new Line[Matrix.PLAYFIELD_WIDTH];
+	private Rectangle[] _block = new Rectangle[(Matrix.BUFFERZONE+Matrix.SKYLINE)*Matrix.PLAYFIELD_WIDTH];
 	private Rectangle[] _tblock = new Rectangle[16];
 	private Rectangle[] _gblock = new Rectangle[16];
 
@@ -78,13 +78,13 @@ public class PlayfieldPane extends Pane {
 
 
 		// prepare some elements and keep them to reference them
-		for (int i=0; i<Playfield.SKYLINE; i++) {
+		for (int i=0; i<Matrix.SKYLINE; i++) {
 			_hlines[i] = new Line();
 		}
-		for (int i=0; i<Playfield.PLAYFIELD_WIDTH; i++) {
+		for (int i=0; i<Matrix.PLAYFIELD_WIDTH; i++) {
 			_vlines[i] = new Line();
 		}
-		for (int i=0; i<(Playfield.BUFFERZONE+Playfield.SKYLINE)*Playfield.PLAYFIELD_WIDTH; i++) {
+		for (int i=0; i<(Matrix.BUFFERZONE+Matrix.SKYLINE)*Matrix.PLAYFIELD_WIDTH; i++) {
 			_block[i] = new Rectangle();
 		}
 		for (int i=0; i<16; i++) {
@@ -100,7 +100,7 @@ public class PlayfieldPane extends Pane {
 	/**
 	 * @param _playField the _playField to set
 	 */
-	public void setPlayField(Playfield _playField) {
+	public void setPlayField(Matrix _playField) {
 		// ToDo: Maybe a copy is needed
 		this._playField = _playField;
 	}
@@ -109,14 +109,14 @@ public class PlayfieldPane extends Pane {
 	 * Draws all elements in the panel. Lines and Tetriminos
 	 */
 	public void draw() {
-		if (_playField == null) _playField=new Playfield(); // draw default field if no other playField is defined
+		if (_playField == null) _playField=new Matrix(); // draw default field if no other playField is defined
 		draw(_playField);
 	}
 
 	/**
 	 * @param _playField2
 	 */
-	private void draw(Playfield playField) {
+	private void draw(Matrix playField) {
 
 		// clear the node to redraw everything
 		this.getChildren().clear();
@@ -133,9 +133,9 @@ public class PlayfieldPane extends Pane {
 		this.getChildren().add(rectangle);
 
 		// draw lines
-		for (int c=1; c<Playfield.PLAYFIELD_WIDTH; c++) {
+		for (int c=1; c<Matrix.PLAYFIELD_WIDTH; c++) {
 			// vertical lines
-			double w = (WIDTH/Playfield.PLAYFIELD_WIDTH)*c;
+			double w = (WIDTH/Matrix.PLAYFIELD_WIDTH)*c;
 			Line v_line =_vlines[c-1];
 			v_line.setStroke(GRID_COLOR);
 			v_line.setStartX(w);
@@ -144,9 +144,9 @@ public class PlayfieldPane extends Pane {
 			v_line.setEndY(HEIGHT);
 			this.getChildren().add(v_line);	
 		}
-		for (int r=1; r<Playfield.SKYLINE; r++) {
+		for (int r=1; r<Matrix.SKYLINE; r++) {
 			// horizontal lines
-			double h = (HEIGHT/Playfield.SKYLINE)*r;
+			double h = (HEIGHT/Matrix.SKYLINE)*r;
 			Line h_line =_hlines[r-1];
 			h_line.setStroke(GRID_COLOR);
 			h_line.setStartX(0);
@@ -156,16 +156,16 @@ public class PlayfieldPane extends Pane {
 			this.getChildren().add(h_line);
 		}
 
-		final double h = (HEIGHT/Playfield.SKYLINE);
-		final double w = (WIDTH/Playfield.PLAYFIELD_WIDTH);
+		final double h = (HEIGHT/Matrix.SKYLINE);
+		final double w = (WIDTH/Matrix.PLAYFIELD_WIDTH);
 
 		int cr = 0; // counter for the prepared drawing objects
 		
 		// draw background cells
 		// iterate through all cells a initialize with zero
 
-		for (int yi = 0; yi < Playfield.SKYLINE+1; yi++) { // we only draw the visible part therefore only to SKYLINE
-			for (int xi = 0; xi < Playfield.PLAYFIELD_WIDTH; xi++) {
+		for (int yi = 0; yi < Matrix.SKYLINE+1; yi++) { // we only draw the visible part therefore only to SKYLINE
+			for (int xi = 0; xi < Matrix.PLAYFIELD_WIDTH; xi++) {
 				final TetrisColor bc = _playField.getBackgroundColor(xi,yi);
 				Color color = bc.toColor();
 				if (bc != TetrisColor.EMPTY) {
@@ -190,9 +190,9 @@ public class PlayfieldPane extends Pane {
 		if (t!=null) { // if no game is running there are no Tetriminos
 			
 			// set the max height we want to see Tetriminos
-			int visibleHeight = Playfield.SKYLINE+1;
+			int visibleHeight = Matrix.SKYLINE+1;
 			if (!_controller.peekOption.isSelected()) {
-				visibleHeight = Playfield.SKYLINE;
+				visibleHeight = Matrix.SKYLINE;
 			} 
 
 			Coordinates c;

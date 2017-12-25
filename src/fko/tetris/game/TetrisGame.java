@@ -28,10 +28,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import fko.tetris.game.Bag;
-import fko.tetris.game.NextQueue;
-import fko.tetris.game.Playfield;
-import fko.tetris.game.TetrisSounds;
 import fko.tetris.game.TetrisSounds.Clips;
 import fko.tetris.tetriminos.Tetrimino;
 
@@ -54,10 +50,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private static final TetrisSounds _sounds = new TetrisSounds();
 
 	// Tetris state
-	private Playfield 	_playfield;		// matrix with all cells
+	private Matrix 		_playfield;		// matrix with all cells
 	private Bag			_bag;			// bag with all 7 Tetriminos - randomly shuffled to the next queue
 	private NextQueue	_nextQueue;		// holds a list the next Tetriminos
-	private Tetrimino	_holdQueue; 	// holds one Tetrimino to be used later
+	private Tetrimino	_holdQueue; 		// holds one Tetrimino to be used later
 	private int			_startLevel; 	// start level can be set differently by the UI
 	private int			_currentLevel; 	// current level while playing
 	private int			_score;			// current score
@@ -105,7 +101,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 * @param startLevel
 	 */
 	public TetrisGame(int startLevel) {
-		_playfield 		= new Playfield();
+		_playfield 		= new Matrix();
 		_bag 			= new Bag();
 		_nextQueue		= new NextQueue(_bag, NEXTQUEUE_SIZE);
 		_holdQueue 		= null;
@@ -127,6 +123,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		if (_gameThread == null) {
 			_gameThread = new Thread(this, "TetrisGame");
 			_gameThread.start();
+			_gameStopped = false; 
 		} else {
 			throw new IllegalStateException("startTetrisGame(): Game thread already exists.");
 		}
@@ -151,8 +148,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	@Override
 	public void run() {
-		_gameStopped = false;
-
+		
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread started");
@@ -384,12 +380,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				_sounds.playClip(Clips.SOFTDROP);
 				break;
 			case HARDDOWN:				
-				_lastHardDropLineCount=0;
-				while (!_playfield.moveDown()) {
-					_lastHardDropLineCount++;
-					setChanged();
-					notifyObservers("During FALLING after HARDOWN");
-				}
+				_lastHardDropLineCount = _playfield.drop(); 
+				setChanged();
+				notifyObservers("During FALLING after HARDOWN");
 				_sounds.playClip(Clips.HARDDROP);
 				breakFlag = true;
 				break;
@@ -595,8 +588,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		if (_lineCount > 0) {
 			int old = _currentLevel;
 			_currentLevel = _lineCount/10 +1;
+			if (_currentLevel > 15) _currentLevel = 15;
 			if (_currentLevel > old) {
-				//sounds.play("SFX_LevelUp.wav");
+				//_sounds.playClip(Clips.););
 			}
 		}
 		_phaseState = TetrisPhase.GENERATION;
@@ -638,8 +632,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		case 13: return 18;
 		case 14: return 11;
 		case 15: return 7;
+		default: return 7;
 		}
-		return 1000;
 	}
 
 	/**
@@ -706,7 +700,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	/**
 	 * @return the _playfield
 	 */
-	public Playfield getPlayfield() {
+	public Matrix getPlayfield() {
 		return _playfield;
 	}
 

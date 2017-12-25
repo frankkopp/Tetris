@@ -58,7 +58,14 @@ public class NextQueue {
 		Tetrimino next = _queue.remove(0);
 		fillQueue();
 		return next;
-		
+	}
+	
+	/**
+	 * Retrieves the Tetrimino at position i 
+	 * @return the next Tetrimino
+	 */
+	public Tetrimino get(int i) {
+		return _queue.get(i);
 	}
 	
 	/**

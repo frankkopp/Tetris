@@ -39,8 +39,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import fko.tetris.game.HighScoreData;
 import fko.tetris.Tetris;
+import fko.tetris.AI.Bot;
+import fko.tetris.AI.LockAheadBot;
+import fko.tetris.AI.SimpleBot;
+import fko.tetris.game.HighScoreData;
 import fko.tetris.game.TetrisControlEvents;
 import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisSettings;
@@ -59,8 +62,11 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -97,6 +103,9 @@ public class TetrisGUI_Controller implements Observer {
 
 	// to use for scheduled updates of ui properties - e.g. mem status label
 	private final ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
+	
+	private Bot _currentBot;
+	private String _oldPlayerName;
 
 	/**
 	 * This method is called by the FXMLLoader when initialization is complete
@@ -127,17 +136,47 @@ public class TetrisGUI_Controller implements Observer {
 				);
 
 		readSettings();
+		
+		initializeBot();
+	}
+
+	private void initializeBot() {
+
+		if (botPlayerOption.isSelected() && _tetrisGame != null && _tetrisGame.isRunning()) {
+			// start selected bot
+			final Toggle selectedToggle = bots.getSelectedToggle();
+			if (_currentBot != null) _currentBot.stopBot();
+			if (selectedToggle == simpleBotOption) {
+				_currentBot = new SimpleBot(_tetrisGame);
+				_currentBot.startBot();
+			} else if (selectedToggle == lookaheadBotOption) {
+				_currentBot = new LockAheadBot(_tetrisGame);
+				_currentBot.startBot();
+			} else {
+				Tetris.criticalError("NO BOT SELECTED");
+				return;
+			}
+			
+			// change player name to bot name, save player name to restore later
+			_oldPlayerName = playerNameField.getText();
+			playerNameField.setText(_currentBot.getClass().getSimpleName());
+			_tetrisGame.setPlayerName(playerNameField.getText());
+			
+		} else {
+			if (_currentBot!=null) _currentBot.stopBot();
+			playerNameField.setText(_oldPlayerName);
+		}
 	}
 
 	/**
 	 * Handles keyboard events - call from Main gui class
 	 */
 	protected void addKeyEventHandler() {
+		// only when game is available and not a bot playing
 		_primaryStage.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				//System.out.println("Key Pressed: "+event.getCode().toString());
-				if (_tetrisGame == null) return; // only when game is available
+				if (_tetrisGame == null || botPlayerOption.isSelected()) return; 
 
 				switch (event.getCode()) {
 				case ESCAPE: _tetrisGame.setPaused(_tetrisGame.isPaused() ? false : true); break;
@@ -217,7 +256,7 @@ public class TetrisGUI_Controller implements Observer {
 			public void run() {
 				Platform.runLater(	() -> 
 				statusbar_mem_text.setText(HelperTools.getMBytes(Runtime.getRuntime().freeMemory()) + " MB / "
-							+ HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB"));
+						+ HelperTools.getMBytes(Runtime.getRuntime().totalMemory()) + " MB"));
 			}
 		};
 		_executor.scheduleAtFixedRate(updater, 0, 250,TimeUnit.MILLISECONDS);
@@ -440,7 +479,10 @@ public class TetrisGUI_Controller implements Observer {
 		settings.setProperty("next_queue_list", nextQueueOption.isSelected() ? "on" : "off");
 		settings.setProperty("peek_spawn", peekOption.isSelected() ? "on" : "off");
 		settings.setProperty("ghost_piece", ghostPieceOption.isSelected() ? "on" : "off");
-		//settings.setProperty("start_level", Double.toString((int)startLevelSlider.getValue()));
+		settings.setProperty("bot_player", botPlayerOption.isSelected() ? "on" : "off");
+		settings.setProperty("simple_bot", simpleBotOption.isSelected() ? "on" : "off");
+		settings.setProperty("lookahead_bot", lookaheadBotOption.isSelected() ? "on" : "off");
+		settings.setProperty("sound", soundOnOption.isSelected() ? "on" : "off");
 		settings.save();
 	}
 
@@ -450,10 +492,14 @@ public class TetrisGUI_Controller implements Observer {
 	private void readSettings() {
 		// read in settings
 		playerNameField.setText(settings.getProperty("player_name", "Unknown Player"));
+		_oldPlayerName = playerNameField.getText();
 		nextQueueOption.setSelected(settings.getProperty("next_queue_list", "on").equals("on") ? true : false);
 		peekOption.setSelected(settings.getProperty("peek_spawn", "on").equals("on") ? true : false);
 		ghostPieceOption.setSelected(settings.getProperty("ghost_piece", "on").equals("on") ? true : false);
-		//startLevelSlider.setValue(Double.parseDouble(settings.getProperty("start_level", "1.0")));
+		botPlayerOption.setSelected(settings.getProperty("bot_player", "off").equals("on") ? true : false);
+		simpleBotOption.setSelected(settings.getProperty("simple_bot", "off").equals("on") ? true : false);
+		lookaheadBotOption.setSelected(settings.getProperty("lookahead_bot", "off").equals("on") ? true : false);
+		soundOnOption.setSelected(settings.getProperty("sound", "off").equals("on") ? true : false);
 	}
 
 	// #######################################################################
@@ -489,13 +535,17 @@ public class TetrisGUI_Controller implements Observer {
 		_playfieldPane.requestFocus();
 		_tetrisGame = new TetrisGame((int)startLevelSlider.getValue());
 		_tetrisGame.setPlayerName(playerNameField.getText());
+		_tetrisGame.setSoundOn(soundOnOption.isSelected());
 		_tetrisGame.addObserver(this);
 		_tetrisGame.startTetrisGame();
+		initializeBot();
+		System.out.println("NEW GAME");
 	}
 
 	@FXML
 	void stopGame_action(ActionEvent event) {
 		_tetrisGame.stopTetrisGame();
+		initializeBot();
 	}
 
 	@FXML
@@ -532,6 +582,16 @@ public class TetrisGUI_Controller implements Observer {
 		if (_tetrisGame!= null) {
 			_tetrisGame.setSoundOn(soundOnOption.isSelected() ? true : false);
 		}
+	}
+
+	@FXML
+	void botPlayerOptionAction(ActionEvent event) {
+		initializeBot();
+	}
+
+	@FXML
+	void botChooserAction(ActionEvent event) {
+		initializeBot();
 	}
 
 	// #######################################################
@@ -642,6 +702,19 @@ public class TetrisGUI_Controller implements Observer {
 
 	@FXML // fx:id="soundOnOption"
 	private CheckMenuItem soundOnOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="botPlayerOption"
+	private CheckMenuItem botPlayerOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="simpleBotOption"
+	private RadioMenuItem simpleBotOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="minimaxBotOption"
+	private RadioMenuItem lookaheadBotOption; // Value injected by FXMLLoader
+
+	@FXML // fx:id="bots"
+	private ToggleGroup bots; // Value injected by FXMLLoader
+
 	/*
 	 * FXML checks
 	 */
@@ -679,6 +752,10 @@ public class TetrisGUI_Controller implements Observer {
 		assert playerNameField != null : "fx:id=\"playerNameField\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert nextQueueOption != null : "fx:id=\"nextQueueOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert soundOnOption != null : "fx:id=\"soundOnOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert botPlayerOption != null : "fx:id=\"botPlayerOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert lookaheadBotOption != null : "fx:id=\"minimaxBotOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert simpleBotOption != null : "fx:id=\"simpleBotOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert bots != null : "fx:id=\"bots\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }
