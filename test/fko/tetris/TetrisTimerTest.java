@@ -48,7 +48,7 @@ public class TetrisTimerTest {
 	}
 
 	/**
-	 * Test method for {@link fko.tetris.TetrisTimer#start()}.
+	 * Test method for {@link fko.tetris.TetrisTimer#startBot()}.
 	 */
 	@Test
 	public final void testStart() {
@@ -66,7 +66,7 @@ public class TetrisTimerTest {
 	}
 
 	/**
-	 * Test method for {@link fko.tetris.TetrisTimer#stop()}.
+	 * Test method for {@link fko.tetris.TetrisTimer#stopBot()}.
 	 */
 	@Test
 	public final void testStop() {
