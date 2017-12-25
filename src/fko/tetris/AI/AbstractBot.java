@@ -29,13 +29,13 @@ public abstract class AbstractBot implements Bot, Runnable {
 			_botThread = new Thread(this, "Bot Thread");
 			_botThread.setDaemon(true);
 			_botThread.start();
-			System.out.println("Bot started");
+//			System.out.println("Bot started");
 		}
 	}
 
 	@Override
 	public void stopBot() {
-		System.out.println("Bot stopped");
+//		System.out.println("Bot stopped");
 		if (_botThread != null) {
 			_botThread.interrupt();
         }

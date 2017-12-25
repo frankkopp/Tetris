@@ -33,7 +33,7 @@ public class LockAheadBot extends AbstractBot {
 	 */
 	public LockAheadBot(TetrisGame game) {
 		super(game);
-		System.out.println("MINIMAX BOT CREATED");
+//		System.out.println("BOT CREATED");
 	}
 
 	/**
@@ -41,11 +41,9 @@ public class LockAheadBot extends AbstractBot {
 	 */
 	@Override
 	public void run() {
-		System.out.println("MINIMAX BOT STARTED");
+//		System.out.println("BOT STARTED");
 		
 		while (!Thread.interrupted()) {
-			try {
-
 				final TetrisPhase phaseState = _game.getPhaseState();
 
 				switch(phaseState) {
@@ -63,15 +61,8 @@ public class LockAheadBot extends AbstractBot {
 				case GAMEOVER: Thread.currentThread().interrupt(); break;
 				default: break;
 				}
-
-				// slow down a bit
-				Thread.sleep(0);
-
-			} catch (InterruptedException e) {
-				break;
-			}
 		}
-		System.out.println("MINIMAX BOT STOPPED");
+//		System.out.println("BOT STOPPED");
 	}
 
 	/*

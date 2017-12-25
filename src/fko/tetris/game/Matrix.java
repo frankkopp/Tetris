@@ -34,7 +34,7 @@ import fko.tetris.util.SimpleIntList;
  * The background matrix contains all settled Tetriminos.
  * 
  * From Tetris Guideline
- * Playfield is 10:40, where rows above 20 are hidden or obstructed by the field frame to trick the player into thinking
+ * Playfield is 10:22, where rows above 20 are hidden or obstructed by the field frame to trick the player into thinking
  * it's 10:20. In 2002 Guideline, it could be at least 22 height. 
  */
 public class Matrix {
@@ -55,9 +55,8 @@ public class Matrix {
 	 */
 	public static final int PLAYFIELD_WIDTH = 10;
 
-	// the internal data structure for the background matrix.
+	// The internal data structure for the background matrix.
 	// All Tetriminos which are locked in place are merged into the background as Minos.
-	// A zero representing an empty field, a non-zero an occupied field.
 	private TetrisColor[][] _backgroundMatrix;
 
 	// The current Tetrimino
@@ -362,8 +361,8 @@ public class Matrix {
 		return counter;		
 	}
 
-	/*
-	 * initializes all fields with EMPTY 
+	/**
+	 * Initializes all fields with EMPTY 
 	 */
 	private void clearMatrix(TetrisColor[][] m) {
 		// iterate through all cells and initialize with zero
@@ -384,10 +383,18 @@ public class Matrix {
 		return _backgroundMatrix[x][y];
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public int getColumns() {
 		return PLAYFIELD_WIDTH;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public int getVisibleRows() {
 		return SKYLINE;
 	}
@@ -408,6 +415,9 @@ public class Matrix {
 		return _currentTetrimino;
 	}
 
+	/**
+	 * Prints the Matrix to System.out for debugging 
+	 */
 	public void debugPrintMatrix() {
 		for (int yi = PLAYFIELD_HEIGHT-1; yi >= 0; yi--) {
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
@@ -422,7 +432,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Deep copy of the playfield. 
+	 * Deep copy of the Matrix. 
 	 */
 	@Override
 	public Matrix clone() {
@@ -437,9 +447,4 @@ public class Matrix {
 		newP._markedLineClears = _markedLineClears == null ? null : _markedLineClears.clone();
 		return newP;
 	}
-	
-	
-
-
-
 }
