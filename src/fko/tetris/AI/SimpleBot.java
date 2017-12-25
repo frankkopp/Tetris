@@ -2,7 +2,7 @@ package fko.tetris.AI;
 
 import java.util.Random;
 
-import fko.tetris.game.Playfield;
+import fko.tetris.game.Matrix;
 import fko.tetris.game.TetrisControlEvents;
 import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisPhase;
@@ -25,7 +25,7 @@ public class SimpleBot extends AbstractBot {
 			try {
 
 				final TetrisPhase phaseState = _game.getPhaseState();
-				final Playfield playfield = _game.getPlayfield();
+				final Matrix playfield = _game.getPlayfield();
 				System.out.println(phaseState.toString());
 
 				switch(phaseState) {
