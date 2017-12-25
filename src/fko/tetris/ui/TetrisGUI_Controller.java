@@ -140,6 +140,9 @@ public class TetrisGUI_Controller implements Observer {
 		initializeBot();
 	}
 
+	/**
+	 * 
+	 */
 	private void initializeBot() {
 
 		if (botPlayerOption.isSelected() && _tetrisGame != null && _tetrisGame.isRunning()) {
@@ -197,7 +200,7 @@ public class TetrisGUI_Controller implements Observer {
 		}); 
 	}
 
-	/*
+	/**
 	 * Creates a PlayfieldPane and adds it to the root panel  
 	 */
 	private void addPlayfieldPane() {
@@ -205,7 +208,7 @@ public class TetrisGUI_Controller implements Observer {
 		rootPanel.setCenter(_playfieldPane);
 	}
 
-	/*
+	/**
 	 * Creates a NextQueuePane and adds it to the root panel  
 	 */
 	private void addNextQueuePane() {
@@ -217,7 +220,7 @@ public class TetrisGUI_Controller implements Observer {
 		nextQueueBox.getChildren().add(_nextQueuePane);
 	}
 
-	/*
+	/**
 	 * Creates a NextQueuePane and adds it to the root panel  
 	 */
 	private void addHoldPane() {
@@ -229,7 +232,7 @@ public class TetrisGUI_Controller implements Observer {
 		holdBox.getChildren().add(_holdPane);
 	}
 
-	/*
+	/**
 	 * Add HotToText to pane 
 	 */
 	private void addHowToText() {
@@ -247,7 +250,7 @@ public class TetrisGUI_Controller implements Observer {
 		howtoText.getChildren().add(howTo);
 	}
 
-	/*
+	/**
 	 * Adds an updater to the mem label in the status bar
 	 */
 	private void addMemLabelUpdater() {
@@ -306,7 +309,7 @@ public class TetrisGUI_Controller implements Observer {
 		}
 	}
 
-	/*
+	/**
 	 * calls draw for all panes  
 	 */
 	private void draw() {
@@ -324,7 +327,7 @@ public class TetrisGUI_Controller implements Observer {
 		updateStatus();
 	}
 
-	/*
+	/**
 	 * Updates the status bar info 
 	 */
 	private void updateStatus() {
@@ -347,7 +350,7 @@ public class TetrisGUI_Controller implements Observer {
 		if (_tetrisGame.isPaused()) statusbar_status_text.setText("Game paused.");
 	}
 
-	/*
+	/**
 	 * Updates all info fields. E.g. score, etc. 
 	 */
 	private void updateScoreDraw() {
@@ -365,7 +368,7 @@ public class TetrisGUI_Controller implements Observer {
 		}
 	}
 
-	/*
+	/**
 	 *	print the highscore list 
 	 */
 	private void updateHighScoreText() {
@@ -390,11 +393,11 @@ public class TetrisGUI_Controller implements Observer {
 
 		textlines.add(highScoreText);
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.");
 
 		List<HighScoreData.HighScoreEntry> list = HighScoreData.getInstance().getList();
 		list.stream().limit(15).forEach((e) -> {
-			final String txt = String.format("%-11.11s %,7d  %8s%n", e.name+":", e.score, e.date.format(formatter));
+			final String txt = String.format("%-12.12s (%6s): %,5d %,10d%n", e.name, e.date.format(formatter),  e.lines, e.score );
 			final Text tmp = new Text(txt);
 			tmp.setFont(font);
 			tmp.setFill(Color.BLACK);
@@ -408,7 +411,7 @@ public class TetrisGUI_Controller implements Observer {
 
 	}
 
-	/*
+	/**
 	 * Setup controls (menu, buttons, etc.) for running game 
 	 */
 	private void setUItoGameRunning() {
@@ -539,7 +542,6 @@ public class TetrisGUI_Controller implements Observer {
 		_tetrisGame.addObserver(this);
 		_tetrisGame.startTetrisGame();
 		initializeBot();
-		System.out.println("NEW GAME");
 	}
 
 	@FXML
