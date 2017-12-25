@@ -34,7 +34,6 @@ import fko.tetris.ui.TetrisGUI;
 /**
  * Main class for Tetris app. Starts up the JavaFX ui and exits.
  * 
- * TODO: Implement self playing BOT
  * TODO: Use resource files for internationalization
  */
 public class Tetris {
