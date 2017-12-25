@@ -48,7 +48,7 @@ public class Playfield {
 	 * The height of the buffer zone.
 	 * Together with the SKYLINE it determines the height of the overall playfield matrix
 	 */
-	public static final int BUFFERZONE = 20;
+	public static final int BUFFERZONE = 2;
 
 	/**
 	 * Playfield matrix width
@@ -64,7 +64,7 @@ public class Playfield {
 	private Tetrimino _currentTetrimino;
 	
 	// convenience field for SKYLINE+BUFFERZONE
-	private static final int PLAYFIELD_HEIGHT = SKYLINE + BUFFERZONE;
+	public static final int PLAYFIELD_HEIGHT = SKYLINE + BUFFERZONE;
 
 	// lines marked for clearing - call clearMarkedLines() to delete these lines
 	private SimpleIntList _markedLineClears;
