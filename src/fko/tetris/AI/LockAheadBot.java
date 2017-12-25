@@ -10,9 +10,10 @@ import fko.tetris.game.TetrisGame;
 import fko.tetris.game.TetrisPhase;
 import fko.tetris.tetriminos.Tetrimino;
 
+
 public class LockAheadBot extends AbstractBot {
 	
-	private static final int MAX_VISIBLE_NEXTQUEUE = 3;
+	private static final int MAX_VISIBLE_NEXTQUEUE = 1;
 	
 	private List<Tetrimino> _nextQueue = new ArrayList<Tetrimino>(); 
 	
@@ -30,7 +31,6 @@ public class LockAheadBot extends AbstractBot {
 			try {
 
 				final TetrisPhase phaseState = _game.getPhaseState();
-				System.out.println(phaseState.toString());
 				
 				switch(phaseState) {
 				case FALLING: {
@@ -63,7 +63,7 @@ public class LockAheadBot extends AbstractBot {
 
 		int best_turn = 0;
 		int best_move = 0;
-		int best_score = 0;
+		int best_score = Integer.MIN_VALUE;
 
 		// for each permutation of move position and turn position get a score
 		for (int turn=0; turn<4; turn++) {
@@ -88,7 +88,7 @@ public class LockAheadBot extends AbstractBot {
 				pfm.drop();
 				pfm.merge();
 				pfm.markLinesToBeCleared();
-				int clearedLines = pfm.clearMarkedLines();
+				pfm.clearMarkedLines();
 				if (pfm.spawn(_nextQueue.get(0).clone())) {
 					return; // game over
 				}
@@ -117,18 +117,20 @@ public class LockAheadBot extends AbstractBot {
 		}
 		
 		// finally a hard drop
+		System.out.println("SCORE: "+best_score);
 		System.out.println(String.format("Evaluations: %,d",_numberOfEvaluations));
 		System.out.println("BOT MAKES MOVE");
 		_game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
 	}
 
 	private int bruteForceTree(Playfield playfield, int nextQueueIndex) {
+		if (Thread.currentThread().isInterrupted()) return Integer.MIN_VALUE;
+		
 		if (nextQueueIndex >= MAX_VISIBLE_NEXTQUEUE) {
-			final int score =  evalutation(playfield);
-			return score;
+			return evalutation(playfield);
 		}
 		
-		int best_score = 0;
+		int best_score = Integer.MIN_VALUE;
 		
 		for (int turn=0; turn<4; turn++) {
 			Playfield pf = playfield.clone();
@@ -154,10 +156,11 @@ public class LockAheadBot extends AbstractBot {
 				pfm.markLinesToBeCleared();
 				int clearedLines = pfm.clearMarkedLines();
 				int score = 0;
+				//score += (clearedLines-1)*2;
 				if (pfm.spawn(_nextQueue.get(nextQueueIndex).clone())) {
-					score = -99; // game_over
+					score += Integer.MIN_VALUE; // game_over
 				} else {
-					score = bruteForceTree(pfm, nextQueueIndex+1);
+					score += bruteForceTree(pfm, nextQueueIndex+1);
 				};
 				if (score > best_score) best_score = score;
 			}
@@ -169,26 +172,58 @@ public class LockAheadBot extends AbstractBot {
 		
 		_numberOfEvaluations++;
 		
+		if (_numberOfEvaluations%100000 == 0) {
+			System.out.println(String.format("%,d",_numberOfEvaluations));
+		}
+		
 		int score = 0;
 		
-		// highest tetrimino - points 20 - highest y
-		for (int y=0; y<pf.SKYLINE+pf.BUFFERZONE; y++) {
-			boolean found = false;
-			for (int x=0; x<pf.PLAYFIELD_WIDTH;x++) {
-				if (pf.getCell(x,y) != TetrisColor.EMPTY) {
-					found=true;
-					break;
+		final double weightabsolutHeight 	= -1.0;	// Absolute height - higher is worse
+		final double weightAggregatedHeight 	= -1.0;	// Aggregated height - higher is worse
+		final double weightUnevenness 		= -0.2;	// unevenness of stacks - higher is worse
+		
+		//pf.debugPrintMatrix();
+		
+		int [] result = scanFieldEvaluations(pf);
+		
+		score += weightabsolutHeight		* (result[0]^2); // more weight to height if higher 
+		score += weightAggregatedHeight	* result[1];
+		score += weightUnevenness		* result[2];
+		
+//		System.out.println("SCORE: "+score);
+		
+		return score;
+	}
+
+	
+	/*
+	 * scans the whole field and calculates various evaluations and returns the as an array
+	 * { absolute height, aggregated height }
+	 */
+	private int[] scanFieldEvaluations(Playfield pf) {
+		int aggregatedHeight = 0;
+		int absoluteHeight = 0;
+		int unevennessLast = 0;
+		int unevenness = 0;
+		for (int x=0; x<Playfield.PLAYFIELD_WIDTH;x++) {
+			int lastHeigth = 0;
+			for (int y=0; y<Playfield.PLAYFIELD_HEIGHT; y++) {
+				if (pf.getCell(x, y) != TetrisColor.EMPTY) {
+					lastHeigth = y+1; 
 				}
 			}
-			if (!found) { // we did not find a Mino in this row so this was the highest. 
-				score += 20 - y;
-				break;
-			}
+			aggregatedHeight += lastHeigth;
+			unevenness += Math.abs(unevennessLast-lastHeigth);
+			unevennessLast = lastHeigth;
+			if (lastHeigth > absoluteHeight) absoluteHeight = lastHeigth;
 		}
 		
 //		pf.debugPrintMatrix();
-//		System.out.println("SCORE: "+score);
-		return score;
+//		System.out.println("AGGREGATED HEIGHT: "+aggregatedHeight);
+//		System.out.println("ABSOLTUE HEIGHT: "+absoluteHeight);
+//		System.out.println("UNEVENNESS: "+unevenness);
+		
+		return new int[] {aggregatedHeight, absoluteHeight*absoluteHeight, unevenness};
 	}
-	
+
 }
