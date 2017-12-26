@@ -61,7 +61,10 @@ public class Matrix {
 
 	// The current Tetrimino
 	private Tetrimino _currentTetrimino;
-	
+
+	// The last Tetrimino before the last merge
+	private Tetrimino _lastTetrimino;
+
 	// convenience field for SKYLINE+BUFFERZONE
 	public static final int PLAYFIELD_HEIGHT = SKYLINE + BUFFERZONE;
 
@@ -88,7 +91,7 @@ public class Matrix {
 	 * @param next
 	 * @return true if collision detected - false otherwise
 	 */
-	public boolean spawn(Tetrimino next) {
+	public synchronized boolean spawn(Tetrimino next) {
 		int[][] tMatrix = next.getMatrix(next.getCurrentOrientation());
 		// define spawn point - Tetrimino have a defined starting point which should be placed on 5:21
 		Coordinates startPoint = next.getCurrentPosition();
@@ -157,7 +160,7 @@ public class Matrix {
 	/*
 	 * actually commit the move
 	 */
-	private void doMoveDown(Tetrimino tetrimino) {
+	private synchronized void doMoveDown(Tetrimino tetrimino) {
 		tetrimino.getCurrentPosition().y -= 1;
 	}
 
@@ -189,17 +192,17 @@ public class Matrix {
  	 * @return true if surface on the left or right
 	 */
 	public boolean moveSideway(int direction, Tetrimino tetrimino) {
-		if (!canMoveLeft(direction, tetrimino)) return true; // check if move is possible or return true for collision 
+		if (!canMoveSideways(direction, tetrimino)) return true; // check if move is possible or return true for collision 
 		doMoveSideways(direction, tetrimino); // do the actual move
 		return false;
 	}
 	
 	/**
-	 * Check of the Tetrimino can move left one cell<br/>
+	 * Check of the Tetrimino can move left or right one cell<br/>
 	 * @param direction 
 	 * @return true if move is possible, false if landed on surface
 	 */
-	public boolean canMoveLeft(int direction, Tetrimino tetrimino) {
+	public boolean canMoveSideways(int direction, Tetrimino tetrimino) {
 		int[][] tMatrix = tetrimino.getMatrix(tetrimino.getCurrentOrientation());
 		// loop through the Tetrimino matrix and check for surface on the left
 		for (int yi = 0; yi < tMatrix.length; yi++) {
@@ -228,7 +231,7 @@ public class Matrix {
 	/*
 	 * actually commit the move
 	 */
-	private void doMoveSideways(int direction, Tetrimino tetrimino) {
+	private synchronized void doMoveSideways(int direction, Tetrimino tetrimino) {
 		tetrimino.getCurrentPosition().x += direction;
 	}
 	
@@ -254,7 +257,7 @@ public class Matrix {
 		// first create a temp copy of the current Tetrimino we can test turns with
 		Tetrimino tmp = tetrimino.clone();
 		if (canTurn(tmp, direction)) {
-			tetrimino.turn(direction);
+			doTurn(direction, tetrimino);
 		}
 		return false;
 	}
@@ -265,8 +268,7 @@ public class Matrix {
 	 * @return
 	 */
 	private boolean canTurn(Tetrimino tmp, int direction) {
-		// turn the Tetrimino
-		tmp.turn(direction);
+		doTurn(direction, tmp);
 		// check for collisions
 		int[][] tMatrix = tmp.getMatrix(tmp.getCurrentOrientation());
 		for (int yi = 0; yi < tMatrix.length; yi++) {
@@ -293,17 +295,26 @@ public class Matrix {
 	}
 
 	/**
+	 * @param direction
+	 * @param tetrimino
+	 */
+	private synchronized void doTurn(int direction, Tetrimino tetrimino) {
+		tetrimino.turn(direction);
+	}
+
+	/**
 	 * Merges the current Tetrimino in play into the background
 	 */
 	public void merge() {
 		merge(_currentTetrimino);
+		_lastTetrimino = _currentTetrimino; // save the last 
 		_currentTetrimino = null; // erase the current tetrimino
 	}
 
 	/**
 	 * Merges a Tetrimino in play into the background
 	 */
-	public void merge(Tetrimino tetrimino) {
+	public synchronized void merge(Tetrimino tetrimino) {
 		int[][] tMatrix = tetrimino.getMatrix(tetrimino.getCurrentOrientation());
 		// loop through the Tetrimino matrix and check for surface on the left
 		for (int yi = 0; yi < tMatrix.length; yi++) {
@@ -322,7 +333,7 @@ public class Matrix {
 	 * This marks all lines which are full to be cleared later
 	 * @return number of lines which have been marked
 	 */
-	public int markLinesToBeCleared() {
+	public synchronized int markLinesToBeCleared() {
 		// loop through the Tetrimino matrix and check for full lines
 		_markedLineClears = new SimpleIntList(PLAYFIELD_HEIGHT);
 		for (int yi = 0; yi < PLAYFIELD_HEIGHT; yi++) {
@@ -342,7 +353,7 @@ public class Matrix {
 	 * This actually deletes all lines which are marked to be cleared.
 	 * @return number of lines which have been deleted
 	 */
-	public int clearMarkedLines() {
+	public synchronized int clearMarkedLines() {
 		// iterate upwards through the marked lines and shift all Minos above the lines one down
 		// as we created the list upwards the list should be correctly sorted
 		int clearedCounter = 0; // as we delete rows the rows of minos shift down and the index in the 
@@ -364,7 +375,7 @@ public class Matrix {
 	/**
 	 * Initializes all fields with EMPTY 
 	 */
-	private void clearMatrix(TetrisColor[][] m) {
+	private synchronized void clearMatrix(TetrisColor[][] m) {
 		// iterate through all cells and initialize with zero
 		for (int yi = 0; yi < PLAYFIELD_HEIGHT; yi++) {
 			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
@@ -409,33 +420,52 @@ public class Matrix {
 	}
 
 	/**
-	 * @return the _currentTetrimino
+	 * @return the currentTetrimino
 	 */
 	public Tetrimino getCurrentTetrimino() {
 		return _currentTetrimino;
+	}
+	
+	/**
+	 * @return the Tetrimino before the last merge
+	 */
+	public Tetrimino getLastTetrimino() {
+		return _lastTetrimino;
+	}
+	
+	
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		for (int yi = PLAYFIELD_HEIGHT-1; yi >= 0; yi--) {
+			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
+				if (_backgroundMatrix[xi][yi] == TetrisColor.EMPTY) {
+					sb.append("- ");
+				} else {
+					sb.append(_backgroundMatrix[xi][yi].ordinal()+" ");
+				}
+			}
+			sb.append(System.lineSeparator());
+		}
+		return sb.toString();
 	}
 
 	/**
 	 * Prints the Matrix to System.out for debugging 
 	 */
 	public void debugPrintMatrix() {
-		for (int yi = PLAYFIELD_HEIGHT-1; yi >= 0; yi--) {
-			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
-				if (_backgroundMatrix[xi][yi] == TetrisColor.EMPTY) {
-					System.out.print("- ");
-				} else {
-					System.out.print(_backgroundMatrix[xi][yi].ordinal()+" ");
-				}
-			}
-			System.out.println();
-		}
+		System.out.println(this.toString());
 	}
 
 	/**
 	 * Deep copy of the Matrix. 
 	 */
 	@Override
-	public Matrix clone() {
+	public synchronized Matrix clone() {
 		Matrix newP = new Matrix();
 		// copy the matrix
 		TetrisColor[][] newM = new TetrisColor[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
