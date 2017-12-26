@@ -418,8 +418,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			setChanged();
 			notifyObservers("During FALLING");
 			_sounds.playClip(Clips.TOUCHDOWN);
+		} else {
+			_sounds.playClip(Clips.FALLING);
 		}
-		_sounds.playClip(Clips.FALLING);
 	}
 
 	/**
@@ -521,6 +522,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	 */
 	private void patternPhase() {
 		//System.out.println("Enter PATTERN phase");
+		
+		// TODO: check for game over - locked piece higher than skyline
+		
 
 		// look for LINE CLEAR
 		_playfield.markLinesToBeCleared();
