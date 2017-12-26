@@ -293,14 +293,14 @@ public class TetrisGUI_Controller implements Observer {
 		//System.out.println("update from "+o+" with args: "+arg);
 
 		if (_tetrisGame != null && _tetrisGame.isRunning()) { // game is running
-			_playfieldPane.setPlayField(_tetrisGame.getPlayfield());
+			_playfieldPane.setPlayField(_tetrisGame.getMatrix());
 			_nextQueuePane.setNextQueue(_tetrisGame.getNextQueue());
 			_holdPane.setHoldTetrimino(_tetrisGame.getHoldTetrimino());
 			PlatformUtil.platformRunAndWait(() -> setUItoGameRunning()); // setup ui
 			PlatformUtil.platformRunAndWait(() -> draw()); // draw panes
 		} else { // no game 
 			// if we just played a game continue to show the playfield after game over or game stopped
-			if (_tetrisGame != null) _playfieldPane.setPlayField(_tetrisGame.getPlayfield());
+			if (_tetrisGame != null) _playfieldPane.setPlayField(_tetrisGame.getMatrix());
 			else _playfieldPane.setPlayField(null);
 			_nextQueuePane.setNextQueue(null);
 			_holdPane.setHoldTetrimino(null);
@@ -393,11 +393,11 @@ public class TetrisGUI_Controller implements Observer {
 
 		textlines.add(highScoreText);
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM");
 
 		List<HighScoreData.HighScoreEntry> list = HighScoreData.getInstance().getList();
 		list.stream().limit(15).forEach((e) -> {
-			final String txt = String.format("%-12.12s (%6s): %,5d %,10d%n", e.name, e.date.format(formatter),  e.lines, e.score );
+			final String txt = String.format("%-12.12s (%5s): %,5d %,11d%n", e.name, e.date.format(formatter),  e.lines, e.score );
 			final Text tmp = new Text(txt);
 			tmp.setFont(font);
 			tmp.setFill(Color.BLACK);

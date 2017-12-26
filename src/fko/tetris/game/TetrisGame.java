@@ -322,9 +322,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_fallingTimer.setTimer(calculateFallingTime());
 		_fallingTimer.start();
 
-		// clear the control queue
-		_controlQueue.clear();
-
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
 		// we query a blocking queue and wait
@@ -436,9 +433,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// Start lock timer - lock time is always 500ms
 		_lockTimer.addObserver(this);
 		_lockTimer.restart();
-
-		// clear the control queue
-		_controlQueue.clear();
 
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
@@ -587,7 +581,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			_currentLevel = _lineCount/10 +1;
 			if (_currentLevel > 15) _currentLevel = 15;
 			if (_currentLevel > old) {
-				//_sounds.playClip(Clips.););
+				_sounds.playClip(Clips.LEVELUP);
 			}
 		}
 		_phaseState = TetrisPhase.GENERATION;
@@ -697,7 +691,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	/**
 	 * @return the _playfield
 	 */
-	public Matrix getPlayfield() {
+	public Matrix getMatrix() {
 		return _playfield;
 	}
 
