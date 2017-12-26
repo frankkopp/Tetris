@@ -25,7 +25,7 @@ public class SimpleBot extends AbstractBot {
 			try {
 
 				final TetrisPhase phaseState = _game.getPhaseState();
-				final Matrix playfield = _game.getPlayfield();
+				final Matrix playfield = _game.getMatrix();
 				System.out.println(phaseState.toString());
 
 				switch(phaseState) {

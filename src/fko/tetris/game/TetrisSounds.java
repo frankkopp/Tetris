@@ -65,6 +65,7 @@ public class TetrisSounds {
 		TOUCH_LR		("SFX_PieceTouchLR"),
 		LINECLEAR   ("lines"),
 		TETRIS		("SFX_SpecialTetris"),
+		LEVELUP		("levelup"),
 		GAME_START 	("SFX_GameStart"),
 		GAME_OVER 	("SFX_GameOver");
 

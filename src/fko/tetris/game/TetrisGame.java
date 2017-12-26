@@ -34,9 +34,6 @@ import fko.tetris.tetriminos.Tetrimino;
 /**
  * This represents the state of a Tetris game. It holds all information necessary to represent a Tetris game at any 
  * point in time.
- * 
- * TODO: Enable switching sound on and off
- * 
  */
 public class TetrisGame extends Observable implements Runnable, Observer {
 
@@ -78,7 +75,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	private boolean _holdAllowed = true; // using hold is only allowed once between LOCK phases
 
-	// gane statistics
+	// game statistics
 	private int _lastClearedLinesCount = 0;
 	private int _lastHardDropLineCount = 0;
 	private int _lastSoftDropLineCount = 0;
@@ -281,14 +278,14 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// game stopped
 		
 		// save highscore 
-		_highScoreData.addEntryAndSave(_playerName, _score, _currentLevel, _tetrisesCount, LocalDateTime.now());
+		_highScoreData.addEntryAndSave(_playerName, _score, _currentLevel, _tetrisesCount, _lineCount, LocalDateTime.now());
 
 		// -- tell the view that model has changed
 		setChanged();
 		notifyObservers("Game Thread stopped");
 	}
 
-	/*
+	/**
 	 * GENERATION phase 
 	 */
 	private void generationPhase() {
@@ -315,7 +312,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		}
 	}
 
-	/*
+	/**
 	 * FALLING phase
 	 */
 	private void fallingPhase() {
@@ -324,9 +321,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_fallingTimer.addObserver(this);
 		_fallingTimer.setTimer(calculateFallingTime());
 		_fallingTimer.start();
-
-		// clear the control queue
-		_controlQueue.clear();
 
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
@@ -424,11 +418,12 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			setChanged();
 			notifyObservers("During FALLING");
 			_sounds.playClip(Clips.TOUCHDOWN);
+		} else {
+			_sounds.playClip(Clips.FALLING);
 		}
-		_sounds.playClip(Clips.FALLING);
 	}
 
-	/*
+	/**
 	 * LOCK phase
 	 * Implements the INFINITE PLACEMENT LOCK DOWN	
 	 * TODO: Implement EXTENDED LOCK DOWN and CLASSIC LOCKDOWN
@@ -439,9 +434,6 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		// Start lock timer - lock time is always 500ms
 		_lockTimer.addObserver(this);
 		_lockTimer.restart();
-
-		// clear the control queue
-		_controlQueue.clear();
 
 		// While timer is >0 allow movements
 		// movement = inputs from keyboard (events)
@@ -524,12 +516,15 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
 	}
 
-	/*
+	/**
 	 * PATTERN phase
 	 * This phase marks all lines for clearance in the ELIMINATE phase.
 	 */
 	private void patternPhase() {
 		//System.out.println("Enter PATTERN phase");
+		
+		// TODO: check for game over - locked piece higher than skyline
+		
 
 		// look for LINE CLEAR
 		_playfield.markLinesToBeCleared();
@@ -539,7 +534,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_phaseState = TetrisPhase.ITERATE;
 	}
 
-	/*
+	/**
 	 * ELIMINATE phase
 	 * This phase removes all lines from the playfield which were marked for clearance.<br/>
 	 * Also handles game statistics like scoring, bonus scores, etc.
@@ -577,7 +572,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		_phaseState = TetrisPhase.COMPLETION;
 	}
 
-	/*
+	/**
 	 * COMPLETION phase
 	 * This is where any updates to information fields on the Tetris playfield are updated, such as the Score and Time. 
 	 * The Level Up condition is also checked to see if it is necessary to advance the game level.
@@ -590,13 +585,13 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			_currentLevel = _lineCount/10 +1;
 			if (_currentLevel > 15) _currentLevel = 15;
 			if (_currentLevel > old) {
-				//_sounds.playClip(Clips.););
+				_sounds.playClip(Clips.LEVELUP);
 			}
 		}
 		_phaseState = TetrisPhase.GENERATION;
 	}
 
-	/*
+	/**
 	 * @param numberOfClearedLines
 	 * @return score for the last placement
 	 */
@@ -612,7 +607,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 		return score;
 	}
 
-	/*
+	/**
 	 * @return the falling time for the current level
 	 */
 	private long calculateFallingTime() {
@@ -700,7 +695,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	/**
 	 * @return the _playfield
 	 */
-	public Matrix getPlayfield() {
+	public Matrix getMatrix() {
 		return _playfield;
 	}
 
