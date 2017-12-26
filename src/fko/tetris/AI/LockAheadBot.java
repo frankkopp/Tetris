@@ -11,7 +11,7 @@ import fko.tetris.game.TetrisPhase;
 import fko.tetris.tetriminos.Tetrimino;
 
 /**
- * A bit capable of looking several Tetriminos ahead using the NextQueue<br>
+ * A Bot capable of looking several Tetriminos ahead using the NextQueue<br>
  * It evaluates absolute height, aggregated height, unevenness, holes, blocker (Minos over holes).<br>
  * It can't play with a lookahead of 3+ in higher levels (12+) as it takes too long to calculate.<br>
  * 
@@ -40,11 +40,12 @@ public class LockAheadBot extends AbstractBot {
 	 */
 	@Override
 	public void run() {
-		boolean moveDone = false;
+		boolean moveDone = false; // to prevent several calculations during the falling phase
 		while (!Thread.interrupted()) {
 				final TetrisPhase phaseState = _game.getPhaseState();
 				switch(phaseState) {
 				// we can only move when we are in FALLING phase
+				case LOCK: // we can still move during LOCK - this is helpful in higher levels when game is really fast
 				case FALLING: {
 					if (!moveDone) {
 						long time = System.nanoTime();
@@ -63,7 +64,6 @@ public class LockAheadBot extends AbstractBot {
 					break;
 				}
 				// we we reset our moveDone flag during LOCK phase but do nothing else for now in LOCK phase
-				case LOCK: moveDone=false; break;
 				// game over stops thread
 				case GAMEOVER: moveDone=false; Thread.currentThread().interrupt(); break;
 				default: moveDone=false; break;
