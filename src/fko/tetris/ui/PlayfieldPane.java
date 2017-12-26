@@ -54,8 +54,8 @@ public class PlayfieldPane extends Pane {
 
 	// helper for an efficient draw()
 	private Line[] _hlines = new Line[Matrix.SKYLINE];
-	private Line[] _vlines = new Line[Matrix.PLAYFIELD_WIDTH];
-	private Rectangle[] _block = new Rectangle[(Matrix.BUFFERZONE+Matrix.SKYLINE)*Matrix.PLAYFIELD_WIDTH];
+	private Line[] _vlines = new Line[Matrix.MATRIX_WIDTH];
+	private Rectangle[] _block = new Rectangle[(Matrix.BUFFERZONE+Matrix.SKYLINE)*Matrix.MATRIX_WIDTH];
 	private Rectangle[] _tblock = new Rectangle[16];
 	private Rectangle[] _gblock = new Rectangle[16];
 
@@ -81,10 +81,10 @@ public class PlayfieldPane extends Pane {
 		for (int i=0; i<Matrix.SKYLINE; i++) {
 			_hlines[i] = new Line();
 		}
-		for (int i=0; i<Matrix.PLAYFIELD_WIDTH; i++) {
+		for (int i=0; i<Matrix.MATRIX_WIDTH; i++) {
 			_vlines[i] = new Line();
 		}
-		for (int i=0; i<(Matrix.BUFFERZONE+Matrix.SKYLINE)*Matrix.PLAYFIELD_WIDTH; i++) {
+		for (int i=0; i<(Matrix.BUFFERZONE+Matrix.SKYLINE)*Matrix.MATRIX_WIDTH; i++) {
 			_block[i] = new Rectangle();
 		}
 		for (int i=0; i<16; i++) {
@@ -133,9 +133,9 @@ public class PlayfieldPane extends Pane {
 		this.getChildren().add(rectangle);
 
 		// draw lines
-		for (int c=1; c<Matrix.PLAYFIELD_WIDTH; c++) {
+		for (int c=1; c<Matrix.MATRIX_WIDTH; c++) {
 			// vertical lines
-			double w = (WIDTH/Matrix.PLAYFIELD_WIDTH)*c;
+			double w = (WIDTH/Matrix.MATRIX_WIDTH)*c;
 			Line v_line =_vlines[c-1];
 			v_line.setStroke(GRID_COLOR);
 			v_line.setStartX(w);
@@ -157,7 +157,7 @@ public class PlayfieldPane extends Pane {
 		}
 
 		final double h = (HEIGHT/Matrix.SKYLINE);
-		final double w = (WIDTH/Matrix.PLAYFIELD_WIDTH);
+		final double w = (WIDTH/Matrix.MATRIX_WIDTH);
 
 		int cr = 0; // counter for the prepared drawing objects
 		
@@ -165,7 +165,7 @@ public class PlayfieldPane extends Pane {
 		// iterate through all cells a initialize with zero
 
 		for (int yi = 0; yi < Matrix.SKYLINE+1; yi++) { // we only draw the visible part therefore only to SKYLINE
-			for (int xi = 0; xi < Matrix.PLAYFIELD_WIDTH; xi++) {
+			for (int xi = 0; xi < Matrix.MATRIX_WIDTH; xi++) {
 				final TetrisColor bc = _playField.getBackgroundColor(xi,yi);
 				Color color = bc.toColor();
 				if (bc != TetrisColor.EMPTY) {

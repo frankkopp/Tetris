@@ -53,7 +53,10 @@ public class Matrix {
 	/**
 	 * Playfield matrix width
 	 */
-	public static final int PLAYFIELD_WIDTH = 10;
+	public static final int MATRIX_WIDTH = 10;
+
+	// convenience field for SKYLINE+BUFFERZONE
+	public static final int PLAYFIELD_HEIGHT = SKYLINE + BUFFERZONE;
 
 	// The internal data structure for the background matrix.
 	// All Tetriminos which are locked in place are merged into the background as Minos.
@@ -65,9 +68,6 @@ public class Matrix {
 	// The last Tetrimino before the last merge
 	private Tetrimino _lastTetrimino;
 
-	// convenience field for SKYLINE+BUFFERZONE
-	public static final int PLAYFIELD_HEIGHT = SKYLINE + BUFFERZONE;
-
 	// lines marked for clearing - call clearMarkedLines() to delete these lines
 	private SimpleIntList _markedLineClears;
 
@@ -76,7 +76,7 @@ public class Matrix {
 	 * @param _backgroundMatrix
 	 */
 	public Matrix() {
-		this._backgroundMatrix = new TetrisColor[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
+		this._backgroundMatrix = new TetrisColor[MATRIX_WIDTH][PLAYFIELD_HEIGHT];
 		clearMatrix(_backgroundMatrix);
 	}
 
@@ -214,7 +214,7 @@ public class Matrix {
 							return false;
 						}
 					} else if (direction > 0) { // right wall
-						if (tetrimino.getCurrentPosition().x+xi  >= PLAYFIELD_WIDTH-1) {
+						if (tetrimino.getCurrentPosition().x+xi  >= MATRIX_WIDTH-1) {
 							return false;
 						}
 					}
@@ -278,7 +278,7 @@ public class Matrix {
 					if (tmp.getCurrentPosition().x+xi  < 0) { // outside left wall
 						return false;
 					}
-					if (tmp.getCurrentPosition().x+xi  > PLAYFIELD_WIDTH-1) { // outside right wall
+					if (tmp.getCurrentPosition().x+xi  > MATRIX_WIDTH-1) { // outside right wall
 						return false;
 					}
 					if (tmp.getCurrentPosition().y-yi-1  < 0) { // below base line
@@ -338,7 +338,7 @@ public class Matrix {
 		_markedLineClears = new SimpleIntList(PLAYFIELD_HEIGHT);
 		for (int yi = 0; yi < PLAYFIELD_HEIGHT; yi++) {
 			boolean foundHole = false;
-			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
+			for (int xi = 0; xi < MATRIX_WIDTH; xi++) {
 				if (_backgroundMatrix[xi][yi] == TetrisColor.EMPTY) {
 					foundHole = true;
 					break;
@@ -360,7 +360,7 @@ public class Matrix {
 								// _markedLinesCleares need to be decreased by 1
 		for (int i : _markedLineClears) {
 			for (int y=i-clearedCounter;y<PLAYFIELD_HEIGHT-1;y++) {
-				for(int x=0;x<PLAYFIELD_WIDTH;x++) {
+				for(int x=0;x<MATRIX_WIDTH;x++) {
 					// copy the cell above to the current cell
 					_backgroundMatrix[x][y] = _backgroundMatrix[x][y+1];
 				}
@@ -378,7 +378,7 @@ public class Matrix {
 	private synchronized void clearMatrix(TetrisColor[][] m) {
 		// iterate through all cells and initialize with zero
 		for (int yi = 0; yi < PLAYFIELD_HEIGHT; yi++) {
-			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
+			for (int xi = 0; xi < MATRIX_WIDTH; xi++) {
 				m[xi][yi] = TetrisColor.EMPTY;
 			}
 		}
@@ -395,16 +395,14 @@ public class Matrix {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * @return matrix width
 	 */
 	public int getColumns() {
-		return PLAYFIELD_WIDTH;
+		return MATRIX_WIDTH;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * @return number of rows visible (to skyline)
 	 */
 	public int getVisibleRows() {
 		return SKYLINE;
@@ -413,7 +411,7 @@ public class Matrix {
 	/**
 	 * @param xi
 	 * @param yi
-	 * @return
+	 * @return returns the <code>TetrisColor</code> of the given cell
 	 */
 	public TetrisColor getBackgroundColor(int xi, int yi) {
 		return _backgroundMatrix[xi][yi];
@@ -435,14 +433,14 @@ public class Matrix {
 	
 	
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/** 
+	 * Returns the matrix a string representation
 	 */
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		for (int yi = PLAYFIELD_HEIGHT-1; yi >= 0; yi--) {
-			for (int xi = 0; xi < PLAYFIELD_WIDTH; xi++) {
+			for (int xi = 0; xi < MATRIX_WIDTH; xi++) {
 				if (_backgroundMatrix[xi][yi] == TetrisColor.EMPTY) {
 					sb.append("- ");
 				} else {
@@ -468,12 +466,13 @@ public class Matrix {
 	public synchronized Matrix clone() {
 		Matrix newP = new Matrix();
 		// copy the matrix
-		TetrisColor[][] newM = new TetrisColor[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
+		TetrisColor[][] newM = new TetrisColor[MATRIX_WIDTH][PLAYFIELD_HEIGHT];
 		for(int x=0; x < _backgroundMatrix.length;x++) {
 			System.arraycopy(_backgroundMatrix[x], 0, newM[x], 0, _backgroundMatrix[x].length);
 		}
 		newP._backgroundMatrix = newM;
 		newP._currentTetrimino = _currentTetrimino == null ? null : _currentTetrimino.clone();
+		newP._lastTetrimino = _lastTetrimino == null ? null : _lastTetrimino.clone();
 		newP._markedLineClears = _markedLineClears == null ? null : _markedLineClears.clone();
 		return newP;
 	}

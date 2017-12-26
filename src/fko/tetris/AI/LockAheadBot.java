@@ -237,7 +237,7 @@ public class LockAheadBot extends AbstractBot {
 
 		// scan the field once and do all evaluations which need to scan the whole matrix
 		// to avoid scanning the matrix multiple times
-		for (int x=0; x<Matrix.PLAYFIELD_WIDTH;x++) {
+		for (int x=0; x<Matrix.MATRIX_WIDTH;x++) {
 			int possibleHoles = 0;
 			height = 0;
 			int tmpHoles = 0;
