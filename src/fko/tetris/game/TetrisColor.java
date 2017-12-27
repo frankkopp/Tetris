@@ -37,7 +37,7 @@ public enum TetrisColor {
 	ORANGE,		// L
 	BLUE,		// J
 	GREEN,		// S
-	RED;		// Z
+	RED;		    // Z
 
     public Color toColor() {
         switch (this) {

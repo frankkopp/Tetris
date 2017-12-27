@@ -242,7 +242,7 @@ public class LockAheadBot extends AbstractBot {
 			height = 0;
 			int tmpHoles = 0;
 			int tmpBlocker = 0;
-			for (int y=0; y<Matrix.PLAYFIELD_HEIGHT; y++) {
+			for (int y=0; y<Matrix.MATRIX_HEIGHT; y++) {
 				if (myMatrix.getCell(x, y) != TetrisColor.EMPTY) {
 					height = y+1; 
 					if (possibleHoles > 0) {
