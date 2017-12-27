@@ -438,7 +438,7 @@ public class Matrix {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int yi = PLAYFIELD_HEIGHT-1; yi >= 0; yi--) {
 			for (int xi = 0; xi < MATRIX_WIDTH; xi++) {
 				if (_backgroundMatrix[xi][yi] == TetrisColor.EMPTY) {
