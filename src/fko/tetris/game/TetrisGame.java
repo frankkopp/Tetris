@@ -62,9 +62,10 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private boolean 		_gameStopped = true; 	// flag to stop a running game
 	private boolean 		_isPaused = false;		// flag to pause a running game
 
-	private TetrisPhase _phaseState = TetrisPhase.NOTSTARTED; // the state/phase the engine is currently in
+	// the state/phase the engine is currently in
 	// this determines what inputs and actions are allowed and 
 	// which states can follow
+	private TetrisPhase _phaseState = TetrisPhase.NOTSTARTED; 
 
 	// Timers to control falling and locking time
 	private TetrisTimer _fallingTimer	= new TetrisTimer(1000); 
@@ -241,7 +242,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				 * 
 				 * Game Statistics
 				 * Statistics such as the number of Singles, Doubles, Triples, Tetrises, and T-Spins can also be 
-				 * tracked in the Eliminate Phase. Ideally, some sort of High Score Table should record the player�s
+				 * tracked in the Eliminate Phase. Ideally, some sort of High Score Table should record the player's
 				 * name, the highest level reached, his total score, and other statistics that can be tracked in 
 				 * this phase.
 				 */
@@ -291,6 +292,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	private void generationPhase() {
 		// get next Tetrimino from nextQueue
 		Tetrimino next = _nextQueue.getNext();
+		
 		// spawn it on the playfield
 		if (_playfield.spawn(next)) {
 			// collision detected - "BLOCK OUT" GAME OVER CONDITION
@@ -300,15 +302,17 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 			notifyObservers("Game Over");
 			_sounds.playClip(Clips.GAME_OVER);
 		} else {
+			// -- tell the view that model has changed
+			setChanged();
+			notifyObservers("Generation finished");
+			try { Thread.sleep(5); // give the UI time to show the falling Tetrimino
+			} catch (InterruptedException e) {}
 			// Immediately fall into visible area and check for collision
 			if (_playfield.moveDown()) {
 				// collision detected - LOCKING
 				_phaseState = TetrisPhase.LOCK;
 			}
 			_phaseState = TetrisPhase.FALLING;
-			// -- tell the view that model has changed
-			setChanged();
-			notifyObservers("Generation finished");
 		}
 	}
 
