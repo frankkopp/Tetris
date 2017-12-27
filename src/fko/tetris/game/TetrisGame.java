@@ -373,11 +373,18 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 				_lastSoftDropLineCount+=1;
 				_sounds.playClip(Clips.SOFTDROP);
 				break;
-			case HARDDOWN:				
-				_lastHardDropLineCount = _playfield.drop(); 
-				setChanged();
-				notifyObservers("During FALLING after HARDOWN");
+			case HARDDOWN:
 				_sounds.playClip(Clips.HARDDROP);
+				// we do the drop manually to make animation smooth (instead of using Matrix.drop()
+				int counter = 0;
+				while (!_playfield.moveDown()) {
+					counter++;
+					setChanged();
+					notifyObservers("During FALLING after HARDOWN");
+					try { Thread.sleep(5); // give the UI time to show the falling Tetrimino
+					} catch (InterruptedException e) {}
+				}			
+				_lastHardDropLineCount = counter; 
 				breakFlag = true;
 				break;
 			case HOLD:
