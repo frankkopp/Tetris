@@ -43,6 +43,7 @@ import fko.tetris.Tetris;
 import fko.tetris.AI.Bot;
 import fko.tetris.AI.LockAheadBot;
 import fko.tetris.AI.SimpleBot;
+import fko.tetris.AI.TrainerBot;
 import fko.tetris.game.HighScoreData;
 import fko.tetris.game.TetrisControlEvents;
 import fko.tetris.game.TetrisGame;
@@ -154,6 +155,9 @@ public class TetrisGUI_Controller implements Observer {
 				_currentBot.startBot();
 			} else if (selectedToggle == lookaheadBotOption) {
 				_currentBot = new LockAheadBot(_tetrisGame);
+				_currentBot.startBot();
+			} else if (selectedToggle == trainerBotOption) {
+				_currentBot = new TrainerBot(_tetrisGame);
 				_currentBot.startBot();
 			} else {
 				Tetris.criticalError("NO BOT SELECTED");
@@ -479,13 +483,14 @@ public class TetrisGUI_Controller implements Observer {
 	 */
 	private void saveSettings() {
 		settings.setProperty("player_name", playerNameField.getText());
+		settings.setProperty("sound", soundOnOption.isSelected() ? "on" : "off");
 		settings.setProperty("next_queue_list", nextQueueOption.isSelected() ? "on" : "off");
 		settings.setProperty("peek_spawn", peekOption.isSelected() ? "on" : "off");
 		settings.setProperty("ghost_piece", ghostPieceOption.isSelected() ? "on" : "off");
 		settings.setProperty("bot_player", botPlayerOption.isSelected() ? "on" : "off");
 		settings.setProperty("simple_bot", simpleBotOption.isSelected() ? "on" : "off");
 		settings.setProperty("lookahead_bot", lookaheadBotOption.isSelected() ? "on" : "off");
-		settings.setProperty("sound", soundOnOption.isSelected() ? "on" : "off");
+		settings.setProperty("trainer_bot", trainerBotOption.isSelected() ? "on" : "off");
 		settings.save();
 	}
 
@@ -496,13 +501,14 @@ public class TetrisGUI_Controller implements Observer {
 		// read in settings
 		playerNameField.setText(settings.getProperty("player_name", "Unknown Player"));
 		_oldPlayerName = playerNameField.getText();
+		soundOnOption.setSelected(settings.getProperty("sound", "off").equals("on") ? true : false);
 		nextQueueOption.setSelected(settings.getProperty("next_queue_list", "on").equals("on") ? true : false);
 		peekOption.setSelected(settings.getProperty("peek_spawn", "on").equals("on") ? true : false);
 		ghostPieceOption.setSelected(settings.getProperty("ghost_piece", "on").equals("on") ? true : false);
 		botPlayerOption.setSelected(settings.getProperty("bot_player", "off").equals("on") ? true : false);
 		simpleBotOption.setSelected(settings.getProperty("simple_bot", "off").equals("on") ? true : false);
 		lookaheadBotOption.setSelected(settings.getProperty("lookahead_bot", "off").equals("on") ? true : false);
-		soundOnOption.setSelected(settings.getProperty("sound", "off").equals("on") ? true : false);
+		trainerBotOption.setSelected(settings.getProperty("trainer_bot", "off").equals("on") ? true : false);
 	}
 
 	// #######################################################################
@@ -716,6 +722,9 @@ public class TetrisGUI_Controller implements Observer {
 
 	@FXML // fx:id="bots"
 	private ToggleGroup bots; // Value injected by FXMLLoader
+	
+	@FXML // fx:id="trainerBotOption"
+    private RadioMenuItem trainerBotOption; // Value injected by FXMLLoader
 
 	/*
 	 * FXML checks
@@ -758,6 +767,7 @@ public class TetrisGUI_Controller implements Observer {
 		assert lookaheadBotOption != null : "fx:id=\"minimaxBotOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert simpleBotOption != null : "fx:id=\"simpleBotOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 		assert bots != null : "fx:id=\"bots\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
+		assert trainerBotOption != null : "fx:id=\"trainerBotOption\" was not injected: check your FXML file 'TetrisGUI.fxml'.";
 	}
 
 }
