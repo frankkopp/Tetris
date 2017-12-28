@@ -32,6 +32,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -47,10 +49,10 @@ import fko.tetris.tetriminos.Tetrimino;
 public class TrainingData {
 
 	/* default value for folder */
-	static private final String folderPathPlain = "./var/";
-	private final Path _folderPath = FileSystems.getDefault().getPath(folderPathPlain);
-	static private final String fileNamePlain = "trainingdata.csv";
-	private final Path _filePath = FileSystems.getDefault().getPath(folderPathPlain, fileNamePlain);
+	private static final String folderPathPlain = "./var/";
+	private static final Path _folderPath = FileSystems.getDefault().getPath(folderPathPlain);
+	private static final String fileNamePlain = "trainingdata.csv";
+	private static final Path _filePath = FileSystems.getDefault().getPath(folderPathPlain, fileNamePlain);
 
 	// Buffer for entry to save asynchronously
 	private LinkedBlockingQueue<DatasetRow> _bufferQueue = new LinkedBlockingQueue<DatasetRow>();
@@ -98,6 +100,31 @@ public class TrainingData {
 
 		// start the service which runs the loop to white for lines to append to file
 		_executor.execute(new Appendtask());
+	}
+	
+	/**
+	 * Reads all line into an List
+	 */
+	public static List<double[]> readFromFile() {
+		List<String> lines = null;
+		try {
+			lines = Files.readAllLines(_filePath);
+		} catch (IOException e) {
+			Tetris.fatalError("Dataset file '" + _filePath + "' could not be loaded!");
+		}
+		List<double[]> dataset = new ArrayList<>(lines.size());
+		lines.stream().forEach(l -> { 
+			if (l.endsWith(";")) {
+				l=l.substring(0, l.length()-1);
+			}
+			String[] subs = l.split(";");
+			double[] datarow = new double[subs.length];
+			for (int i=0; i<subs.length; i++) {
+				datarow[i] = Double.valueOf(subs[i]);
+			}
+			dataset.add(datarow);
+		});
+		return dataset;
 	}
 
 	/**
@@ -197,8 +224,9 @@ public class TrainingData {
 				sb.append(i==turn ? "1" : "0").append(";");
 			}
 			sb.append(" ");
-			for (int i=-(Matrix.MATRIX_WIDTH/2); i<=(Matrix.MATRIX_WIDTH/2); i++) {
-				sb.append(i==move ? "1" : "0").append(";");
+			for (int i=-5; i<=5; i++) { // hard coded playfield width 10 = 5+5
+				sb.append(i==move ? "1" : "0");
+				if (i != 5) sb.append(";");
 			}
 			return sb.toString();
 		}
