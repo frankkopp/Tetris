@@ -136,6 +136,11 @@ public class TrainerBot extends AbstractBot {
 					best_turn = turn;
 					best_move = m;
 					best_score = score;
+				} else if (score == best_score && Math.random() < 0.5) {
+					System.out.println("RANDOM");
+					best_turn = turn;
+					best_move = m;
+					best_score = score;
 				}
 			}
 		}
