@@ -1,8 +1,6 @@
 /**
  * The MIT License (MIT)
  *
- * "Chessly by Frank Kopp"
- *
  * mail-to:frank@familie-kopp.de
  *
  * Copyright (c) 2016 Frank Kopp

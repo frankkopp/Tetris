@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * "Chessly by Frank Kopp"
+ * "Tetris by Frank Kopp"
  *
  * mail-to:frank@familie-kopp.de
  *
