@@ -96,7 +96,6 @@ public class TetrisSounds {
 		.forEach(c -> {
 			final String filename = SOUND_FOLDER + c._name+".wav";
 			final URL url = Tetris.class.getResource(filename);
-			//final File file = new File(SOUND_FOLDER+c._name+".wav");
 			// create AudioInputStream object
 			if (url != null) {
 				_sounds.put(c, url);
