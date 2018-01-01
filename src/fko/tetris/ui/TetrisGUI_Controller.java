@@ -93,8 +93,14 @@ import javafx.stage.Stage;
  */
 public class TetrisGUI_Controller implements Observer {
 
+	// pre-load the high score data and share it through the class as static
+	private static final HighScoreData _highScoreData = HighScoreData.getInstance();
+
+	// pre-load setting
+	private static final TetrisSettings _tetrisSettings = TetrisSettings.getInstance();
+
+	// pre-load previous windows state
 	private static final WindowStateFX windowState = WindowStateFX.getInstance(); // to save and restore the last position of our window
-	private static final TetrisSettings settings = TetrisSettings.getInstance();
 
 	private Stage _primaryStage; // handle to primary stage
 	private TetrisGame _tetrisGame; // holds a running tetrisGame
@@ -104,8 +110,10 @@ public class TetrisGUI_Controller implements Observer {
 
 	// to use for scheduled updates of ui properties - e.g. mem status label
 	private final ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
-	
+
 	private Bot _currentBot;
+	
+	// when a Bot plays it replaces the name of the current player. To reset is later we save the name
 	private String _oldPlayerName;
 
 	/**
@@ -119,12 +127,14 @@ public class TetrisGUI_Controller implements Observer {
 		assertFXML(); // FXML auto checks
 
 		statusbar_copyright_text.setText("Tetris(c) by Frank Kopp 2017 v"+Tetris.VERSION);
-
-		addMemLabelUpdater(); // add constantly updated memory info into status panel
+		
+		// these probably don't belong here - should be in UI class not controller
 		addPlayfieldPane(); // add the playfield pane 
 		addNextQueuePane(); // add the next queue pane
 		addHoldPane(); // add the hold Tetrimino pane
 		addHowToText();
+		addMemLabelUpdater(); // add constantly updated memory info into status panel
+
 		updateHighScoreText();
 		updateStatus();
 
@@ -399,7 +409,7 @@ public class TetrisGUI_Controller implements Observer {
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM");
 
-		List<HighScoreData.HighScoreEntry> list = HighScoreData.getInstance().getList();
+		List<HighScoreData.HighScoreEntry> list = _highScoreData.getList();
 		list.stream().limit(15).forEach((e) -> {
 			final String txt = String.format("%-12.12s (%5s): %,5d %,11d%n", e.name, e.date.format(formatter),  e.lines, e.score );
 			final Text tmp = new Text(txt);
@@ -482,16 +492,16 @@ public class TetrisGUI_Controller implements Observer {
 	 * Save settings to file 
 	 */
 	private void saveSettings() {
-		settings.setProperty("player_name", playerNameField.getText());
-		settings.setProperty("sound", soundOnOption.isSelected() ? "on" : "off");
-		settings.setProperty("next_queue_list", nextQueueOption.isSelected() ? "on" : "off");
-		settings.setProperty("peek_spawn", peekOption.isSelected() ? "on" : "off");
-		settings.setProperty("ghost_piece", ghostPieceOption.isSelected() ? "on" : "off");
-		settings.setProperty("bot_player", botPlayerOption.isSelected() ? "on" : "off");
-		settings.setProperty("simple_bot", simpleBotOption.isSelected() ? "on" : "off");
-		settings.setProperty("lookahead_bot", lookaheadBotOption.isSelected() ? "on" : "off");
-		settings.setProperty("trainer_bot", trainerBotOption.isSelected() ? "on" : "off");
-		settings.save();
+		_tetrisSettings.setProperty("player_name", playerNameField.getText());
+		_tetrisSettings.setProperty("sound", soundOnOption.isSelected() ? "on" : "off");
+		_tetrisSettings.setProperty("next_queue_list", nextQueueOption.isSelected() ? "on" : "off");
+		_tetrisSettings.setProperty("peek_spawn", peekOption.isSelected() ? "on" : "off");
+		_tetrisSettings.setProperty("ghost_piece", ghostPieceOption.isSelected() ? "on" : "off");
+		_tetrisSettings.setProperty("bot_player", botPlayerOption.isSelected() ? "on" : "off");
+		_tetrisSettings.setProperty("simple_bot", simpleBotOption.isSelected() ? "on" : "off");
+		_tetrisSettings.setProperty("lookahead_bot", lookaheadBotOption.isSelected() ? "on" : "off");
+		_tetrisSettings.setProperty("trainer_bot", trainerBotOption.isSelected() ? "on" : "off");
+		_tetrisSettings.save();
 	}
 
 	/**
@@ -499,16 +509,16 @@ public class TetrisGUI_Controller implements Observer {
 	 */
 	private void readSettings() {
 		// read in settings
-		playerNameField.setText(settings.getProperty("player_name", "Unknown Player"));
+		playerNameField.setText(_tetrisSettings.getProperty("player_name", "Unknown Player"));
 		_oldPlayerName = playerNameField.getText();
-		soundOnOption.setSelected(settings.getProperty("sound", "off").equals("on") ? true : false);
-		nextQueueOption.setSelected(settings.getProperty("next_queue_list", "on").equals("on") ? true : false);
-		peekOption.setSelected(settings.getProperty("peek_spawn", "on").equals("on") ? true : false);
-		ghostPieceOption.setSelected(settings.getProperty("ghost_piece", "on").equals("on") ? true : false);
-		botPlayerOption.setSelected(settings.getProperty("bot_player", "off").equals("on") ? true : false);
-		simpleBotOption.setSelected(settings.getProperty("simple_bot", "off").equals("on") ? true : false);
-		lookaheadBotOption.setSelected(settings.getProperty("lookahead_bot", "off").equals("on") ? true : false);
-		trainerBotOption.setSelected(settings.getProperty("trainer_bot", "off").equals("on") ? true : false);
+		soundOnOption.setSelected(_tetrisSettings.getProperty("sound", "off").equals("on") ? true : false);
+		nextQueueOption.setSelected(_tetrisSettings.getProperty("next_queue_list", "on").equals("on") ? true : false);
+		peekOption.setSelected(_tetrisSettings.getProperty("peek_spawn", "on").equals("on") ? true : false);
+		ghostPieceOption.setSelected(_tetrisSettings.getProperty("ghost_piece", "on").equals("on") ? true : false);
+		botPlayerOption.setSelected(_tetrisSettings.getProperty("bot_player", "off").equals("on") ? true : false);
+		simpleBotOption.setSelected(_tetrisSettings.getProperty("simple_bot", "off").equals("on") ? true : false);
+		lookaheadBotOption.setSelected(_tetrisSettings.getProperty("lookahead_bot", "off").equals("on") ? true : false);
+		trainerBotOption.setSelected(_tetrisSettings.getProperty("trainer_bot", "off").equals("on") ? true : false);
 	}
 
 	// #######################################################################

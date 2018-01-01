@@ -26,10 +26,8 @@
  */
 package fko.tetris;
 
-import fko.tetris.game.HighScoreData;
-import fko.tetris.game.TetrisGame;
-import fko.tetris.game.TetrisSettings;
 import fko.tetris.ui.TetrisGUI;
+import javafx.application.Application;
 
 /**
  * Main class for Tetris app. Starts up the JavaFX ui and exits.
@@ -39,31 +37,14 @@ import fko.tetris.ui.TetrisGUI;
 public class Tetris {
 
 	// VERSION
-	public static final String VERSION = "1.2"; 
-
-	// pre-load the high score data and share it through the class as static
-	public static final HighScoreData _highScoreData = HighScoreData.getInstance();
-
-	// pre-load setting
-	public static final TetrisSettings _tetrisSettings = TetrisSettings.getInstance();
+	public static final String VERSION = "1.2.2"; 
 
 	/**
-	 * The handle to the user interface class
-	 */
-	public static TetrisGUI _ui;
-
-	/**
-	 * The handle to the model
-	 */
-	public static TetrisGame _tetrisModel;
-
-	/**
-	 * Main creates the UI object (JavaFX Application) and waits for the UI to show. After that the thread exits as 
-	 * JavaFX runs in a separate thread. 
+	 * Main starts the JavaFX Application and waits until this Applications ends. 
 	 * @param args - not yet used
 	 */
 	public static void main(String[] args) {
-		_ui = new TetrisGUI();
+		Application.launch(TetrisGUI.class,args);
 	}
 
 	/**

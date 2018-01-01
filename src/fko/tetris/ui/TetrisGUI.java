@@ -23,12 +23,7 @@ SOFTWARE.
  */
 package fko.tetris.ui;
 
-import java.util.Locale;
-
-import com.sun.javafx.application.PlatformImpl;
-
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -49,35 +44,23 @@ public class TetrisGUI extends Application {
 	private BorderPane _root;					// the root pane for the gui 
 
 	/**
-	 * Creates the JavaFX UI and starts the JavaFX application and waits until the Stage is shown.<br/>
+	 * Creates a JavaFX UI instance. Is usually called by the Application.launch() method.<br>
 	 * It is not possible to instantiate this more than once - throws RunTime Exception.
 	 */
 	public TetrisGUI() {
 		if (_instance != null) // singleton pattern 
 			throw new RuntimeException("It is not possible to instantiate the GUI more than once!");
-
-		// Startup the JavaFX platform
-		Platform.setImplicitExit(false);
-		
-		Locale.setDefault(Locale.GERMANY);
-		
-		PlatformImpl.startup(() -> {
-			final Stage primaryStage = new Stage();
-			primaryStage.setTitle("Tetris by Frank Kopp (c)");
-			start(primaryStage);
-		});
-		
 		TetrisGUI._instance = this; // save instance handle in static class
-		waitForUI(); // wait until primary stage is shown
 	}
 
 	/**
-	 * Standard way to start a JavaFX application. Is called in the constructor.
+	 * Standard way to start a JavaFX application. Is called from Application.launch().<br>
 	 */
 	@Override
 	public void start(Stage primaryStage) {
 
 		TetrisGUI._primaryStage = primaryStage;
+		_primaryStage.setTitle("Tetris by Frank Kopp (c)");
 
 		try {
 
@@ -86,7 +69,7 @@ public class TetrisGUI extends Application {
 			_root = (BorderPane)fxmlLoader.load();
 			_controller = fxmlLoader.getController();
 
-			// Create the Sceen based on the FXML root pane
+			// Create the Scene based on the FXML root pane
 			Scene scene = new Scene(_root,_root.getPrefWidth(),_root.getPrefHeight());
 			//scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			_primaryStage.setScene(scene);
@@ -97,16 +80,15 @@ public class TetrisGUI extends Application {
 			_primaryStage.setMaxWidth(785);
 			_primaryStage.setMaxHeight(795);
 
-			
-            // get last window position and size from window state file
-            double windowLocX = Double.parseDouble(
-                    TetrisGUI_Controller.getWindowState().getProperty("windowLocationX", "100"));
-            double windowLocY = Double.parseDouble(
-            		TetrisGUI_Controller.getWindowState().getProperty("windowLocationY", "200"));
-            double windowSizeX = Double.parseDouble(
-            		TetrisGUI_Controller.getWindowState().getProperty("windowSizeX", "785"));
-            double windowSizeY = Double.parseDouble(
-            		TetrisGUI_Controller.getWindowState().getProperty("windowSizeY", "795"));
+			// get last window position and size from window state file
+			double windowLocX = Double.parseDouble(
+					TetrisGUI_Controller.getWindowState().getProperty("windowLocationX", "100"));
+			double windowLocY = Double.parseDouble(
+					TetrisGUI_Controller.getWindowState().getProperty("windowLocationY", "200"));
+			double windowSizeX = Double.parseDouble(
+					TetrisGUI_Controller.getWindowState().getProperty("windowSizeX", "785"));
+			double windowSizeY = Double.parseDouble(
+					TetrisGUI_Controller.getWindowState().getProperty("windowSizeY", "795"));
 
 			// position and resize the window
 			_primaryStage.setX(windowLocX);
@@ -116,7 +98,7 @@ public class TetrisGUI extends Application {
 
 			// add key handler
 			_controller.addKeyEventHandler(); 
-			
+
 			// now show the window
 			_primaryStage.show();
 
@@ -129,20 +111,6 @@ public class TetrisGUI extends Application {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Waits for the UI to show
-	 */
-	public void waitForUI() {
-		// wait for the UI to show before returning
-		do {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				//return;
-			}
-		} while (_primaryStage == null || !_primaryStage.isShowing());
 	}
 
 	/**
