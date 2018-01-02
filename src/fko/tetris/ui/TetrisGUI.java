@@ -40,7 +40,7 @@ public class TetrisGUI extends Application {
 	public static TetrisGUI_Controller _controller;
 
 	private static TetrisGUI _instance = null; 	// The singleton instance of this class
-	private static Stage _primaryStage; 		// The primary stage
+	private static Stage _primaryStage; 			// The primary stage
 	private BorderPane _root;					// the root pane for the gui 
 
 	/**
@@ -71,42 +71,38 @@ public class TetrisGUI extends Application {
 
 			// Create the Scene based on the FXML root pane
 			Scene scene = new Scene(_root,_root.getPrefWidth(),_root.getPrefHeight());
-			//scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-			_primaryStage.setScene(scene);
 
-			// set the minimum size
-			_primaryStage.setMinWidth(785);
-			_primaryStage.setMinHeight(795);
-			_primaryStage.setMaxWidth(785);
-			_primaryStage.setMaxHeight(795);
+			// configure stage
+			_primaryStage.setScene(scene);
+			_primaryStage.setResizable(false);
 
 			// get last window position and size from window state file
 			double windowLocX = Double.parseDouble(
 					TetrisGUI_Controller.getWindowState().getProperty("windowLocationX", "100"));
 			double windowLocY = Double.parseDouble(
 					TetrisGUI_Controller.getWindowState().getProperty("windowLocationY", "200"));
-			double windowSizeX = Double.parseDouble(
-					TetrisGUI_Controller.getWindowState().getProperty("windowSizeX", "785"));
-			double windowSizeY = Double.parseDouble(
-					TetrisGUI_Controller.getWindowState().getProperty("windowSizeY", "795"));
+			//double windowSizeX = Double.parseDouble(
+			//	TetrisGUI_Controller.getWindowState().getProperty("windowSizeX", "785"));
+			//double windowSizeY = Double.parseDouble(
+			//	TetrisGUI_Controller.getWindowState().getProperty("windowSizeY", "795"));
 
 			// position and resize the window
 			_primaryStage.setX(windowLocX);
 			_primaryStage.setY(windowLocY);
-			_primaryStage.setWidth(windowSizeX);
-			_primaryStage.setHeight(windowSizeY);
-
+			//_primaryStage.setWidth(windowSizeX);
+			//_primaryStage.setHeight(windowSizeY); 
+			
 			// add key handler
 			_controller.addKeyEventHandler(); 
-
-			// now show the window
-			_primaryStage.show();
-
+			
 			// closeAction - close through close action
-			scene.getWindow().setOnCloseRequest(event -> {
+			primaryStage.setOnCloseRequest(event -> {
 				_controller.close_action(event);
 				event.consume();
 			});
+
+			// now show the window
+			_primaryStage.show();
 
 		} catch(Exception e) {
 			e.printStackTrace();

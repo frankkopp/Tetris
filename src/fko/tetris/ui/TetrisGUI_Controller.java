@@ -56,7 +56,6 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
@@ -68,6 +67,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -128,36 +128,36 @@ public class TetrisGUI_Controller implements Observer {
 
 		statusbar_copyright_text.setText("Tetris(c) by Frank Kopp 2017 v"+Tetris.VERSION);
 		
-		// these probably don't belong here - should be in UI class not controller
+		// adds additional views 
 		addPlayfieldPane(); // add the playfield pane 
 		addNextQueuePane(); // add the next queue pane
 		addHoldPane(); // add the hold Tetrimino pane
 		addHowToText();
 		addMemLabelUpdater(); // add constantly updated memory info into status panel
 
+		// set some default values
 		updateHighScoreText();
 		updateStatus();
 
-		// change the startLevelLabel when the slider changes
-		startLevelLabel.textProperty().bind(
-				Bindings.format(
-						"%.0f",
-						startLevelSlider.valueProperty()
-						)
-				);
-
+		// bind interdependent view elements together
+		setupViewInternalBindungs();
+		
+		// read previous setting
 		readSettings();
 		
+		// initialize AI Bot (check if enabled in the mothed)
 		initializeBot();
 	}
 
 	/**
-	 * 
+	 * Chooses a AI Bot and starts it. The bot will watch the game and calculate 
+	 * its moves. It sends the moves to the game as a keyboard event would
 	 */
 	private void initializeBot() {
 
 		if (botPlayerOption.isSelected() && _tetrisGame != null && _tetrisGame.isRunning()) {
-			// start selected bot
+			
+			// choose a bot, instantiate and start it
 			final Toggle selectedToggle = bots.getSelectedToggle();
 			if (_currentBot != null) _currentBot.stopBot();
 			if (selectedToggle == simpleBotOption) {
@@ -180,7 +180,7 @@ public class TetrisGUI_Controller implements Observer {
 			_tetrisGame.setPlayerName(playerNameField.getText());
 			
 		} else {
-			if (_currentBot!=null) _currentBot.stopBot();
+			if (_currentBot!=null) _currentBot.stopBot(); // stop running bot
 			playerNameField.setText(_oldPlayerName);
 		}
 	}
@@ -280,6 +280,20 @@ public class TetrisGUI_Controller implements Observer {
 	}
 
 	/**
+	 * 
+	 */
+	private void setupViewInternalBindungs() {
+		// change the startLevelLabel when the slider changes
+		startLevelLabel.textProperty().bind(Bindings.format(	"%.0f",	startLevelSlider.valueProperty()));
+	
+		// bind toolbar buttons disabling to menu entries
+		newGame_menu.disableProperty().bindBidirectional(newGame_button.disableProperty());
+		stopGame_menu.disableProperty().bindBidirectional(stopGame_button.disableProperty());
+		pauseGame_menu.disableProperty().bindBidirectional(pauseGame_button.disableProperty());
+		resumeGame_menu.disableProperty().bindBidirectional(resumeGame_button.disableProperty());
+	}
+
+	/**
 	 * This is called by model explicitly whenever the model changes
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
@@ -373,7 +387,6 @@ public class TetrisGUI_Controller implements Observer {
 			levelLabel.setText("1");
 			linecountLabel.setText("0");
 			tetrisCountLabel.setText("0");
-			startLevelLabel.setText("not yet implemented"); // this is kept in UI as a property to menu or so
 		} else {
 			scoreLabel.setText(String.format("%,d",_tetrisGame.getScore()));
 			levelLabel.setText(Integer.toString(_tetrisGame.getCurrentLevel()));
@@ -383,7 +396,9 @@ public class TetrisGUI_Controller implements Observer {
 	}
 
 	/**
-	 *	print the highscore list 
+	 * Print the highscore list. 
+	 * 
+	 *  TODO: Improve in separate pane view
 	 */
 	private void updateHighScoreText() {
 
@@ -429,21 +444,16 @@ public class TetrisGUI_Controller implements Observer {
 	 * Setup controls (menu, buttons, etc.) for running game 
 	 */
 	private void setUItoGameRunning() {
-		// -- set possible actions (menu) --
+		// set possible actions (menu)
+		// toolbar buttons are bound to menu entries
 		newGame_menu.setDisable(true);
-		newGame_button.setDisable(true);
 		stopGame_menu.setDisable(false);
-		stopGame_button.setDisable(false);
 		if (_tetrisGame.isPaused()) {
 			pauseGame_menu.setDisable(true);
-			pauseGame_button.setDisable(true);
 			resumeGame_menu.setDisable(false);
-			resumeGame_button.setDisable(false);
 		} else {
 			pauseGame_menu.setDisable(false);
-			pauseGame_button.setDisable(false);
 			resumeGame_menu.setDisable(true);
-			resumeGame_button.setDisable(true);
 		}
 		close_menu.setDisable(false);
 		about_menu.setDisable(false);
@@ -454,15 +464,12 @@ public class TetrisGUI_Controller implements Observer {
 	 * Setup controls (menu, buttons, etc.) for game not running
 	 */
 	private void setUItoGameNotRunning() {
-		// -- set possible actions (menu) --
+		// set possible actions (menu)
+		// toolbar buttons are bound to menu entries
 		newGame_menu.setDisable(false);
-		newGame_button.setDisable(false);
 		stopGame_menu.setDisable(true);
-		stopGame_button.setDisable(true);
 		pauseGame_menu.setDisable(true);
-		pauseGame_button.setDisable(true);
 		resumeGame_menu.setDisable(true);
-		resumeGame_button.setDisable(true);
 		close_menu.setDisable(false);
 		about_menu.setDisable(false);
 		statusbar_status_text.setText("No Game");
