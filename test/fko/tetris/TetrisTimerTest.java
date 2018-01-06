@@ -91,12 +91,13 @@ public class TetrisTimerTest {
 		assertFalse(timer.isRunning());
 	}
 
-	/**
-	 * Test method for {@link fko.tetris.TetrisTimer#reset()}.
-	 */
+	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+	/**
+	 * Test method for {@link fko.tetris.TetrisTimer#reset()}.
+	 */
 	@Test
 	public final void testReset() {
 		TetrisTimer timer = new TetrisTimer(2000);
