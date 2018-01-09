@@ -28,7 +28,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import fko.tetris.game.TetrisSounds.Clips;
+import fko.tetris.game.SoundManager.Clips;
 import fko.tetris.tetriminos.Tetrimino;
 
 /**
@@ -44,7 +44,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 	public static final int NEXTQUEUE_SIZE = 7;
 
 	// sounds are play at certain points ==> should this be in model or view??
-	private static final TetrisSounds _sounds = new TetrisSounds();
+	private static final SoundManager _sounds = SoundManager.getInstance();
 
 	// Tetris state
 	private Matrix 		_playfield;		// matrix with all cells

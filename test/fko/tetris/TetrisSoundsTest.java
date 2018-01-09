@@ -25,8 +25,8 @@ package fko.tetris;
 
 import org.junit.Test;
 
-import fko.tetris.game.TetrisSounds.Clips;
-import fko.tetris.game.TetrisSounds;
+import fko.tetris.game.SoundManager;
+import fko.tetris.game.SoundManager.Clips;
 
 /**
  * 
@@ -35,7 +35,7 @@ public class TetrisSoundsTest {
 
 	@Test
 	public final void testPlay() throws InterruptedException {
-		TetrisSounds ts = new TetrisSounds();
+		SoundManager ts = SoundManager.getInstance();
 		ts.playClip(Clips.TOUCHDOWN);
 		ts.playClip(Clips.GAME_OVER);
 		ts.playClip(Clips.FALLING);
