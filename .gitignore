@@ -27,3 +27,6 @@ hs_err_pid*
 highscore.csv
 tetris.settings
 windowstate.guid
+
+#IDEA
+.idea
