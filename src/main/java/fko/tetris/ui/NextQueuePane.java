@@ -34,7 +34,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 /**
- * The pane presenting the Next Queue for Tetriminos.<br/>
+ * The pane presenting the Next Queue for Tetriminos.<br>
  * 
  */
 public class NextQueuePane extends Pane {
@@ -58,7 +58,7 @@ public class NextQueuePane extends Pane {
 	}
 
 	/**
-	 * @param _nextQueue the _nextQueue to set
+	 * @param _nextQueue the nextQueue to set
 	 */
 	public void setNextQueue(NextQueue _nextQueue) {
 		this._nextQueue = _nextQueue;
@@ -78,7 +78,7 @@ public class NextQueuePane extends Pane {
 
 	/**
 	 * Draw all Tetriminos in NextQueue
-	 * @param _nextQueue
+	 * @param nextQueue
 	 */
 	private void draw(NextQueue nextQueue) {
 

@@ -73,7 +73,6 @@ public class Matrix {
 
 	/**
 	 * Generates a new Playfield with default width and height
-	 * @param _backgroundMatrix
 	 */
 	public Matrix() {
 		this._backgroundMatrix = new TetrisColor[MATRIX_WIDTH][MATRIX_HEIGHT];
@@ -81,7 +80,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Spawns a new Tetrimino.<br/>
+	 * Spawns a new Tetrimino.<br>
 	 * Tetriminos are all generated North Facing (just as they appear in the Next Queue) on the 
 	 * 21st and 22nd rows, just above the Skyline. Every Tetrimino that is three Minos wide is generated on the 4th 
 	 * cell across (4, 21) and stretches to the 6th (6, 21). This includes the T-Tetrimino, L-Tetrimino, J-Tetrimino, 
@@ -111,7 +110,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Move the current Tetrimino down one cell and checks if it has landed on a surface.<br/>
+	 * Move the current Tetrimino down one cell and checks if it has landed on a surface.<br>
 	 * @return true if landed on surface
 	 */
 	public boolean moveDown() {
@@ -119,7 +118,7 @@ public class Matrix {
 	}
 	
 	/**
-	 * Move a Tetrimino down one cell and checks if it has landed on a surface.<br/>
+	 * Move a Tetrimino down one cell and checks if it has landed on a surface.<br>
 	 * @return true if landed on surface
 	 */
 	public boolean moveDown(Tetrimino tetrimino) {
@@ -137,8 +136,8 @@ public class Matrix {
 	}
 
 	/**
-	 * Check if a Tetrimino can move down one cell<br/>
-	 * @param _currentTetrimino2 
+	 * Check if a Tetrimino can move down one cell<br>
+	 * @param tetrimino
 	 * @return true if move is possible, false if landed on surface
 	 */
 	public boolean canMoveDown(Tetrimino tetrimino) {
@@ -177,7 +176,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Move the current Tetrimino left (-1) or right (1) one cell, If blocked does not move and returns true<br/>
+	 * Move the current Tetrimino left (-1) or right (1) one cell, If blocked does not move and returns true<br>
 	 * @return true if surface on the left or right
 	 * @param direction
 	 */
@@ -186,7 +185,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Move a Tetrimino left (-1) or right (1) one cell, If blocked does not move and returns true<br/>
+	 * Move a Tetrimino left (-1) or right (1) one cell, If blocked does not move and returns true<br>
 	 * @param direction
 	 * @param tetrimino
  	 * @return true if surface on the left or right
@@ -198,7 +197,7 @@ public class Matrix {
 	}
 	
 	/**
-	 * Check of the Tetrimino can move left or right one cell<br/>
+	 * Check of the Tetrimino can move left or right one cell<br>
 	 * @param direction 
 	 * @return true if move is possible, false if landed on surface
 	 */
@@ -236,7 +235,7 @@ public class Matrix {
 	}
 	
 	/**
-	 * Turns a Tetrimino after collision checks.<br/> 
+	 * Turns a Tetrimino after collision checks.<br>
 	 * Uses Classic Rotation System. 
 	 * @param direction
 	 * @return true if turn would cause collision - Tetrimino is then not turned
@@ -246,7 +245,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Turns a Tetrimino after collision checks.<br/> 
+	 * Turns a Tetrimino after collision checks.<br>
 	 * Uses Classic Rotation System. 
 	 * TODO: Implement Super Rotation System
 	 * @param direction

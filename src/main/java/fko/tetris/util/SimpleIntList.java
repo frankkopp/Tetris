@@ -317,7 +317,7 @@ public class SimpleIntList implements Iterable<Integer> {
     }
 
     /**
-     * Sort implementation to order the list according to the given comparator.<br/>
+     * Sort implementation to order the list according to the given comparator.<br>
      * Uses insertionsort for smaller arrays and quicksort for larger arrays.
      *
      * @param head (including)

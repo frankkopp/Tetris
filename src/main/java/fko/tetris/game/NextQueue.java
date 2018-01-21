@@ -51,7 +51,7 @@ public class NextQueue {
 	}
 	
 	/**
-	 * Retrieves the next Tetrimino from the queue and back-fills the queue from the give Bag.
+	 * Retrieves the next Tetrimino from the queue and back-fills the queue from the Bag.
 	 * @return the next Tetrimino
 	 */
 	public Tetrimino getNext() {

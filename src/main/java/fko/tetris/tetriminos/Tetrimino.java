@@ -85,8 +85,8 @@ abstract public class Tetrimino {
 	}
 	
 	/**
-	 * Turns the Tetrimino in the given direction.<br/>
-	 * direction >0 turn right/clockwise, <0 left/counter clockwise
+	 * Turns the Tetrimino in the given direction.<br>
+	 * direction &gt;0 turn right/clockwise, &lt;0 left/counter clockwise
 	 * @return the new facing
 	 */
 	public Facing turn(int direction) {

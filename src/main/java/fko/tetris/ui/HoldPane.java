@@ -55,7 +55,7 @@ public class HoldPane extends Pane {
 	}
 
 	/**
-	 * @param _nextQueue the _nextQueue to set
+	 * @param hold the Tetrimino to set
 	 */
 	public void setHoldTetrimino(Tetrimino hold) {
 		this._holdTetrimino = hold;

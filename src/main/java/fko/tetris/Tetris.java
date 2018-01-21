@@ -29,67 +29,65 @@ import javafx.application.Application;
 
 /**
  * Main class for Tetris app. Starts up the JavaFX ui and exits.
- * 
- * TODO: Use resource files for internationalization
+ *
+ * <p>TODO: Use resource files for internationalization
  */
 public class Tetris {
 
-	// VERSION
-	public static final String VERSION = "1.2.2"; 
+  // VERSION
+  public static final String VERSION = "1.2.2";
 
-	/**
-	 * Main starts the JavaFX Application and waits until this Applications ends. 
-	 * @param args - not yet used
-	 */
-	public static void main(String[] args) {
-		Application.launch(TetrisGUI.class,args);
-	}
+  /**
+   * Main starts the JavaFX Application and waits until this Applications ends.
+   *
+   * @param args - not yet used
+   */
+  public static void main(String[] args) {
+    Application.launch(TetrisGUI.class, args);
+  }
 
-	/**
-	 * Clean up and exit the application
-	 */
-	public static void exitTetris() {
-		exitTetris(0);
-	}
+  /** Clean up and exit the application */
+  public static void exitTetris() {
+    exitTetris(0);
+  }
 
-	/**
-	 * Clean up and exit the application
-	 */
-	private static void exitTetris(int returnCode) {
-		// nothing to clean up yet
-		System.exit(returnCode);
-	}
+  /** Clean up and exit the application */
+  private static void exitTetris(int returnCode) {
+    // nothing to clean up yet
+    System.exit(returnCode);
+  }
 
-	/**
-	 * Called when there is an unexpected unrecoverable error.<br/>
-	 * Prints a stack trace together with a provided message.<br/>
-	 * Terminates with <tt>exit(1)</tt>.
-	 * @param message to be displayed with the exception message
-	 */
-	public static void fatalError(String message) {
-		Exception e = new Exception(message);
-		e.printStackTrace();
-		exitTetris(1);
-	}
+  /**
+   * Called when there is an unexpected unrecoverable error.<br>
+   * Prints a stack trace together with a provided message.<br>
+   * Terminates with <tt>exit(1)</tt>.
+   *
+   * @param message to be displayed with the exception message
+   */
+  public static void fatalError(String message) {
+    Exception e = new Exception(message);
+    e.printStackTrace();
+    exitTetris(1);
+  }
 
-	/**
-	 * Called when there is an unexpected but recoverable error.<br/>
-	 * Prints a stack trace together with a provided message.<br/>
-	 * @param message to be displayed with the exception message
-	 */
-	public static void criticalError(String message) {
-		Exception e = new Exception(message);
-		e.printStackTrace();
-	}
+  /**
+   * Called when there is an unexpected but recoverable error.<br>
+   * Prints a stack trace together with a provided message.<br>
+   *
+   * @param message to be displayed with the exception message
+   */
+  public static void criticalError(String message) {
+    Exception e = new Exception(message);
+    e.printStackTrace();
+  }
 
-	/**
-	 * Called when there is an unexpected minor error.<br/>
-	 * Prints a provided message.<br/>
-	 * @param message to be displayed
-	 */
-	public static void minorError(String message) {
-		System.err.println(message);
-	}
-
-
+  /**
+   * Called when there is an unexpected minor error.<br>
+   * Prints a provided message.<br>
+   *
+   * @param message to be displayed
+   */
+  public static void minorError(String message) {
+    System.err.println(message);
+  }
 }
