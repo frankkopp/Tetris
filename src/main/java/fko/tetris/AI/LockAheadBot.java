@@ -49,7 +49,7 @@ public class LockAheadBot extends AbstractBot {
     LOG.info("{} started.",this.getClass().getName());
     boolean moveDone = false; // to prevent several calculations during the falling phase
     while (!Thread.interrupted()) {
-      final TetrisPhase phaseState = _game.getPhaseState();
+      final TetrisPhase phaseState = game.getPhaseState();
       switch (phaseState) {
           // we can only move when we are in FALLING phase
         case LOCK: // we can still move during LOCK - this is helpful in higher levels when game is
@@ -63,7 +63,7 @@ public class LockAheadBot extends AbstractBot {
               nextQueue.clear();
               // copy the nextQueue into a list
               for (int i = 0; i <= MAX_VISIBLE_NEXTQUEUE; i++) {
-                nextQueue.add(_game.getNextQueue().get(i));
+                nextQueue.add(game.getNextQueue().get(i));
               }
               // calculate the best position and place Tetrimino
               placeTetrimino();
@@ -98,7 +98,7 @@ public class LockAheadBot extends AbstractBot {
 
     // make a copy of the playfield as the game playfield could move on in the meantime
     // also we do want to change the original Matrix
-    Matrix myMatrix = _game.getMatrix().clone();
+    Matrix myMatrix = game.getMatrix().clone();
 
     // for each relevant permutation of move position and turn position get a score
     // avoid symmetrical permutations to save some time
@@ -164,20 +164,20 @@ public class LockAheadBot extends AbstractBot {
 
     // now turn to the best position on the real matrix
     for (int i = 0; i < best_turn; i++) {
-      _game.controlQueueAdd(TetrisControlEvents.RTURN);
+      game.controlQueueAdd(TetrisControlEvents.RTURN);
     }
 
     // now move to the best position on the real matrix
     for (int i = 0; i < Math.abs(best_move); i++) {
       if (best_move < 0) {
-        _game.controlQueueAdd(TetrisControlEvents.LEFT);
+        game.controlQueueAdd(TetrisControlEvents.LEFT);
       } else if (best_move > 0) {
-        _game.controlQueueAdd(TetrisControlEvents.RIGHT);
+        game.controlQueueAdd(TetrisControlEvents.RIGHT);
       }
     }
 
     // finally drop on the Tetrimino on the real matrix
-    _game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
+    game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
 
     saveTrainingData(best_turn, best_move, myMatrix);
 

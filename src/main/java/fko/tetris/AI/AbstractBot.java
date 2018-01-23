@@ -17,10 +17,10 @@ public abstract class AbstractBot implements Bot, Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractBot.class);
 
-  protected TetrisGame _game;
+  protected TetrisGame game;
 
-  public AbstractBot(TetrisGame game) {
-    this._game = game;
+  public AbstractBot(TetrisGame tetrisGame) {
+    this.game = tetrisGame;
   }
 
   // Thread

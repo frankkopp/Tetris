@@ -110,6 +110,7 @@ public class TrainingData {
    */
   public void appendEntry(
       Matrix matrix, Tetrimino currentTetrimino, Tetrimino nextTetrimino, int turn, int move) {
+
     DatasetRow dr = new DatasetRow(matrix, currentTetrimino, nextTetrimino, turn, move);
     _bufferQueue.add(dr);
     LOG.debug("Entry added. Queue size={}", _bufferQueue.size());
@@ -235,6 +236,9 @@ public class TrainingData {
     }
   }
 
+  /**
+   * Commandline to split up the data file into train and test data
+   */
   public static void main(String[] args) throws ParseException {
 
     int percentTest;

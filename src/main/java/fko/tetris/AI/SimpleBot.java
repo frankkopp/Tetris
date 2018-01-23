@@ -26,7 +26,7 @@ public class SimpleBot extends AbstractBot {
     while (!Thread.interrupted()) {
       try {
 
-        final TetrisPhase phaseState = _game.getPhaseState();
+        final TetrisPhase phaseState = game.getPhaseState();
         LOG.debug("Game is in state: {}", phaseState.toString());
 
         switch (phaseState) {
@@ -42,7 +42,7 @@ public class SimpleBot extends AbstractBot {
             break;
         }
 
-        // System.out.println(_game.getPlayfield().toString());
+        // System.out.println(game.getPlayfield().toString());
 
         // do something
         Thread.sleep(100);
@@ -63,14 +63,14 @@ public class SimpleBot extends AbstractBot {
 
     for (int i = 0; i < 10; i++) { // 5 moves sideways
       if (rand.nextInt(2) == 1) {
-        _game.controlQueueAdd(TetrisControlEvents.LEFT);
+        game.controlQueueAdd(TetrisControlEvents.LEFT);
       } else {
-        _game.controlQueueAdd(TetrisControlEvents.RIGHT);
+        game.controlQueueAdd(TetrisControlEvents.RIGHT);
       }
       if (rand.nextInt(2) == 1) {
-        _game.controlQueueAdd(TetrisControlEvents.LEFT);
+        game.controlQueueAdd(TetrisControlEvents.LEFT);
       } else {
-        _game.controlQueueAdd(TetrisControlEvents.RIGHT);
+        game.controlQueueAdd(TetrisControlEvents.RIGHT);
       }
       try {
         Thread.sleep(50);
@@ -79,6 +79,6 @@ public class SimpleBot extends AbstractBot {
     }
 
     // finally a hardrop
-    _game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
+    game.controlQueueAdd(TetrisControlEvents.HARDDOWN);
   }
 }
