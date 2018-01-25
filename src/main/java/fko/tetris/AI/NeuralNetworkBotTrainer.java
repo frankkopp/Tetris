@@ -78,7 +78,7 @@ public class NeuralNetworkBotTrainer {
     int channels = 1; // we only need 1 color (black & white) - color has no real meaning in tetris
     int outputNum = 44; // 4 turns and 11 moves (-5, 0, +5)
     int batchSize = 64;
-    int iterations = 4;
+    int iterations = 400;
 
     int seed = 1234;
 
@@ -165,58 +165,6 @@ public class NeuralNetworkBotTrainer {
     System.exit(0);
   }
 
-  private static MultiLayerConfiguration getDenseNNetwork(
-      final int height,
-      final int width,
-      final int channels,
-      final int outputNum,
-      final int seed,
-      final int iterations) {
-
-    final WeightInit weightInit = WeightInit.XAVIER;
-    final OptimizationAlgorithm optimizationAlgo =
-        OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT;
-    final Updater updater = Updater.ADADELTA; //  new Nesterovs(0.98); //
-    final LossFunctions.LossFunction lossFunction =
-        LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD;
-
-    Map<Integer, Double> lrSchedule = new HashMap<>();
-    lrSchedule.put(0, 0.1); // iteration #, learning rate
-    lrSchedule.put(200, 0.05);
-    lrSchedule.put(600, 0.03);
-    lrSchedule.put(800, 0.01);
-    lrSchedule.put(1000, 0.005);
-    lrSchedule.put(1500, 0.001);
-
-    return new NeuralNetConfiguration.Builder()
-        .seed(seed) // include a random seed for reproducibility
-        .optimizationAlgo(
-            optimizationAlgo) // use stochastic gradient descent as an optimization algorithm
-        .iterations(iterations)
-        .activation(Activation.RELU)
-        .weightInit(weightInit)
-        .learningRate(0.1)
-        // .learningRateDecayPolicy(LearningRatePolicy.Schedule)
-        // .learningRateSchedule(lrSchedule) // overrides the rate set in learningRate
-        .updater(updater)
-        .regularization(true)
-        .l2(0.0005)
-        .optimizationAlgo(optimizationAlgo)
-        .list()
-        .layer(0, new DenseLayer.Builder().nIn(height * width).nOut(130).build())
-        .layer(1, new DenseLayer.Builder().nIn(130).nOut(88).build())
-        .layer(
-            2,
-            new OutputLayer.Builder(lossFunction)
-                .activation(Activation.SOFTMAX)
-                .nIn(88)
-                .nOut(outputNum)
-                .build())
-        .pretrain(false)
-        .backprop(true) // use backpropagation to adjust weights
-        .build();
-  }
-
   private static MultiLayerConfiguration getConvolutionalNetwork(
       final int height,
       final int width,
@@ -227,7 +175,7 @@ public class NeuralNetworkBotTrainer {
     final WeightInit weightInit = WeightInit.XAVIER;
     final OptimizationAlgorithm optimizationAlgo =
         OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT;
-    final Updater updater = Updater.ADADELTA; // Updater.NESTEROVS;
+    final Updater updater = Updater.ADAM; // Updater.NESTEROVS;
     final LossFunctions.LossFunction lossFunction =
         LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD;
 
@@ -292,5 +240,57 @@ public class NeuralNetworkBotTrainer {
         .backprop(true)
         .pretrain(false)
         .build();
+  }
+
+  private static MultiLayerConfiguration getDenseNNetwork(
+          final int height,
+          final int width,
+          final int channels,
+          final int outputNum,
+          final int seed,
+          final int iterations) {
+
+    final WeightInit weightInit = WeightInit.XAVIER;
+    final OptimizationAlgorithm optimizationAlgo =
+            OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT;
+    final Updater updater = Updater.ADADELTA; //  new Nesterovs(0.98); //
+    final LossFunctions.LossFunction lossFunction =
+            LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD;
+
+    Map<Integer, Double> lrSchedule = new HashMap<>();
+    lrSchedule.put(0, 0.1); // iteration #, learning rate
+    lrSchedule.put(200, 0.05);
+    lrSchedule.put(600, 0.03);
+    lrSchedule.put(800, 0.01);
+    lrSchedule.put(1000, 0.005);
+    lrSchedule.put(1500, 0.001);
+
+    return new NeuralNetConfiguration.Builder()
+            .seed(seed) // include a random seed for reproducibility
+            .optimizationAlgo(
+                    optimizationAlgo) // use stochastic gradient descent as an optimization algorithm
+            .iterations(iterations)
+            .activation(Activation.RELU)
+            .weightInit(weightInit)
+            .learningRate(0.1)
+            // .learningRateDecayPolicy(LearningRatePolicy.Schedule)
+            // .learningRateSchedule(lrSchedule) // overrides the rate set in learningRate
+            .updater(updater)
+            .regularization(true)
+            .l2(0.0005)
+            .optimizationAlgo(optimizationAlgo)
+            .list()
+            .layer(0, new DenseLayer.Builder().nIn(height * width).nOut(130).build())
+            .layer(1, new DenseLayer.Builder().nIn(130).nOut(88).build())
+            .layer(
+                    2,
+                    new OutputLayer.Builder(lossFunction)
+                            .activation(Activation.SOFTMAX)
+                            .nIn(88)
+                            .nOut(outputNum)
+                            .build())
+            .pretrain(false)
+            .backprop(true) // use backpropagation to adjust weights
+            .build();
   }
 }
