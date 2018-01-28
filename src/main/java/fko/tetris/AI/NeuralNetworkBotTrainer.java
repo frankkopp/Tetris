@@ -44,7 +44,7 @@ public class NeuralNetworkBotTrainer {
   public static final String NN_SAVE_FILE = folderPathPlain + "tetris_nn_model.zip";
 
   // with webserver UI
-  public static final boolean WITH_UI = false;
+  public static final boolean WITH_UI = true;
 
   /**
    * Run this to train the NeuralNetworkBot and save the Network to file.
@@ -60,12 +60,12 @@ public class NeuralNetworkBotTrainer {
     // Configuration
     int height =
         9; // +2 current tetrimino, +2 next plus 5 rows either with at least one non-zero or the
-           // lowest 5 rows. "5" is a parameter but data needs to be prepared with it (was 22
-           // matrix, +2 current tetrimino, +2 next)
+    // lowest 5 rows. "5" is a parameter but data needs to be prepared with it (was 22
+    // matrix, +2 current tetrimino, +2 next)
     int width = 10; // tetris is 10 blocks wide
     int channels = 1; // we only need 1 color (black & white) - color has no real meaning in tetris
     int outputNum = 44; // 4 turns and 11 moves (-5, 0, +5)
-    int batchSize = 128;
+    int batchSize = 64;
     int iterations = 4;
     int nEpochs = 50;
 
@@ -94,9 +94,9 @@ public class NeuralNetworkBotTrainer {
 
     // Configuration
     MultiLayerConfiguration conf =
-    // getConvolutionalNetwork(height, width, channels, outputNum, seed, iterations);
-    // getAlexnetModel(height, width, channels, outputNum, seed, iterations);
-    getDenseNNetwork(height, width, channels, outputNum, seed, iterations);
+        // getConvolutionalNetwork(height, width, channels, outputNum, seed, iterations);
+        // getAlexnetModel(height, width, channels, outputNum, seed, iterations);
+        getDenseNNetwork(height, width, channels, outputNum, seed, iterations);
 
     LOG.debug("Model configured");
 
@@ -138,8 +138,8 @@ public class NeuralNetworkBotTrainer {
     for (int i = 0; i < nEpochs; i++) {
       LOG.info("Starting training epoch {}", i + 1);
 
-      //MultipleEpochsIterator mTrainIter = new MultipleEpochsIterator(1, trainIter);
-      //mTrainIter.trackEpochs();
+      // MultipleEpochsIterator mTrainIter = new MultipleEpochsIterator(1, trainIter);
+      // mTrainIter.trackEpochs();
       net.fit(trainIter);
 
       LOG.info("Starting evaluating");
@@ -184,7 +184,7 @@ public class NeuralNetworkBotTrainer {
     final WeightInit weightInit = WeightInit.XAVIER;
     final OptimizationAlgorithm optimizationAlgo =
         OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT;
-    final Updater updater = Updater.NESTEROVS; // Updater.ADAM;
+    final Updater updater = Updater.ADADELTA; // Updater.ADAM;
     final LossFunctions.LossFunction lossFunction =
         LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD;
     final double dropOut = 0.5;
@@ -192,16 +192,17 @@ public class NeuralNetworkBotTrainer {
     LOG.info("Build model....");
 
     Map<Integer, Double> lrSchedule = new HashMap<>();
-    lrSchedule.put(0, 0.05); // iteration #, learning rate
-    lrSchedule.put(200, 0.01);
-    lrSchedule.put(600, 0.005);
-    lrSchedule.put(1000, 0.001);
-    lrSchedule.put(1500, 0.0001);
+    lrSchedule.put(0, 0.08); // iteration #, learning rate
+    lrSchedule.put(200, 0.05);
+    lrSchedule.put(600, 0.03);
+    lrSchedule.put(800, 0.01);
+    lrSchedule.put(1000, 0.005);
+    lrSchedule.put(1500, 0.001);
 
     return new NeuralNetConfiguration.Builder()
         .seed(seed)
         .iterations(iterations)
-        // .miniBatch(true)
+        .miniBatch(true)
         .regularization(true)
         .l2(0.0005)
         .learningRate(0.1)
@@ -213,49 +214,41 @@ public class NeuralNetworkBotTrainer {
         .list()
         .layer(
             0,
-            new ConvolutionLayer.Builder(4, 4)
+            new ConvolutionLayer.Builder(2, 2)
                 .nIn(channels)
                 .stride(1, 1)
-                .padding(2, 2)
-                .nOut(64)
-                .activation(Activation.RELU)
+                .padding(1, 1)
+                .nOut(40)
+                .activation(Activation.IDENTITY)
                 .build())
         .layer(
             1,
-            new ConvolutionLayer.Builder(4, 4)
+            new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
+                .kernelSize(2, 2)
                 .stride(1, 1)
-                .padding(2, 2)
-                .nOut(64)
-                .activation(Activation.RELU)
                 .build())
-        //        .layer(
-        //            2,
-        //            new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
-        //                .kernelSize(2, 2)
-        //                .stride(2, 2)
-        //                .build())
         .layer(
             2,
-            new ConvolutionLayer.Builder(3, 3)
+            new ConvolutionLayer.Builder(4, 4)
                 .stride(1, 1) // nIn need not specified in later layers
-                .nOut(128)
-                .activation(Activation.RELU)
+                .nOut(80)
+                .activation(Activation.IDENTITY)
                 .build())
-        //        .layer(
-        //            4,
-        //            new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
-        //                .kernelSize(2, 2)
-        //                .stride(2, 2)
-        //                .build())
         .layer(
             3,
-            new DenseLayer.Builder()
-                .activation(Activation.RELU)
-                // .dropOut(dropOut)
-                .nOut(512)
+            new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
+                .kernelSize(2, 2)
+                .stride(2, 2)
                 .build())
         .layer(
             4,
+            new DenseLayer.Builder()
+                .activation(Activation.RELU)
+                // .dropOut(dropOut)
+                .nOut(320)
+                .build())
+        .layer(
+            5,
             new OutputLayer.Builder(lossFunction)
                 .nOut(outputNum)
                 .activation(Activation.SOFTMAX)
