@@ -24,17 +24,6 @@
  */
 package fko.tetris.AI;
 
-import java.io.*;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import fko.tetris.Tetris;
 import fko.tetris.game.Matrix;
 import fko.tetris.game.TetrisColor;
@@ -42,7 +31,19 @@ import fko.tetris.tetriminos.Tetrimino;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import views.html.helper.options;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Reads and stores the highscore from and to file */
 public class TrainingData {
@@ -55,6 +56,8 @@ public class TrainingData {
   private static final String fileNamePlain = "trainingdata.csv";
   private static final Path filePath =
       FileSystems.getDefault().getPath(folderPathPlain, fileNamePlain);
+  private static int nZoomLines;
+  private static boolean lineZoomOption;
 
   // Buffer for entry to save asynchronously
   private LinkedBlockingQueue<DatasetRow> _bufferQueue = new LinkedBlockingQueue<DatasetRow>();
@@ -100,7 +103,7 @@ public class TrainingData {
     }
 
     // start the service which runs the loop to white for lines to append to file
-    executor.execute(new Appendtask());
+    executor.execute(new AppendTask());
   }
 
   /**
@@ -131,7 +134,7 @@ public class TrainingData {
   }
 
   /** This is the Task the for writing to file */
-  private final class Appendtask implements Runnable {
+  private final class AppendTask implements Runnable {
     @Override
     public void run() {
       while (!Thread.currentThread().isInterrupted()) {
@@ -236,9 +239,7 @@ public class TrainingData {
     }
   }
 
-  /**
-   * Commandline to split up the data file into train and test data
-   */
+  /** Commandline to split up the data file into train and test data */
   public static void main(String[] args) throws ParseException {
 
     int percentTest;
@@ -249,6 +250,11 @@ public class TrainingData {
     Option split = Option.builder("split").hasArg(true).desc("the file to be split").build();
     Option testPercentage =
         Option.builder("test").hasArg(true).desc("percent of overall data for tests").build();
+    Option lineZoom =
+        Option.builder("lineZoom")
+            .optionalArg(true)
+            .desc("how many lines of relevant data should be kept")
+            .build();
 
     // create Options object
     Options options = new Options();
@@ -256,10 +262,17 @@ public class TrainingData {
     options.addOption(help2);
     options.addOption(split);
     options.addOption(testPercentage);
+    options.addOption(lineZoom);
 
     // create the parser
     CommandLineParser parser = new DefaultParser();
     CommandLine param = parser.parse(options, args);
+
+    if (param.hasOption('?') || param.hasOption("help")) {
+      // automatically generate the help statement
+      HelpFormatter formatter = new HelpFormatter();
+      formatter.printHelp("TrainingData", options);
+    }
 
     if (param.hasOption("test")) {
       percentTest = Integer.parseInt(param.getOptionValue("test"));
@@ -269,18 +282,24 @@ public class TrainingData {
       LOG.info("Percentage of test data is not set. Using default of 20%");
     }
 
-    if (param.hasOption('?') || param.hasOption("help")) {
-      // automatically generate the help statement
-      HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp("TrainingData", options);
+    if (param.hasOption("lineZoom")) {
+      lineZoomOption = true;
+      if (lineZoom.getValue() != null) {
+        nZoomLines = Integer.parseInt(lineZoom.getValue());
+      } else {
+        nZoomLines = 5; // default
+      }
+      LOG.info("Zooming in on {} lines",nZoomLines);
     }
 
     if (param.hasOption("split")) {
+      LOG.info("Splitting file");
       splitDataFile(param.getOptionValue("split"), percentTest);
     }
+
   }
 
-  private static void splitDataFile(final String file, final int percentTest) {
+  static void splitDataFile(final String file, final int percentTest) {
 
     try (Stream<String> stream = Files.lines(Paths.get(file))) {
       LOG.info("File \"{}\" opened...", file);
@@ -308,12 +327,18 @@ public class TrainingData {
 
       // Write train data to file
       String trainDataFileName =
-          file.substring(0, file.lastIndexOf('.'))
-              + "_train"
-              + file.substring(file.lastIndexOf('.', file.length()));
+          new StringBuilder()
+              .append(file.substring(0, file.lastIndexOf('.')))
+              .append("_train")
+              .append(lineZoomOption ? "_zoomed" : "")
+              .append(file.substring(file.lastIndexOf('.', file.length())))
+              .toString();
       FileWriter trainFileW = new FileWriter(trainDataFileName, false);
       LOG.info("Writing train data into {}", trainDataFileName);
       for (String str : list.stream().limit(nTrain).collect(Collectors.toList())) {
+        if (lineZoomOption) {
+          str = zoomLines(str, nZoomLines);
+        }
         trainFileW.write(str);
         trainFileW.write(System.lineSeparator());
       }
@@ -321,12 +346,18 @@ public class TrainingData {
 
       // Write test data to file
       String testDataFileName =
-              file.substring(0, file.lastIndexOf('.'))
-                      + "_test"
-                      + file.substring(file.lastIndexOf('.', file.length()));
+          new StringBuilder()
+              .append(file.substring(0, file.lastIndexOf('.')))
+              .append("_test")
+              .append(lineZoomOption ? "_zoomed" : "")
+              .append(file.substring(file.lastIndexOf('.', file.length())))
+              .toString();
       FileWriter testFileW = new FileWriter(testDataFileName, false);
       LOG.info("Writing test data into {}", testDataFileName);
       for (String str : list.stream().skip(nTrain).collect(Collectors.toList())) {
+        if (lineZoomOption) {
+          str = zoomLines(str, nZoomLines);
+        }
         testFileW.write(str);
         testFileW.write(System.lineSeparator());
       }
@@ -335,5 +366,51 @@ public class TrainingData {
     } catch (IOException e) {
       LOG.error("" + e);
     }
+  }
+
+  static String zoomLines(final String line, final int nZoomLines) {
+
+    StringBuilder newLine = new StringBuilder();
+
+    // partition line
+    String[] elements = line.split(";");
+    ArrayList<Double> doubles = new ArrayList<>(elements.length - 1);
+    Arrays.stream(elements).limit(260).forEach((e) -> doubles.add(Double.parseDouble(e)));
+    int label = Integer.parseInt(elements[elements.length - 1]);
+
+    // create rows
+    String newRow = "";
+    int nRows = 0;
+    int i = 0;
+    boolean foundNonZero = false;
+
+    for (Double d : doubles) {
+      newRow += d.toString() + ";";
+      i++;
+      if (d != 0d) foundNonZero = true;
+      if (i % 10 == 0) { // new row every 10 items
+        // first 4 rows always
+        if (nRows < 4) {
+          foundNonZero=false;
+          newLine.append(newRow);
+          nRows++;
+        } else
+        // remove empty (zero) lines but leave at least nZoomLines rows left
+        if ((nRows < 4 + nZoomLines
+                // when non zero items in line and we do not have enough lines yet
+                && (foundNonZero
+                    // at least as many rows as need as per nZoomLines
+                    || ((26 - i / 10) < nRows - 4 + nZoomLines) && nRows < 4 + nZoomLines))) {
+          newLine.append(newRow);
+          nRows++;
+        }
+        newRow = "";
+      }
+    }
+
+    // add label to line
+    newLine.append(label);
+
+    return newLine.toString();
   }
 }
