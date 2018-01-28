@@ -44,7 +44,7 @@ public class NeuralNetworkBotTrainer {
   public static final String NN_SAVE_FILE = folderPathPlain + "tetris_nn_model.zip";
 
   // with webserver UI
-  public static final boolean WITH_UI = true;
+  public static final boolean WITH_UI = false;
 
   /**
    * Run this to train the NeuralNetworkBot and save the Network to file.
@@ -94,9 +94,9 @@ public class NeuralNetworkBotTrainer {
 
     // Configuration
     MultiLayerConfiguration conf =
-        // getConvolutionalNetwork(height, width, channels, outputNum, seed, iterations);
+        getConvolutionalNetwork(height, width, channels, outputNum, seed, iterations);
         // getAlexnetModel(height, width, channels, outputNum, seed, iterations);
-        getDenseNNetwork(height, width, channels, outputNum, seed, iterations);
+        //getDenseNNetwork(height, width, channels, outputNum, seed, iterations);
 
     LOG.debug("Model configured");
 
