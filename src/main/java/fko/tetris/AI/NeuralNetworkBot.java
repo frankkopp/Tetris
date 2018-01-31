@@ -36,7 +36,7 @@ public class NeuralNetworkBot extends AbstractBot {
 
   /* default value for folder */
   private static final String folderPathPlain = "./var/";
-  private static final String fileNamePlain = "tetris_nn_model_zoom5.zip";
+  private static final String fileNamePlain = "tetris_nn_model_30012018.zip";
 
   private MultiLayerNetwork botAI = null;
 
