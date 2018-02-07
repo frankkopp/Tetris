@@ -18,6 +18,7 @@ import org.datavec.api.split.FileSplit;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
+import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.*;
 import org.deeplearning4j.nn.conf.distribution.GaussianDistribution;
@@ -26,6 +27,7 @@ import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.*;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.stats.StatsListener;
@@ -58,12 +60,13 @@ public class NeuralNetworkBotTrainer {
   private static final String fileNamePlainTest = "trainingdata_test_zoomed.csv";
 
   // where to store the trained network
-  public static final String NN_SAVE_FILE = folderPathPlain + "tetris_nn_model_30012018.zip";
+  public static final String NN_SAVE_FILE = folderPathPlain + "tetris_nn_model_07022018.zip";
 
   // with webserver UI
   public static final boolean WITH_UI = false;
 
   private MultiLayerNetwork multiLayerNetwork = null;
+
   private Evaluation evaluation = null;
 
   /**
@@ -77,8 +80,6 @@ public class NeuralNetworkBotTrainer {
 
   public NeuralNetworkBotTrainer() throws IOException, InterruptedException {
 
-    TrainingUI ui = new TrainingUI(multiLayerNetwork);
-
     // Configuration
     int height =
         9; // +2 current tetrimino, +2 next plus 5 rows either with at least one non-zero or the
@@ -87,7 +88,7 @@ public class NeuralNetworkBotTrainer {
     int width = 10; // tetris is 10 blocks wide
     int channels = 1; // we only need 1 color (black & white) - color has no real meaning in tetris
     int outputNum = 44; // 4 turns and 11 moves (-5, 0, +5)
-    int batchSize = 64;
+    int batchSize = 512;
     int iterations = 2;
     int nEpochs = 50;
 
@@ -116,7 +117,7 @@ public class NeuralNetworkBotTrainer {
 
     // Configuration
     MultiLayerConfiguration conf =
-        getConvolutionalNetwork(height, width, channels, outputNum, seed, iterations);
+        getConvolutionalNetwork2(height, width, channels, outputNum, seed, iterations);
     // getAlexnetModel(height, width, channels, outputNum, seed, iterations);
     // getDenseNNetwork(height, width, channels, outputNum, seed, iterations);
 
@@ -131,6 +132,9 @@ public class NeuralNetworkBotTrainer {
       uiServer.attach(statsStorage);
       multiLayerNetwork.addListeners(new StatsListener(statsStorage));
     }
+
+    TrainingUI trainingUI = new TrainingUI(multiLayerNetwork, 10);
+    multiLayerNetwork.addListeners(trainingUI);
 
     LOG.debug("Total num of params: {}", multiLayerNetwork.numParams());
 
@@ -168,6 +172,7 @@ public class NeuralNetworkBotTrainer {
 
       LOG.info("Starting evaluating");
       evaluation = multiLayerNetwork.evaluate(testIter);
+      trainingUI.setEvaluation(evaluation);
       LOG.info(evaluation.stats());
 
       trainIter.reset();
@@ -191,6 +196,84 @@ public class NeuralNetworkBotTrainer {
     }
 
     System.exit(0);
+  }
+
+  /**
+   * Test the network: 1. does the initial loss make sense (log(1/y) 2. does it overfit for a small
+   * sample of the data 3. does it converge at all
+   *
+   * @param height
+   * @param width
+   * @param channels
+   * @param outputNum
+   * @param seed
+   * @param iterations
+   * @return configured network
+   */
+  private MultiLayerConfiguration getConvolutionalNetwork2(
+          final int height,
+          final int width,
+          final int channels,
+          final int outputNum,
+          final int seed,
+          final int iterations) {
+
+    LOG.info("Build model....");
+
+    Map<Integer, Double> lrSchedule = new HashMap<>();
+    lrSchedule.put(0, 0.1); // iteration #, learning rate
+    lrSchedule.put(100, 0.05);
+    lrSchedule.put(600, 0.01);
+    lrSchedule.put(1000, 0.005);
+    lrSchedule.put(1500, 0.001);
+    lrSchedule.put(2500, 0.0005);
+
+    return new NeuralNetConfiguration.Builder()
+            .seed(seed)
+            .iterations(iterations)
+            .miniBatch(true)
+            .regularization(true)
+            .l2(0.0005)
+            .learningRate(0.1)
+            //.learningRateDecayPolicy(LearningRatePolicy.Schedule)
+            //.learningRateSchedule(lrSchedule) // overrides the rate set in learningRate
+            .weightInit(WeightInit.XAVIER)
+            .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+            .updater(Updater.NESTEROVS)
+            .list()
+            .layer(
+                    0,
+                    new ConvolutionLayer.Builder(4, 4)
+                            .nIn(channels)
+                            .stride(1, 1)
+                            .padding(2, 2)
+                            .nOut(80)
+                            .activation(Activation.RELU)
+                            .build())
+            .layer(
+                    1,
+                    new ConvolutionLayer.Builder(4, 4)
+                            .stride(1, 1) // nIn need not specified in later layers
+                            .nOut(160)
+                            .activation(Activation.RELU)
+                            .build())
+            .layer(
+                    2,
+                    new DenseLayer.Builder()
+                            .activation(Activation.RELU)
+                            // .dropOut(dropOut)
+                            .nOut(320)
+                            .build())
+            .layer(
+                    3,
+                    new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                            .nOut(outputNum)
+                            .activation(Activation.SOFTMAX)
+                            .build())
+            .setInputType(InputType.convolutionalFlat(height, width, channels))
+            .backprop(true)
+            .pretrain(false)
+            .build();
   }
 
   /**
@@ -466,105 +549,4 @@ public class NeuralNetworkBotTrainer {
     return conf;
   }
 
-  public class TrainingUI extends Application {
-
-    public static final int updateInterval = 1; // ms
-
-    private Stage primaryStage;
-    private Text score;
-    private XYChart.Series scoreSeries;
-    private XYChart.Series f1Series;
-
-    private long timeCounter = 0;
-
-    public TrainingUI(final MultiLayerNetwork multiLayerNetwork) {
-
-      // Startup the JavaFX platform
-      Platform.setImplicitExit(false);
-      PlatformImpl.startup(
-          () -> {
-            primaryStage = new Stage();
-            start(primaryStage);
-          });
-
-      // wait for the UI to show before returning
-      do {
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException ignore) {
-        }
-      } while (primaryStage == null || !primaryStage.isShowing());
-
-      // ui updater
-      ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-      executor.scheduleAtFixedRate(
-          () -> {
-            Platform.runLater(() -> updateUI());
-          },
-          0,
-          updateInterval,
-          TimeUnit.SECONDS);
-    }
-
-    private void updateUI() {
-
-      if (multiLayerNetwork == null) {
-        score.setText("N/A");
-      } else {
-        double score = multiLayerNetwork.score();
-        this.score.setText("" + score);
-        timeCounter += updateInterval;
-        if (score>0) {
-          scoreSeries.getData().add(new XYChart.Data(timeCounter, score));
-        }
-        if (evaluation != null) {
-          double f1 = evaluation.f1();
-          evaluation.stats();
-          if (f1>0) {
-            f1Series.getData().add(new XYChart.Data(timeCounter, f1));
-          }
-        }
-      }
-    }
-
-    @Override
-    public void start(final Stage stage) {
-
-      // raw score out put row
-      HBox scoreRow = new HBox();
-      scoreRow.setAlignment(Pos.CENTER);
-      Text label = new Text("Score: ");
-      score = new Text("n/a");
-      scoreRow.getChildren().addAll(label, score);
-
-      // graph
-      //defining the axes
-      final NumberAxis xAxis = new NumberAxis();
-      final NumberAxis yAxis = new NumberAxis();
-      xAxis.setLabel("time");
-      yAxis.setLabel("score");
-      //creating the chart
-      final LineChart<Number,Number> lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-      lineChart.setTitle("Training Score");
-      lineChart.setCreateSymbols(false); //hide dots
-      //defining a scoreSeries
-      scoreSeries = new XYChart.Series();
-      scoreSeries.setName("Loss Score");
-      f1Series = new XYChart.Series();
-      f1Series.setName("F1 Score");
-      lineChart.getData().addAll(scoreSeries, f1Series);
-
-      // horizontal box with all rows
-      VBox root = new VBox();
-      root.setAlignment(Pos.CENTER);
-      root.getChildren().addAll(scoreRow);
-      root.getChildren().addAll(lineChart);
-
-      Scene scene = new Scene(root, 520, 300);
-      stage.setScene(scene);
-      stage.setTitle("Training Info");
-      stage.setResizable(true);
-      stage.show();
-    }
-  }
 }
