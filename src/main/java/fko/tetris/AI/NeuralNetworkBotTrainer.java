@@ -34,6 +34,8 @@ import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.dataset.api.DataSet;
+import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -60,7 +62,7 @@ public class NeuralNetworkBotTrainer {
   private static final String fileNamePlainTest = "trainingdata_test_zoomed.csv";
 
   // where to store the trained network
-  public static final String NN_SAVE_FILE = folderPathPlain + "tetris_nn_model_07022018.zip";
+  public static final String NN_SAVE_FILE = folderPathPlain + "tetris_nn_model_08022018.zip";
 
   // with webserver UI
   public static final boolean WITH_UI = false;
@@ -81,8 +83,8 @@ public class NeuralNetworkBotTrainer {
   public NeuralNetworkBotTrainer() throws IOException, InterruptedException {
 
     // Configuration
-    int height =
-        9; // +2 current tetrimino, +2 next plus 5 rows either with at least one non-zero or the
+    int height = 9;
+    // +2 current tetrimino, +2 next plus 5 rows either with at least one non-zero or the
     // lowest 5 rows. "5" is a parameter but data needs to be prepared with it (was 22
     // matrix, +2 current tetrimino, +2 next)
     int width = 10; // tetris is 10 blocks wide
@@ -137,6 +139,15 @@ public class NeuralNetworkBotTrainer {
     multiLayerNetwork.addListeners(trainingUI);
 
     LOG.debug("Total num of params: {}", multiLayerNetwork.numParams());
+//
+//    DataSetPreProcessor preProcessor =
+//        new DataSetPreProcessor() {
+//          @Override
+//          public void preProcess(final DataSet toPreProcess) {
+//            toPreProcess.;
+//          }
+//        };
+//    trainIter.setPreProcessor(preProcessor);
 
     // debugging put - print the number of examples per set
     int trainingExamples = 0;
@@ -222,11 +233,10 @@ public class NeuralNetworkBotTrainer {
 
     Map<Integer, Double> lrSchedule = new HashMap<>();
     lrSchedule.put(0, 0.1); // iteration #, learning rate
-    lrSchedule.put(100, 0.05);
-    lrSchedule.put(600, 0.01);
-    lrSchedule.put(1000, 0.005);
-    lrSchedule.put(1500, 0.001);
-    lrSchedule.put(2500, 0.0005);
+    lrSchedule.put(2000, 0.05);
+    lrSchedule.put(4000, 0.01);
+    lrSchedule.put(8000, 0.005);
+    lrSchedule.put(16000, 0.001);
 
     return new NeuralNetConfiguration.Builder()
             .seed(seed)
@@ -235,8 +245,8 @@ public class NeuralNetworkBotTrainer {
             .regularization(true)
             .l2(0.0005)
             .learningRate(0.1)
-            //.learningRateDecayPolicy(LearningRatePolicy.Schedule)
-            //.learningRateSchedule(lrSchedule) // overrides the rate set in learningRate
+            .learningRateDecayPolicy(LearningRatePolicy.Schedule)
+            .learningRateSchedule(lrSchedule) // overrides the rate set in learningRate
             .weightInit(WeightInit.XAVIER)
             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
             .updater(Updater.NESTEROVS)
@@ -247,14 +257,14 @@ public class NeuralNetworkBotTrainer {
                             .nIn(channels)
                             .stride(1, 1)
                             .padding(2, 2)
-                            .nOut(80)
+                            .nOut(120)
                             .activation(Activation.RELU)
                             .build())
             .layer(
                     1,
                     new ConvolutionLayer.Builder(4, 4)
                             .stride(1, 1) // nIn need not specified in later layers
-                            .nOut(160)
+                            .nOut(120)
                             .activation(Activation.RELU)
                             .build())
             .layer(
@@ -262,7 +272,7 @@ public class NeuralNetworkBotTrainer {
                     new DenseLayer.Builder()
                             .activation(Activation.RELU)
                             // .dropOut(dropOut)
-                            .nOut(320)
+                            .nOut(360)
                             .build())
             .layer(
                     3,
