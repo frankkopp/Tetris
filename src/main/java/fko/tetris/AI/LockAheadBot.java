@@ -154,11 +154,12 @@ public class LockAheadBot extends AbstractBot {
           best_turn = turn;
           best_move = m;
           best_score = score;
-        } else if (score == best_score && Math.random() < 0.5) {
-          best_turn = turn;
-          best_move = m;
-          best_score = score;
         }
+//        else if (score == best_score && Math.random() < 0.5) {
+//          best_turn = turn;
+//          best_move = m;
+//          best_score = score;
+//        }
       }
     }
 
