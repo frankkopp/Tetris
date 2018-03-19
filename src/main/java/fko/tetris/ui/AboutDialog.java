@@ -51,7 +51,7 @@ public class AboutDialog extends Stage {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(TetrisGUI.class.getResource("AboutDialog.fxml"));
+            loader.setLocation(TetrisGUI.class.getResource("/fxml/AboutDialog.fxml"));
             AnchorPane pane = (AnchorPane) loader.load();
             Scene scene = new Scene(pane);
 

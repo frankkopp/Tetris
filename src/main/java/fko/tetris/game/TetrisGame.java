@@ -154,7 +154,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
     _sounds.playClip(Clips.GAME_START);
 
     // run completion phase one time to set level
-    // completion will the go to generation phase
+    // completion will then go to generation phase
     completionPhase();
 
     // clear control input queue
@@ -307,14 +307,14 @@ public class TetrisGame extends Observable implements Runnable, Observer {
       notifyObservers("Generation finished");
       try {
         Thread.sleep(5); // give the UI time to show the falling Tetrimino
-      } catch (InterruptedException ignored) {
-      }
+      } catch (InterruptedException ignored) {}
       // Immediately fall into visible area and check for collision
       if (_playfield.moveDown()) {
         // collision detected - LOCKING
         _phaseState = TetrisPhase.LOCK;
+      } else {
+        _phaseState = TetrisPhase.FALLING;
       }
-      _phaseState = TetrisPhase.FALLING;
     }
   }
 
@@ -417,7 +417,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
 
     } while (!breakFlag && _fallingTimer.getRemainingTime() > 0);
 
-    // stop the timer just t make sure
+    // stop the timer just to make sure
     _fallingTimer.stop();
 
     // time is <=0 shift Tetrimino DOWN
@@ -436,8 +436,8 @@ public class TetrisGame extends Observable implements Runnable, Observer {
   }
 
   /**
-   * LOCK phase Implements the INFINITE PLACEMENT LOCK DOWN TODO: Implement EXTENDED LOCK DOWN and
-   * CLASSIC LOCKDOWN
+   * LOCK phase Implements the INFINITE PLACEMENT LOCK DOWN
+   * TODO: Implement EXTENDED LOCK DOWN and CLASSIC LOCKDOWN
    */
   private void lockPhase() {
     // System.out.println("Enter LOCK phase");
