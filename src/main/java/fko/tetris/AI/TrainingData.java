@@ -45,7 +45,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** Reads and stores the highscore from and to file */
+/**  */
 public class TrainingData {
 
   private static final Logger LOG = LoggerFactory.getLogger(TrainingData.class);
@@ -346,12 +346,10 @@ public class TrainingData {
 
       // Write test data to file
       String testDataFileName =
-          new StringBuilder()
-              .append(file.substring(0, file.lastIndexOf('.')))
-              .append("_test")
-              .append(lineZoomOption ? "_zoomed" : "")
-              .append(file.substring(file.lastIndexOf('.', file.length())))
-              .toString();
+              file.substring(0, file.lastIndexOf('.')) +
+                      "_test" +
+                      (lineZoomOption ? "_zoomed" : "") +
+                      file.substring(file.lastIndexOf('.', file.length()));
       FileWriter testFileW = new FileWriter(testDataFileName, false);
       LOG.info("Writing test data into {}", testDataFileName);
       for (String str : list.stream().skip(nTrain).collect(Collectors.toList())) {

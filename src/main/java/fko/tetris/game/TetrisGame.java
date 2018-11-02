@@ -44,7 +44,7 @@ public class TetrisGame extends Observable implements Runnable, Observer {
    */
   public static final int NEXTQUEUE_SIZE = 7;
 
-  // sounds are play at certain points ==> should this be in model or view??
+  // sounds are played at certain points ==> should this be in model or view??
   private static final SoundManager _sounds = SoundManager.getInstance();
 
   // Tetris state
@@ -547,8 +547,9 @@ public class TetrisGame extends Observable implements Runnable, Observer {
   /**
    * ELIMINATE phase This phase removes all lines from the playfield which were marked for
    * clearance.<br>
-   * Also handles game statistics like scoring, bonus scores, etc. TODO: BackToBack Bonus TODO:
-   * SPINS and SPIN Bonus
+   * Also handles game statistics like scoring, bonus scores, etc.
+   * TODO: BackToBack Bonus
+   * TODO: SPINS and SPIN Bonus
    */
   private void eliminatePhase() {
 

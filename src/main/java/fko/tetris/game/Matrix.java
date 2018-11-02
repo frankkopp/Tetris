@@ -55,7 +55,9 @@ public class Matrix {
 	 */
 	public static final int MATRIX_WIDTH = 10;
 
-	// convenience field for SKYLINE+BUFFERZONE
+	/**
+	 * convenience field for SKYLINE+BUFFERZONE
+ 	 */
 	public static final int MATRIX_HEIGHT = SKYLINE + BUFFERZONE;
 
 	// The internal data structure for the background matrix.

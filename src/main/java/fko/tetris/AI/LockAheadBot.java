@@ -298,7 +298,7 @@ public class LockAheadBot extends AbstractBot {
       lastHeight = height;
       if (height > absoluteHeight) absoluteHeight = height;
     }
-    unevenness += Math.abs(lastHeight - 0);
+    unevenness += Math.abs(lastHeight);
 
     //		pf.debugPrintMatrix();
     //		System.out.println("AGGREGATED HEIGHT: "+aggregatedHeight);

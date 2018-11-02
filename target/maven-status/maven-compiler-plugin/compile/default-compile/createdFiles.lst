@@ -35,6 +35,7 @@ fko\tetris\tetriminos\I_Tetrimino.class
 fko\tetris\util\SimpleIntList.class
 fko\tetris\tetriminos\L_Tetrimino.class
 fko\tetris\ui\NextQueuePane.class
+fko\tetris\AI\TrainingUI.class
 fko\tetris\tetriminos\S_Tetrimino.class
 fko\tetris\AI\TrainingData$DatasetRow.class
 fko\tetris\AI\DQN\SimpleDQNState.class
